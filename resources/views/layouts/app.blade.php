@@ -87,8 +87,8 @@
                     - {{ date('Y') }}
                   @endif
                   &nbsp; All rights reserved • by
-                  <a href="https://github.com/adhiariyadi/" target="_blank"
-                    >Adhi Ariyadi</a
+                  <a href="" target="_blank"
+                    >Axcellent Christian</a
                   >.
                 </span>
               </div>
@@ -161,7 +161,7 @@
                 - {{ date('Y') }}
               @endif
               &nbsp; All rights reserved • by
-              <a href="https://github.com/adhiariyadi/" target="_blank"
+              <a href="" target="_blank"
                 >Axcellent Christian</a
               >.
             </span>

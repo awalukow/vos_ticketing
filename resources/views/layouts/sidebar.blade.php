@@ -15,20 +15,7 @@
       <span>Dashboard</span></a>
   </li>
   <!-- Nav Item - Data Master Menu -->
-  <li class="nav-item">
-    <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-      <i class="fas fa-folder"></i>
-      <span>Data Master</span>
-    </a>
-    <div id="collapsePages" class="collapse show" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-      <div class="bg-white py-2 collapse-inner rounded">
-        <a class="collapse-item" href="{{ route('rute.index') }}">Class Pricing</a>
-        <a class="collapse-item" href="{{ route('transportasi.index') }}">Detail Class</a>
-        <a class="collapse-item" href="{{ route('category.index') }}">Event Name</a>
-        <a class="collapse-item" href="{{ route('user.index') }}">User</a>
-      </div>
-    </div>
-  </li>
+  
   <!-- Nav Item - Verifikasi -->
   <li class="nav-item">
     <a class="nav-link" href="{{ route('petugas') }}">
