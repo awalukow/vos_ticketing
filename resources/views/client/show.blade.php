@@ -33,8 +33,8 @@
                   </div>
                 </div>
               @else
-                <!--<a href="{{ route('cari.kursi', Crypt::encrypt($data)) }}">-->
-                <a href="{{ route('pesan', ['kursi' => '[Diatur Petugas]', 'data' => Crypt::encrypt($data)]) }}">
+                <a href="{{ route('cari.kursi', Crypt::encrypt($data)) }}">
+                <!--<a href="{{ route('pesan', ['kursi' => '[Diatur Petugas]', 'data' => Crypt::encrypt($data)]) }}">-->
                   <div class="card o-hidden border-0 shadow h-100 py-2">
                     <div class="card-body">
                       <div class="row no-gutters align-items-center">

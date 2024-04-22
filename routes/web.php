@@ -39,6 +39,15 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('/user', App\Http\Controllers\UserController::class);
             Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
         });
+
+        Route::middleware(['superadmin'])->group(function () {
+            Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+            Route::resource('/category', App\Http\Controllers\CategoryController::class);
+            Route::resource('/transportasi', App\Http\Controllers\TransportasiController::class);
+            Route::resource('/rute', App\Http\Controllers\RuteController::class);
+            Route::resource('/user', App\Http\Controllers\UserController::class);
+            Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+        });
     });
 
     Route::middleware(['penumpang'])->group(function () {

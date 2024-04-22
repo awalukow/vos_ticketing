@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class Penumpang
+class SuperAdmin
 {
     /**
      * Handle an incoming request.
@@ -16,12 +16,10 @@ class Penumpang
      */
     public function handle(Request $request, Closure $next)
     {
-        if ($request->user()->level == "Admin") {
+        if ($request->user()->level == "SuperAdmin") {
             return redirect('/home');
         } else if ($request->user()->level == "Petugas") {
             return redirect('/petugas');
-        } else if ($request->user()->level == "SuperAdmin") {
-            return redirect('/home');
         } else {
             return $next($request);
         }

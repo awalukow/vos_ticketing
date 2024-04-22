@@ -22,7 +22,7 @@
                   @enderror
                 </div>
                 <div class="form-group">
-                  <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Nomor Telepon">
+                  <input type="number" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Nomor Telepon">
                   @error('username')
                     <span class="invalid-feedback" role="alert">
                       <strong>{{ $message }}</strong>
@@ -30,7 +30,7 @@
                   @enderror
                 </div>
                 <div class="form-group">
-                  <input type="text" class="form-control form-control-user @error('email') is-invalid @enderror" name="email" required autocomplete="off" placeholder="Email">
+                  <input type="email" class="form-control form-control-user @error('email') is-invalid @enderror" name="email" required autocomplete="off" placeholder="Email">
                   @error('email')
                     <span class="invalid-feedback" role="alert">
                       <strong>{{ $message }}</strong>

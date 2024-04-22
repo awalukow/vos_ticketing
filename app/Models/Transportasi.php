@@ -24,7 +24,9 @@ class Transportasi extends Model
     public function kursi($id)
     {
         $data = json_decode($id, true);
-        $kursi = Pemesanan::where('rute_id', $data['rute'])->where('waktu', $data['waktu'])->where('kursi', $data['kursi'])->count();
+        $kursi = Pemesanan:://where('rute_id', $data['rute'])
+                            //->where('waktu', $data['waktu'])
+                            where('kursi', $data['kursi'])->count();
         if ($kursi > 0) {
             return null;
         } else {

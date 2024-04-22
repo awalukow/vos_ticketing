@@ -40,9 +40,6 @@
                 </button>
               </form>
               <hr>
-              <div class="text-center">
-                <a class="small" href="{{ route('register') }}">Buat Akun!</a>
-              </div>
             </div>
           </div>
         </div>
@@ -50,6 +47,7 @@
     </div>
   </div>
 @endsection
+
 @section('script')
   <script>
     $("body").addClass("bg-gradient-primary");
