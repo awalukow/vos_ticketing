@@ -54,7 +54,7 @@
       </div>
     </div>
   @else
-    @if (Auth::user()->level == 'Admin')
+    @if (Auth::user()->level == 'Admin' || Auth::user()->level == 'SuperAdmin')
       <!-- Page Wrapper -->
       <div id="wrapper">
         <!-- Sidebar -->
