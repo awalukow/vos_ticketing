@@ -104,12 +104,11 @@ class PemesananController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id, $data)
+    public function _show($id, $data)
     {
         $data = Crypt::decrypt($data);
         $category = Category::find($data['category']);
         
-        //$rute = Rute::with('transportasi')->where('start', $data['start'])->where('end', $data['end'])->get();
         $rute = Rute::with('transportasi')->get();
         if ($rute->count() > 0) {
             foreach ($rute as $val) {
@@ -124,7 +123,7 @@ class PemesananController extends Controller
                             'tujuan' => $val->tujuan,
                             'transportasi' => $val->transportasi->name,
                             'kode' => $val->transportasi->kode,
-                            'kursi' => $kursi,
+                            'kursi' => $kursi, // Ensure $kursi is included in the data
                             'waktu' => date("h:i A", strtotime($val->jam)),
                             'id' => $val->id,
                             'kategori' => $category->name
@@ -138,8 +137,51 @@ class PemesananController extends Controller
         }
         
         $id = $category->name;
-        return view('client.show', compact('id', 'dataRute'));
+        return view('client.show', compact('id', 'dataRute', 'kursi')); // Pass $kursi to the view
     }
+
+     
+    public function show($id, $data)
+{
+    // Decrypt the data
+    $data = Crypt::decrypt($data);
+
+    // Find the category based on the decrypted data
+    $category = Category::find($data['category']);
+    
+    // Fetch relevant route data based on the category
+    $rute = Rute::with('transportasi')->get();
+
+    // Initialize an empty array to store route data
+    $dataRute = [];
+
+    // Iterate over route data and filter based on category
+    foreach ($rute as $val) {
+        $pemesanan = Pemesanan::where('rute_id', $val->id)->count();
+        if ($val->transportasi && $val->transportasi->category_id == $category->id) {
+            $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan;
+            $dataRute[] = [
+                'harga' => $val->harga,
+                'start' => $val->start,
+                'end' => $val->end,
+                'tujuan' => $val->tujuan,
+                'transportasi' => $val->transportasi->name,
+                'kode' => $val->transportasi->kode,
+                'kursi' => $kursi,
+                'waktu' => date("h:i A", strtotime($val->jam)),
+                'id' => $val->id,
+                'kategori' => $category->name
+            ];
+        }
+    }
+    
+    // Sort the data if needed
+    sort($dataRute);
+    
+    // Pass the necessary variables to the view
+    return view('client.show', compact('id', 'dataRute', 'data'));
+}
+    
 
     /**
      * Show the form for editing the specified resource.
@@ -152,7 +194,8 @@ class PemesananController extends Controller
         $data = Crypt::decrypt($id);
         $rute = Rute::find($data['id']);
         $transportasi = Transportasi::find($rute->transportasi_id);
-        return view('client.kursi', compact('data', 'transportasi'));
+        $dataString = json_encode($data);
+        return view('client.kursi', compact('data', 'transportasi', 'dataString'));
     }
 
     /**
@@ -179,6 +222,31 @@ class PemesananController extends Controller
     }
 
     public function pesan($kursi, $data)
+{
+    $d = Crypt::decrypt($data);
+    $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    $rute = Rute::with('transportasi.category')->find($d['id']);
+    $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+
+    foreach ($kursi as $k) {
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+        Pemesanan::create([
+            'kode' => $kodePemesanan,
+            'kursi' => $k,
+            'waktu' => $waktu,
+            'total' => $rute->harga,
+            'rute_id' => $rute->id,
+            'penumpang_id' => Auth::user()->id
+        ]);
+    }
+
+    // Assuming you want to redirect after processing all seats
+    return redirect('/')->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+}
+
+
+    public function pesan_BACKUP270424($kursi, $data)
     {
         $d = Crypt::decrypt($data);
         $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
