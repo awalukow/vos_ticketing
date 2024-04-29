@@ -52,7 +52,7 @@
           @endif
         @endfor
       </div>
-      <button id="submitBtn" class="btn btn-primary">Submit</button>
+      <button id="submitBtn" class="btn btn-primary" data-data="{{ $dataString }}">Submit</button>
     </div>
   </div>
 @endsection

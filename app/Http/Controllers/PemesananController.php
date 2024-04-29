@@ -6,10 +6,12 @@ use App\Models\Rute;
 use App\Models\Category;
 use App\Models\Pemesanan;
 use App\Models\Transportasi;
+use App\Models\Pemesanan_Detail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class PemesananController extends Controller
 {
@@ -194,6 +196,7 @@ class PemesananController extends Controller
         $data = Crypt::decrypt($id);
         $rute = Rute::find($data['id']);
         $transportasi = Transportasi::find($rute->transportasi_id);
+        //$pesananDetail = Pemesanan_Detail::where('pemesananCode', 'LIKE', '%' . $data['kode'] . '%')->get();
         $dataString = json_encode($data);
         return view('client.kursi', compact('data', 'transportasi', 'dataString'));
     }
@@ -221,30 +224,28 @@ class PemesananController extends Controller
         //
     }
 
-    public function pesan($kursi, $data)
-{
-    $d = Crypt::decrypt($data);
-    $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    $rute = Rute::with('transportasi.category')->find($d['id']);
-    $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
-
-    foreach ($kursi as $k) {
+    public function __pesan($kursi, $data)
+    {
+        $d = Crypt::decrypt($data);
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
 
-        Pemesanan::create([
+        $rute = Rute::with('transportasi.category')->find($d['id']);
+
+        $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+
+        Pemesanan::Create([
             'kode' => $kodePemesanan,
-            'kursi' => $k,
+            'kursi' => $kursi,
             'waktu' => $waktu,
             'total' => $rute->harga,
             'rute_id' => $rute->id,
             'penumpang_id' => Auth::user()->id
         ]);
+
+        //return redirect('/')->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+        return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
     }
-
-    // Assuming you want to redirect after processing all seats
-    return redirect('/')->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
-}
-
 
     public function pesan_BACKUP270424($kursi, $data)
     {
@@ -270,28 +271,81 @@ class PemesananController extends Controller
     }
 
     public function pesan_NOUSE($data)
+    {
+        $d = Crypt::decrypt($data);
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+        $rute = Rute::with('transportasi.category')->find($d['id']);
+
+        // Selecting a default seat (e.g., the first available seat)
+        $firstAvailableSeat = $rute->pemesanans()->count() + 1; // Assuming seats are numbered sequentially
+
+        $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+
+        Pemesanan::create([
+            'kode' => $kodePemesanan,
+            'kursi' => 'K' . $firstAvailableSeat, // Setting default seat
+            'waktu' => $waktu,
+            'total' => $rute->harga,
+            'rute_id' => $rute->id,
+            'penumpang_id' => Auth::user()->id
+        ]);
+
+        return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+    }
+
+    public function pesan($kursi, $data)
 {
-    $d = Crypt::decrypt($data);
+    //$d = Crypt::decrypt($data);
+    $dataKursi = json_decode($kursi, true); 
+    $dataArray = json_decode($data, true); 
+    //Log::info($kursi); // Log the contents of $dataArray
+    //Log::info($data); // Log the contents of $dataArray
     $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    
+    // Update this line to use $dataArray instead of $data
+    $rute = Rute::with('transportasi.category')->find($dataArray['id']);
+    // Update this line as well
+    $waktu = Carbon::parse($dataArray['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+
     $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+    //$checkSeat = Pemesanan::with('kode')->find($kodePemesanan);
+    $checkSeat = Pemesanan::with('kode')->where('kode', 'LIKE', $kodePemesanan)->get();
+    
+    Log::info($checkSeat); // Log the contents of $dataArray
+    // Check if $checkSeat is not null
+    if ($checkSeat != null || $checkSeat != "") {
+        $count = 0;
+        foreach ($dataKursi as $a){
+            $count++;
+        }
+        $harga = $rute->harga * $count;
+        Pemesanan::create([
+            'kode' => $kodePemesanan,
+            //'kursi' => $k,
+            'waktu' => $waktu,
+            //'total' => $rute->harga,
+            'total' => $harga,
+            'rute_id' => $rute->id,
+            'penumpang_id' => Auth::user()->id
+        ]);
 
-    $rute = Rute::with('transportasi.category')->find($d['id']);
-
-    // Selecting a default seat (e.g., the first available seat)
-    $firstAvailableSeat = $rute->pemesanans()->count() + 1; // Assuming seats are numbered sequentially
-
-    $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
-
-    Pemesanan::create([
-        'kode' => $kodePemesanan,
-        'kursi' => 'K' . $firstAvailableSeat, // Setting default seat
-        'waktu' => $waktu,
-        'total' => $rute->harga,
-        'rute_id' => $rute->id,
-        'penumpang_id' => Auth::user()->id
-    ]);
-
-    return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+        foreach ($dataKursi as $k) {
+            Pemesanan_Detail::create([
+                'pemesananCode' => $kodePemesanan,
+                'seatNumber' => $k
+            ]);
+        }
+        // Assuming you want to redirect after processing all seats
+        return redirect('/')->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+    } else {
+        // Handle if $checkSeat is null, maybe redirect or show an error message
+        // For now, let's just log a message
+        Log::info('Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
+        return redirect('/')->with('error', 'Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
+    }
 }
+
 
 }
