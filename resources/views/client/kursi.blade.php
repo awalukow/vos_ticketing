@@ -22,6 +22,12 @@
       color: #fff;
     }
     
+    .kursi.reserved {
+      background-color: #ccc;
+      border-color: #aaa;
+      cursor: not-allowed;
+    }
+    
     #submitBtn {
       margin-top: 20px;
     }
@@ -45,14 +51,33 @@
             </div>
           @else
             <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
-              <div class="kursi" style="background: #858796" onclick="toggleSeat(this)">
+              <div class="kursi reserved" style="background: #858796">
                 <div class="font-weight-bold text-white m-auto" style="font-size: 26px;">{{$transportasi->kode}}{{ $i }}</div>
               </div>
             </div>
           @endif
         @endfor
       </div>
-      <button id="submitBtn" class="btn btn-primary" data-data="{{ $dataString }}">Submit</button>
+      <button id="submitBtn" class="btn btn-primary">Submit</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmationModalLabel">Konfirmasi Pembelian</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modalBodyContent">
+          <!-- Seat list will be dynamically inserted here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmPurchaseBtn">Confirm</button>
+        </div>
+      </div>
     </div>
   </div>
 @endsection
@@ -61,26 +86,44 @@
     var selectedSeats = [];
 
     function toggleSeat(seat) {
-      seat.classList.toggle('selected');
-      var seatNumber = seat.querySelector('.font-weight-bold').textContent.trim();
-      var index = selectedSeats.indexOf(seatNumber);
-      if (index === -1) {
-        selectedSeats.push(seatNumber);
-      } else {
-        selectedSeats.splice(index, 1);
+      if (!seat.classList.contains('reserved')) {
+        seat.classList.toggle('selected');
+        var seatNumber = seat.querySelector('.font-weight-bold').textContent.trim();
+        var index = selectedSeats.indexOf(seatNumber);
+        if (index === -1) {
+          selectedSeats.push(seatNumber);
+        } else {
+          selectedSeats.splice(index, 1);
+        }
       }
     }
 
     document.getElementById('submitBtn').addEventListener('click', function() {
-      if (selectedSeats.length > 0) {
-        var selectedSeatsJSON = JSON.stringify(selectedSeats);
-        var data = @json($dataString);
-        window.location.href = "{{ route('pesan', ['kursi' => 'placeholder', 'data' => 'placeholder']) }}"
-          .replace('placeholder', selectedSeatsJSON)
-          .replace('placeholder', data);
-      } else {
-        alert('Please select at least one seat.');
-      }
+    if (selectedSeats.length > 0) {
+      var modalBody = document.getElementById('modalBodyContent');
+      var seatList = selectedSeats.join(', '); // Join selected seats into a string separated by comma
+      var content = "<p>Apakah anda yakin akan melanjutkan pembelian tiket dengan kursi: " + seatList + "?</p>";
+      modalBody.innerHTML = content;
+      $('#confirmationModal').modal('show');
+    } else {
+      alert('Silakan pilih minimal satu kursi.');
+    }
+  });
+
+
+    document.getElementById('confirmPurchaseBtn').addEventListener('click', function() {
+      var selectedSeatsJSON = JSON.stringify(selectedSeats);
+      var data = @json($dataString);
+      window.location.href = "{{ route('pesan', ['kursi' => 'placeholder', 'data' => 'placeholder']) }}"
+        .replace('placeholder', selectedSeatsJSON)
+        .replace('placeholder', data);
+    });
+
+    // Close modal on Cancel button click
+    document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        $('#confirmationModal').modal('hide');
+      });
     });
   </script>
 @endsection
