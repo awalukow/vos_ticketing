@@ -13,6 +13,7 @@ class Pemesanan extends Model
         'kode',
         'kursi',
         'waktu',
+        'event_date',
         'total',
         'status',
         'rute_id',

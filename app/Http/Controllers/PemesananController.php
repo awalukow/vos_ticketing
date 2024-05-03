@@ -171,6 +171,7 @@ class PemesananController extends Controller
                 'kode' => $val->transportasi->kode,
                 'kursi' => $kursi,
                 'waktu' => date("h:i A", strtotime($val->jam)),
+                'event_date' => date("h:i A", strtotime($val->jam)),
                 'id' => $val->id,
                 'kategori' => $category->name
             ];
@@ -300,32 +301,26 @@ class PemesananController extends Controller
         //$d = Crypt::decrypt($data);
         $dataKursi = json_decode($kursi, true); 
         $dataArray = json_decode($data, true); 
-        //Log::info($kursi); // Log the contents of $dataArray
-        //Log::info($data); // Log the contents of $dataArray
         $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         
-        // Update this line to use $dataArray instead of $data
         $rute = Rute::with('transportasi.category')->find($dataArray['id']);
-        // Update this line as well
         $waktu = Carbon::parse($dataArray['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
 
         $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
         //$checkSeat = Pemesanan::with('kode')->find($kodePemesanan);
         $checkSeat = Pemesanan::with('kode')->where('kode', 'LIKE', $kodePemesanan)->get();
         
-        Log::info($checkSeat); // Log the contents of $dataArray
-        // Check if $checkSeat is not null
         if ($checkSeat != null || $checkSeat != "") {
-            $temp_kursi = ""; // Initialize $temp_kursi as an empty string
-            $count = 0; // Initialize count variable
-            $total_elements = count($dataKursi); // Get the total number of elements in $dataKursi array
+            $temp_kursi = "";
+            $count = 0; 
+            $total_elements = count($dataKursi); 
             
             foreach ($dataKursi as $a){
                 $count++;
                 if ($count < $total_elements) {
-                    $temp_kursi .= $a . ", "; // Concatenate $a and a comma to $temp_kursi
+                    $temp_kursi .= $a . ", "; 
                 } else {
-                    $temp_kursi .= $a; // Append $a without a comma
+                    $temp_kursi .= $a; 
                 }
             }
             $harga = $rute->harga * $count;

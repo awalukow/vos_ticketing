@@ -92,10 +92,10 @@
           <p style="margin-bottom: 0; margin-top: 5px;">Jadwal Event</p>
           <h5 class="font-weight-bold text-center">
             <div>
-              {{ date('l, d F Y', strtotime($data->waktu)) }}
+              {{ date('l, d F Y', strtotime($data->event_date)) }}
             </div>
             <div>
-              {{ date('H:i', strtotime($data->waktu)) }} WIB
+              {{ date('H:i', strtotime($data->event_date)) }} WIB
             </div>
           </h5>
         </div>
