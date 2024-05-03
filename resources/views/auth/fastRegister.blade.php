@@ -11,7 +11,7 @@
               <div class="text-center">
                 <h1 class="h4 text-gray-900 mb-4">VOS Online Ticketing V.0.1</h1>
               </div>
-              <form method="POST" action="{{ route('register') }}" class="user">
+              <form method="POST" action="{{ route('register') }}" class="user" id="registerForm">
               @csrf
                 <div class="form-group">
                   <input type="text" class="form-control form-control-user @error('name') is-invalid @enderror" name="name" required autocomplete="off" autofocus placeholder="Nama User">
@@ -22,8 +22,16 @@
                   @enderror
                 </div>
                 <div class="form-group">
-                  <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Nomor Telepon">
+                  <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Nomor Telepon" id="username">
                   @error('username')
+                    <span class="invalid-feedback" role="alert">
+                      <strong>{{ $message }}</strong>
+                    </span>
+                  @enderror
+                </div>
+                <div class="form-group">
+                  <input type="email" class="form-control form-control-user @error('email') is-invalid @enderror" name="email" required autocomplete="off" placeholder="Email">
+                  @error('email')
                     <span class="invalid-feedback" role="alert">
                       <strong>{{ $message }}</strong>
                     </span>
@@ -55,13 +63,16 @@
   <script>
     $("body").addClass("bg-gradient-primary");
 
-    // JavaScript to transform phone number as per the condition
-    $('input[name="username"]').on('input', function() {
-      var phoneNumber = $(this).val();
-      if (phoneNumber.charAt(0) === '0' && phoneNumber.charAt(1) !== '0') {
-        phoneNumber = '62' + phoneNumber.substr(1);
-        $(this).val(phoneNumber);
-      }
+    // JavaScript to modify input value
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+        var usernameInput = document.getElementById('username');
+        var usernameValue = usernameInput.value;
+
+        // Check if the first digit is not 62 and starts with 0
+        if (usernameValue.startsWith('0') && !usernameValue.startsWith('62')) {
+            // Replace 0 with 62
+            usernameInput.value = '62' + usernameValue.substring(1);
+        }
     });
   </script>
 @endsection
