@@ -22,16 +22,8 @@
                   @enderror
                 </div>
                 <div class="form-group">
-                  <input type="number" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Nomor Telepon">
+                  <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Nomor Telepon">
                   @error('username')
-                    <span class="invalid-feedback" role="alert">
-                      <strong>{{ $message }}</strong>
-                    </span>
-                  @enderror
-                </div>
-                <div class="form-group">
-                  <input type="email" class="form-control form-control-user @error('email') is-invalid @enderror" name="email" required autocomplete="off" placeholder="Email">
-                  @error('email')
                     <span class="invalid-feedback" role="alert">
                       <strong>{{ $message }}</strong>
                     </span>
@@ -62,6 +54,14 @@
 @section('script')
   <script>
     $("body").addClass("bg-gradient-primary");
+
+    // JavaScript to transform phone number as per the condition
+    $('input[name="username"]').on('input', function() {
+      var phoneNumber = $(this).val();
+      if (phoneNumber.charAt(0) === '0' && phoneNumber.charAt(1) !== '0') {
+        phoneNumber = '62' + phoneNumber.substr(1);
+        $(this).val(phoneNumber);
+      }
+    });
   </script>
 @endsection
-
