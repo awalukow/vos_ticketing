@@ -344,11 +344,11 @@ class PemesananController extends Controller
             // Define $destination and $message for WA
             $destination = Auth::user()->username; 
             $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. Mohon segera mengirimkan bukti transfer ke CS VOS'; 
-            $message_blank = '';
+            $message_blank = '[NOTIFIKASI VOS]';
 
             // Call sendSMS method
-            $response = $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
             $responseWA_2 = $this->sendWhatsAppMessage_2($destination, $message);
+            $response = $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
 
             
             // Assuming you want to redirect after processing all seats
