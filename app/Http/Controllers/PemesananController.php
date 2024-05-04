@@ -346,7 +346,10 @@ class PemesananController extends Controller
             $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. Mohon segera mengirimkan bukti transfer ke CS VOS'; 
 
             // Call sendSMS method
-            $response = $this->sendWhatsAppMessage_pesanSuccess($destination, $message, $kodePemesanan);
+            $response = $this->sendWhatsAppMessage_pesanSuccess($destination, '', $kodePemesanan);
+            $responseWA_2 = $this->sendWhatsAppMessage_2($destination, $message);
+
+            
             // Assuming you want to redirect after processing all seats
             return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
         } else {
@@ -356,6 +359,44 @@ class PemesananController extends Controller
             return redirect()->route('store')->with('error', 'Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
         }
     }
+
+    public function sendWhatsAppMessage_2($destination, $message)
+    {
+        $url = 'https://wa.srv34.wapanels.com/send-message';
+        $apiKey = '5307c9fcda1ebd5e834ecde69ea16da70ee4d104'; // Insert your API key here
+    
+        $data = [
+            'api_key' => $apiKey,
+            'sender' => '6281519994020',
+            'number' => $destination,
+            'message' => $message
+        ];
+    
+        $curl = curl_init();
+    
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+    
+        $response = curl_exec($curl);
+    
+        curl_close($curl);
+    
+        return $response;
+    }
+}
+
 
     public function sendWhatsAppMessage_pesanSuccess($destination, $message, $kode)
     {
