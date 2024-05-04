@@ -135,10 +135,6 @@
 
     document.getElementById('submitBtn').addEventListener('click', function() {
       if (selectedSeats.length > 0) {
-        // Show loading animation
-        var loadingOverlay = document.querySelector('.loading-overlay');
-        loadingOverlay.style.display = 'block';
-
         var modalBody = document.getElementById('modalBodyContent');
         var seatList = selectedSeats.join(', '); // Join selected seats into a string separated by comma
         var content = "<p>Apakah anda yakin akan melanjutkan pembelian tiket dengan kursi: " + seatList + "?</p>";
@@ -150,6 +146,10 @@
     });
 
     document.getElementById('confirmPurchaseBtn').addEventListener('click', function() {
+      // Show loading animation
+      var loadingOverlay = document.querySelector('.loading-overlay');
+      loadingOverlay.style.display = 'block';
+
       var selectedSeatsJSON = JSON.stringify(selectedSeats);
       var data = @json($dataString);
       window.location.href = "{{ route('pesan', ['kursi' => 'placeholder', 'data' => 'placeholder']) }}"
@@ -161,9 +161,6 @@
     document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function(button) {
       button.addEventListener('click', function() {
         $('#confirmationModal').modal('hide');
-        // Hide loading animation
-        var loadingOverlay = document.querySelector('.loading-overlay');
-        loadingOverlay.style.display = 'none';
       });
     });
   </script>
