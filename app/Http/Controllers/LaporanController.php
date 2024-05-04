@@ -71,7 +71,7 @@ class LaporanController extends Controller
 
         // Define $destination and $message for WA
         $destination = $penumpang->username; // Replace with the destination number
-        $message = '[NOTIFIKASI VOS] Tiket konser VOS Pre Competition Concert, 06 September 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah dikonfirmasi.'; 
+        $message = '[NOTIFIKASI VOS] Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah dikonfirmasi.'; 
 
         // Call sendSMS method
         $response = $this->sendWhatsAppMessage_2($destination, $message);

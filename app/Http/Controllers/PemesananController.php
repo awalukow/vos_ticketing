@@ -340,6 +340,13 @@ class PemesananController extends Controller
                     'seatNumber' => $k
                 ]);
             }
+
+            // Define $destination and $message for WA
+            $destination = Auth::user()->username; 
+            $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. Mohon segera mengirimkan bukti transfer ke CS VOS'; 
+
+            // Call sendSMS method
+            $response = $this->sendWhatsAppMessage_pesanSuccess($destination, $message, $kodePemesanan);
             // Assuming you want to redirect after processing all seats
             return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
         } else {
@@ -348,6 +355,45 @@ class PemesananController extends Controller
             Log::info('Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
             return redirect()->route('store')->with('error', 'Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
         }
+    }
+
+    public function sendWhatsAppMessage_pesanSuccess($destination, $message, $kode)
+    {
+        $url = 'https://wa.srv34.wapanels.com/send-template';
+        $apiKey = '5307c9fcda1ebd5e834ecde69ea16da70ee4d104'; // Insert your API key here
+    
+        $data = [
+            'sender' => '6281519994020',
+            'api_key' => $apiKey,
+            'number' => $destination,
+            'url' => null,
+            'footer' => 'Link konfirmasi pembelian tiket',
+            'message' => $message,
+            'template' => ["call|Telepon CS VOS|081257575617","url|WA CS VOS|https://api.whatsapp.com/send?phone=6285156651097&text=Halo%20Admin%2C%20saya%20sudah%20melakukan%20pembelian%20tiket%20konser%20dengan%20kode%3A%20{{ $kode }}%20%5BBukti%20Bayar%20Dilampirkan%5D"]
+        ];
+    
+        $curl = curl_init();
+    
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+    
+        $response = curl_exec($curl);
+    
+        curl_close($curl);
+    
+        return $response;
     }
 
 
