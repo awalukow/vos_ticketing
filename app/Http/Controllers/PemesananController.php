@@ -343,7 +343,7 @@ class PemesananController extends Controller
 
             // Define $destination and $message for WA
             $destination = Auth::user()->username; 
-            $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. Mohon segera mengirimkan bukti transfer ke CS VOS'; 
+            $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097)'; 
             $message_blank = '[NOTIFIKASI VOS]';
 
             // Call sendSMS method
@@ -396,8 +396,6 @@ class PemesananController extends Controller
     
         return $response;
     }
-
-
 
     public function sendWhatsAppMessage_pesanSuccess($destination, $message, $kode)
     {
