@@ -108,52 +108,64 @@
     $("body").addClass("bg-gradient-primary");
 
     // JavaScript to gather input values and display confirmation modal
-document.getElementById('submitButton').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent default form submission
+    document.getElementById('submitButton').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default form submission
 
-    // Gather input values
-    var name = document.getElementsByName('name')[0].value;
-    var username = document.getElementsByName('username')[0].value;
-    var email = document.getElementsByName('email')[0].value;
+        // Gather input values
+        var name = document.getElementsByName('name')[0].value;
+        var username = document.getElementsByName('username')[0].value;
+        var email = document.getElementsByName('email')[0].value;
 
-    // Email validation regex
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // Email validation regex
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Phone number validation regex (starts with '0' and only contains numbers)
-    var phoneRegex = /^0\d{9,}$/;
+        // Phone number validation regex (starts with '0' and only contains numbers)
+        var phoneRegex = /^0\d{9,}$/;
 
-    // Validation flags
-    var isValidEmail = emailRegex.test(email);
-    var isValidPhone = phoneRegex.test(username);
+        // Validation flags
+        var isValidEmail = emailRegex.test(email);
+        var isValidPhone = phoneRegex.test(username);
 
-    // If email or phone number is invalid, show error and return
-    if (!isValidEmail) {
-        $('#errorModalBody').html('<p>Email tidak valid!</p>');
-        $('#errorModal').modal('show');
-        return;
-    }
-    if (!isValidPhone) {
-        $('#errorModalBody').html('<p>Nomor Telepon tidak valid!</p>');
-        $('#errorModal').modal('show');
-        return;
-    }
+        // If email or phone number is invalid, show error and return
+        if (!isValidEmail) {
+            $('#errorModalBody').html('<p>Email tidak valid!</p>');
+            $('#errorModal').modal('show');
+            return;
+        }
+        if (!isValidPhone) {
+            $('#errorModalBody').html('<p>Nomor Telepon tidak valid!</p>');
+            $('#errorModal').modal('show');
+            return;
+        }
 
-    // If phone number starts with '0', replace '0' with '62'
-    if (username.startsWith('0')) {
-        username = '62' + username.substring(1);
-    }
+        // If phone number starts with '0', replace '0' with '62'
+        if (username.startsWith('0')) {
+            username = '62' + username.substring(1);
+        }
 
-    // Build confirmation message
-    var confirmationMessage = "<li><strong>Nama User:</strong> " + name + "</li>";
-    confirmationMessage += "<li><strong>Nomor Telepon:</strong> " + username + "</li>";
-    confirmationMessage += "<li><strong>Email:</strong> " + email + "</li>";
+        // Build confirmation message
+        var confirmationMessage = "<li><strong>Nama User:</strong> " + name + "</li>";
+        confirmationMessage += "<li><strong>Nomor Telepon:</strong> " + username + "</li>";
+        confirmationMessage += "<li><strong>Email:</strong> " + email + "</li>";
 
-    // Set confirmation details in modal
-    document.getElementById('confirmationDetails').innerHTML = confirmationMessage;
+        // Set confirmation details in modal
+        document.getElementById('confirmationDetails').innerHTML = confirmationMessage;
 
-    // Show confirmation modal
-    $('#confirmationModal').modal('show');
-});
+        // Show confirmation modal
+        $('#confirmationModal').modal('show');
+    });
 
+    // Handle confirm button click event
+    document.getElementById('confirmButton').addEventListener('click', function(event) {
+        // Replace '0' with '62' in the phone number if it starts with '0'
+        var username = document.getElementsByName('username')[0].value;
+        if (username.startsWith('0')) {
+            username = '62' + username.substring(1);
+            document.getElementsByName('username')[0].value = username; // Update the input field value
+        }
+
+        // Submit the form
+        document.getElementById('registerForm').submit();
+    });
   </script>
 @endsection
