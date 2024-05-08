@@ -29,7 +29,11 @@
     }
     
     #submitBtn {
-      margin-top: 20px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999; /* Ensure it's on top of other content */
     }
 
     /* Loading animation */
@@ -88,9 +92,11 @@
           @endif
         @endfor
       </div>
-      <button id="submitBtn" class="btn btn-primary">Submit</button>
     </div>
   </div>
+
+  <!-- Submit button -->
+  <button id="submitBtn" class="btn btn-primary">Submit</button>
 
   <!-- Modal -->
   <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
@@ -163,5 +169,21 @@
         $('#confirmationModal').modal('hide');
       });
     });
+
+    // Function to make submit button follow the scroll
+    function followScroll() {
+      var submitBtn = document.getElementById('submitBtn');
+      var rect = submitBtn.getBoundingClientRect();
+      var offset = 20; // Adjust this value as needed
+
+      if (rect.bottom + offset >= window.innerHeight) {
+        submitBtn.style.bottom = (window.innerHeight - rect.bottom + offset) + 'px';
+      } else {
+        submitBtn.style.bottom = '0';
+      }
+    }
+
+    // Call followScroll function on scroll event
+    window.addEventListener('scroll', followScroll);
   </script>
 @endsection
