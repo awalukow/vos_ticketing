@@ -30,7 +30,7 @@
     
     #submitBtn {
       position: fixed;
-      bottom: 0;
+      bottom: 70px ;
       left: 0;
       width: 100%;
       z-index: 999; /* Ensure it's on top of other content */
