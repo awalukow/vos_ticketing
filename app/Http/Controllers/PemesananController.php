@@ -337,7 +337,8 @@ class PemesananController extends Controller
             foreach ($dataKursi as $k) {
                 Pemesanan_Detail::create([
                     'pemesananCode' => $kodePemesanan,
-                    'seatNumber' => $k
+                    'seatNumber' => $k,
+                    'category_id' => $rute->transportasi->category->id
                 ]);
             }
 

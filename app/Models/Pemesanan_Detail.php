@@ -11,7 +11,8 @@ class Pemesanan_Detail extends Model
 
     protected $fillable = [
         'pemesananCode',
-        'seatNumber'
+        'seatNumber',
+        'category_id'
     ];
     protected $table = 'Pemesanan_Detail';
 }
