@@ -53,28 +53,14 @@
     $("body").addClass("bg-gradient-primary");
 
     // JavaScript function to adjust input value
-    function adjustUsername() {
+    document.getElementById("loginButton").addEventListener("click", function() {
       var usernameInput = document.getElementById("username");
       var inputValue = usernameInput.value;
       if (inputValue.startsWith("0")) {
         usernameInput.value = "62" + inputValue.slice(1);
       }
-    }
-
-    // Add event listener for login button click
-    document.getElementById("loginButton").addEventListener("click", function() {
-      adjustUsername();
       // Submit the form after modification
       document.getElementById("loginForm").submit();
-    });
-
-    // Add event listener for Enter key press on username input field
-    document.getElementById("username").addEventListener("keypress", function(event) {
-      if (event.key === "Enter") {
-        adjustUsername();
-        // Submit the form after modification
-        document.getElementById("loginForm").submit();
-      }
     });
   </script>
 @endsection
