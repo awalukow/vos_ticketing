@@ -348,7 +348,7 @@ class PemesananController extends Controller
 
             // Call sendSMS method
             $responseWA_2 = $this->sendWhatsAppMessage_2($destination, $message);
-            sleep(3); // Add a 3-second delay
+            //sleep(3); // Add a 3-second delay
             $response = $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
 
             

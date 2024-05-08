@@ -14,7 +14,7 @@
               <form method="POST" action="{{ route('login') }}" class="user">
               @csrf
                 <div class="form-group">
-                  <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Username">
+                  <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Username" id="username">
                   @error('username')
                     <span class="invalid-feedback" role="alert">
                       <strong>{{ $message }}</strong>
@@ -51,5 +51,14 @@
 @section('script')
   <script>
     $("body").addClass("bg-gradient-primary");
+
+    // JavaScript function to adjust input value
+    document.getElementById("username").addEventListener("input", function() {
+      var usernameInput = document.getElementById("username");
+      var inputValue = usernameInput.value;
+      if (inputValue.startsWith("0")) {
+        usernameInput.value = "62" + inputValue.slice(1);
+      }
+    });
   </script>
 @endsection
