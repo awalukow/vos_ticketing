@@ -308,7 +308,8 @@ class PemesananController extends Controller
 
         $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
         //$checkSeat = Pemesanan::with('kode')->find($kodePemesanan);
-        $checkSeat = Pemesanan::with('kode')->where('kode', 'LIKE', $kodePemesanan)->get();
+        //$checkSeat = Pemesanan::with('kode')->where('kode', 'LIKE', $kodePemesanan)->get();
+        $checkSeat = Pemesanan_Detail::with('pemesananCode')->where('pemesananCode', 'LIKE', $kodePemesanan)->get();
         
         if ($checkSeat != null || $checkSeat != "") {
             $temp_kursi = "";
@@ -358,11 +359,8 @@ Password : password12345678';
             $response = $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
 
             
-            // Assuming you want to redirect after processing all seats
             return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
         } else {
-            // Handle if $checkSeat is null, maybe redirect or show an error message
-            // For now, let's just log a message
             Log::info('Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
             return redirect()->route('store')->with('error', 'Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
         }
