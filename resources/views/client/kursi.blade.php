@@ -32,7 +32,7 @@
       position: fixed;
       bottom: 0;
       left: 0;
-      width: calc(100% - 40px); /* Adjusted width to avoid overlap with back-to-top button */
+      width: 100%;
       z-index: 999; /* Ensure it's on top of other content */
     }
 
@@ -176,7 +176,7 @@
       var rect = submitBtn.getBoundingClientRect();
       var offset = 20; // Adjust this value as needed
 
-      if (rect.bottom + offset >= window.innerHeight) {
+      if (rect.bottom + offset >= window. innerHeight) {
         submitBtn.style.bottom = (window.innerHeight - rect.bottom + offset) + 'px';
       } else {
         submitBtn.style.bottom = '0';
