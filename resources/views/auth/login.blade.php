@@ -11,7 +11,7 @@
               <div class="text-center">
                 <h1 class="h4 text-gray-900 mb-4">Selamat Datang!</h1>
               </div>
-              <form method="POST" action="{{ route('login') }}" class="user">
+              <form id="loginForm" method="POST" action="{{ route('login') }}" class="user">
               @csrf
                 <div class="form-group">
                   <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Username" id="username">
@@ -35,7 +35,7 @@
                     <label class="custom-control-label" for="remember">{{ __('Remember Me') }}</label>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-user btn-block">
+                <button type="button" id="loginButton" class="btn btn-primary btn-user btn-block">
                   {{ __('Login') }}
                 </button>
               </form>
@@ -53,12 +53,14 @@
     $("body").addClass("bg-gradient-primary");
 
     // JavaScript function to adjust input value
-    document.getElementById("username").addEventListener("input", function() {
+    document.getElementById("loginButton").addEventListener("click", function() {
       var usernameInput = document.getElementById("username");
       var inputValue = usernameInput.value;
       if (inputValue.startsWith("0")) {
         usernameInput.value = "62" + inputValue.slice(1);
       }
+      // Submit the form after modification
+      document.getElementById("loginForm").submit();
     });
   </script>
 @endsection
