@@ -32,7 +32,7 @@
       position: fixed;
       bottom: 0;
       left: 0;
-      width: 100%;
+      width: calc(100% - 40px); /* Adjusted width to avoid overlap with back-to-top button */
       z-index: 999; /* Ensure it's on top of other content */
     }
 
