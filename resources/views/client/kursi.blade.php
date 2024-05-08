@@ -32,7 +32,7 @@
       position: fixed;
       bottom: 0 ;
       left: 0;
-      width: 70%;
+      width: 100%;
       z-index: 999; /* Ensure it's on top of other content */
     }
 
