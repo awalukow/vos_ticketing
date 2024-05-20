@@ -96,7 +96,7 @@ class LaporanController extends Controller
             'subject' => '[VOS] Pesanan anda sudah dikonfirmasi! - Kode Booking : ' . $pemesanan->kode ,
             'content' => $messageEmail
         ];
-        Mail::to(Auth::user()->email)->send(new EmailNotification($emailData));
+        Mail::to($penumpang->email)->send(new EmailNotification($emailData));
 
 
         return redirect()->back()->with('success', 'Pembayaran Ticket Success!');
