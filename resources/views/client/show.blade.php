@@ -110,6 +110,13 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           <button id="confirmBtn" type="button" class="btn btn-primary">Confirm</button>
+          <!-- Loading animation -->
+        <div class="loading-overlay" style="display: none;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <span class="ml-2">Loading...</span>
+        </div>
         </div>
       </div>
     </div>
@@ -136,8 +143,6 @@
 
   // Increment ticket count
   $(document).on('click', '#incrementBtn', function() {
-    var currentCount = parseInt($('#ticketCount').val());
-    var maxSeats = parseInt($('#maxSeats').text());
     if (currentCount < maxSeats) {
       $('#ticketCount').val(currentCount + 1);
       selectedCount = currentCount + 1; // Update the selected count
@@ -153,24 +158,27 @@
     }
   });
 
-  // Confirm ticket selection
-  $(document).on('click', '#confirmBtn', function() {
-        // Show loading animation
-    var loadingOverlay = document.querySelector('.loading-overlay');
-    loadingOverlay.style.display = 'block';
-    var url = "{{ route('pesan', ['kursi' => ':kursi', 'data' => ':data']) }}";
-    url = url.replace(':kursi', selectedCount);
+ // Confirm ticket selection
+$(document).on('click', '#confirmBtn', function() {
+  // Disable the Confirm button
+  $('#confirmBtn, .btn-secondary').prop('disabled', true);
 
-    // Encrypt data using a route
-    $.get("{{ route('encryptData') }}", { data: selectedData }, function(encryptedData) {
-      url = url.replace(':data', encryptedData);
-      window.location.href = url;
+  // Show loading animation
+  $('.loading-overlay').css('display', 'flex');
+  
+  var url = "{{ route('pesan', ['kursi' => ':kursi', 'data' => ':data']) }}";
+  url = url.replace(':kursi', selectedCount);
+
+  // Encrypt data using a route
+  $.get("{{ route('encryptData') }}", { data: selectedData }, function(encryptedData) {
+    url = url.replace(':data', encryptedData);
+    // Attach an event listener to keep the loading animation displayed until page navigation begins
+    $(window).on('beforeunload', function() {
+      $('.loading-overlay').css('display', 'block');
     });
+    window.location.href = url;
   });
+});
 
-  // Reset selected count when modal is closed
-  $('#ticketModal').on('hidden.bs.modal', function () {
-    selectedCount = 1;
-  });
 </script>
 @endsection

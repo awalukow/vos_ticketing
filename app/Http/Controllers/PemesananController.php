@@ -657,7 +657,9 @@ public function pesan__CANCELEDAGAIN($kursi, $encodedData)
     public function sendWhatsAppMessage_2($destination, $message)
     {
         $url = 'https://wa.srv34.wapanels.com/send-message';
+        //$url   = 'https://api.watsap.id/send-message';
         $apiKey = '5307c9fcda1ebd5e834ecde69ea16da70ee4d104'; // Insert your API key here
+        $id_device = '7601';
     
         $data = [
             'api_key' => $apiKey,
@@ -665,6 +667,13 @@ public function pesan__CANCELEDAGAIN($kursi, $encodedData)
             'number' => $destination,
             'message' => $message
         ];
+
+        $data_post = [
+            'id_device' => $id_device,
+            'api-key' => $apiKey,
+            'no_hp'   => '6285781788462',
+            'pesan'   => $message
+         ];
     
         $curl = curl_init();
     
@@ -678,6 +687,7 @@ public function pesan__CANCELEDAGAIN($kursi, $encodedData)
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => json_encode($data),
+            //CURLOPT_POSTFIELDS => json_encode($data_post),
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json'
             ),
