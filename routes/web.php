@@ -51,10 +51,13 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['penumpang'])->group(function () {
+        //Route::get('/pesan/{kursi}/{data}', [App\Http\Controllers\PemesananController::class, 'pesan'])->name('pesan');     
         Route::get('/pesan/{kursi}/{data}', [App\Http\Controllers\PemesananController::class, 'pesan'])->name('pesan');
         Route::get('/cari/kursi/{data}', [App\Http\Controllers\PemesananController::class, 'edit'])->name('cari.kursi');
         Route::resource('/', App\Http\Controllers\PemesananController::class);
         Route::get('/history', [App\Http\Controllers\LaporanController::class, 'history'])->name('history');
         Route::get('/{id}/{data}', [App\Http\Controllers\PemesananController::class, 'show'])->name('show');
+        Route::get('/encrypt-data', [App\Http\Controllers\PemesananController::class, 'encryptData'])->name('encryptData');
+
     });
 });

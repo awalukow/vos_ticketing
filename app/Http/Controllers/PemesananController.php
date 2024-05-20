@@ -159,7 +159,8 @@ class PemesananController extends Controller
 
     // Iterate over route data and filter based on category
     foreach ($rute as $val) {
-        $pemesanan = Pemesanan::where('rute_id', $val->id)->count();
+        //$pemesanan = Pemesanan::where('rute_id', $val->id)->count();
+        $pemesanan = Pemesanan::where('rute_id', $val->id)->sum('kursi');
         if ($val->transportasi && $val->transportasi->category_id == $category->id) {
             $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan;
             $dataRute[] = [
@@ -181,9 +182,13 @@ class PemesananController extends Controller
     // Sort the data if needed
     sort($dataRute);
     
+    // Encode the decrypted data as a JSON string
+    $dataString = json_encode($data);
+
     // Pass the necessary variables to the view
-    return view('client.show', compact('id', 'dataRute', 'data'));
+    return view('client.show', compact('id', 'dataRute', 'dataString'));
 }
+
     
 
     /**
@@ -296,7 +301,7 @@ class PemesananController extends Controller
         return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
     }
 
-    public function pesan($kursi, $data)
+    public function pesan_tempChange($kursi, $data)
     {
         //$d = Crypt::decrypt($data);
         $dataKursi = json_decode($kursi, true); 
@@ -365,6 +370,289 @@ Password : password12345678';
             return redirect()->route('store')->with('error', 'Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
         }
     }
+
+    public function encryptData(Request $request)
+{
+    return Crypt::encrypt($request->data);
+}
+
+public function pesan($kursi, $encodedData)
+{
+    // Decrypt the data
+    $data = Crypt::decrypt($encodedData);
+
+    // Get the route details
+    $rute = Rute::with('transportasi.category')->find($data['id']);
+
+    // Calculate the total price
+    $total = $rute->harga * $kursi;
+
+    // Generate a random booking code
+    $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+    // Create the booking
+    Pemesanan::create([
+        'kode' => $kodePemesanan,
+        'kursi' => $kursi,
+        'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
+        'total' => $total,
+        'rute_id' => $rute->id,
+        'penumpang_id' => Auth::user()->id
+    ]);
+
+    // Send WhatsApp message
+    $destination = Auth::user()->username; 
+    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+    Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
+    Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
+    Username : '.Auth::user()->username.' 
+    Password : password12345678';
+
+    $message_blank = '[NOTIFIKASI VOS]';
+    $this->sendWhatsAppMessage_2($destination, $message);
+    $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
+
+    // Redirect to the transaction page with success message
+    return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+}
+
+
+public function pesan__CANCELEDAGAIN($kursi, $encodedData)
+{
+    $dataArray = json_decode(Crypt::decrypt($encodedData), true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return redirect()->route('store')->with('error', 'Invalid data provided.');
+    }
+
+    $requestedSeatCount = $kursi;
+
+    // Get the rute and transportasi details
+    $rute = Rute::with('transportasi.category')->find($dataArray['id']);
+    $transportasi = $rute->transportasi;
+
+    // Get all available seats for the specified transportasi
+    $availableSeats = [];
+    for ($i = 1; $i <= $transportasi->jumlah; $i++) {
+        $seatCode = $transportasi->kode . $i;
+        $cekData = json_encode(['kursi' => $seatCode, 'rute' => $dataArray['id'], 'waktu' => $dataArray['waktu']]);
+        if ($transportasi->kursi($cekData) === null) {
+            $availableSeats[] = $seatCode;
+        }
+    }
+
+    if (count($availableSeats) < $requestedSeatCount) {
+        return redirect()->route('store')->with('error', 'Not enough seats available.');
+    }
+
+    // Select the required number of seats
+    $selectedSeats = array_slice($availableSeats, 0, $requestedSeatCount);
+    $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+    $temp_kursi = implode(', ', $selectedSeats);
+    $harga = $rute->harga * $requestedSeatCount;
+
+    Pemesanan::create([
+        'kode' => $kodePemesanan,
+        'kursi' => $temp_kursi,
+        'waktu' => Carbon::parse($dataArray['event_date'])->format('Y-m-d') . ' ' . $rute->jam,
+        'total' => $harga,
+        'rute_id' => $rute->id,
+        'penumpang_id' => Auth::user()->id
+    ]);
+
+    foreach ($selectedSeats as $seat) {
+        Pemesanan_Detail::create([
+            'pemesananCode' => $kodePemesanan,
+            'seatNumber' => $seat,
+            'category_id' => $rute->transportasi->category->id
+        ]);
+    }
+
+    $destination = Auth::user()->username; 
+    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+    Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
+    Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
+    Username : '.Auth::user()->username.' 
+    Password : password12345678';
+
+    $message_blank = '[NOTIFIKASI VOS]';
+    $this->sendWhatsAppMessage_2($destination, $message);
+    $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
+
+    return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+}
+
+
+
+    public function pesan_28329873($kursi, $encodedData)
+{
+    // Decode the JSON string from the URL parameter
+    $dataArray = json_decode(urldecode($encodedData), true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        // Handle JSON decode error
+        return redirect()->route('store')->with('error', 'Invalid data provided.');
+    }
+
+    // Get the rute and transportasi details
+    $rute = Rute::with('transportasi.category')->find($dataArray['id']);
+    $transportasi = $rute->transportasi;
+
+    // Get all available seats for the specified transportasi
+    $availableSeats = [];
+    for ($i = 1; $i <= $transportasi->jumlah; $i++) {
+        $seatCode = $transportasi->kode . $i;
+        $cekData = json_encode(['kursi' => $seatCode, 'rute' => $dataArray['id'], 'waktu' => $dataArray['waktu']]);
+        if ($transportasi->kursi($cekData) === null) {
+            $availableSeats[] = $seatCode;
+        }
+    }
+
+    //if (count($availableSeats) < $kursi) {
+    //    return redirect()->route('store')->with('error', 'Not enough seats available.');
+    //}
+
+    // Select the required number of seats
+    $selectedSeats = array_slice($availableSeats, 0, $kursi);
+    $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+    $temp_kursi = implode(', ', $selectedSeats);
+    $harga = $rute->harga * $kursi;
+
+    Pemesanan::create([
+        'kode' => $kodePemesanan,
+        'kursi' => $temp_kursi,
+        'waktu' => Carbon::parse($dataArray['event_date'])->format('Y-m-d') . ' ' . $rute->jam,
+        'total' => $harga,
+        'rute_id' => $rute->id,
+        'penumpang_id' => Auth::user()->id
+    ]);
+
+    foreach ($selectedSeats as $seat) {
+        Pemesanan_Detail::create([
+            'pemesananCode' => $kodePemesanan,
+            'seatNumber' => $seat,
+            'category_id' => $rute->transportasi->category->id
+        ]);
+    }
+
+    $destination = Auth::user()->username; 
+    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+    Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
+    Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
+    Username : '.Auth::user()->username.' 
+    Password : password12345678';
+
+    $message_blank = '[NOTIFIKASI VOS]';
+    $this->sendWhatsAppMessage_2($destination, $message);
+    $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
+
+    return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+}
+
+
+    public function pesan__canceled20052024($kursi, $encodedData)
+{
+    // Decode the JSON string from the URL parameter
+    $selectedSeats = json_decode(urldecode($kursi), true);
+    $dataArray = json_decode(urldecode($encodedData), true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        // Handle JSON decode error
+        return redirect()->route('store')->with('error', 'Invalid data provided.');
+    }
+
+    $requestedSeatCount = count($selectedSeats);
+
+    // Get the rute and transportasi details
+    $rute = Rute::with('transportasi.category')->find($dataArray['id']);
+    $transportasi = $rute->transportasi;
+
+    // Get all available seats for the specified transportasi
+    $availableSeats = [];
+    for ($i = 1; $i <= $transportasi->jumlah; $i++) {
+        $seatCode = $transportasi->kode . $i;
+        $cekData = json_encode(['kursi' => $seatCode, 'rute' => $dataArray['id'], 'waktu' => $dataArray['waktu']]);
+        if ($transportasi->kursi($cekData) === null) {
+            $availableSeats[] = $seatCode;
+        }
+    }
+
+    if (count($availableSeats) < $requestedSeatCount) {
+        return redirect()->route('store')->with('error', 'Not enough seats available.');
+    }
+
+    // Select the required number of seats
+    $selectedSeats = array_slice($availableSeats, 0, $requestedSeatCount);
+    $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+    $temp_kursi = implode(', ', $selectedSeats);
+    $harga = $rute->harga * $requestedSeatCount;
+
+    Pemesanan::create([
+        'kode' => $kodePemesanan,
+        'kursi' => $temp_kursi,
+        'waktu' => Carbon::parse($dataArray['event_date'])->format('Y-m-d') . ' ' . $rute->jam,
+        'total' => $harga,
+        'rute_id' => $rute->id,
+        'penumpang_id' => Auth::user()->id
+    ]);
+
+    foreach ($selectedSeats as $seat) {
+        Pemesanan_Detail::create([
+            'pemesananCode' => $kodePemesanan,
+            'seatNumber' => $seat,
+            'category_id' => $rute->transportasi->category->id
+        ]);
+    }
+
+    $destination = Auth::user()->username; 
+    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+    Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
+    Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
+    Username : '.Auth::user()->username.' 
+    Password : password12345678';
+
+    $message_blank = '[NOTIFIKASI VOS]';
+    $this->sendWhatsAppMessage_2($destination, $message);
+    $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
+
+    return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+}
+  
+        
+    public function pesan__($data)
+    {
+        $d = Crypt::decrypt($data);
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+    
+        $rute = Rute::with('transportasi.category')->find($d['id']);
+    
+        // Extract selected ticket count from the decrypted data
+        $selectedTicketCount = $d['selected_ticket_count'];
+    
+        // Calculate total price based on selected ticket count
+        $totalPrice = $rute->harga * $selectedTicketCount;
+    
+        $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+    
+        Pemesanan::create([
+            'kode' => $kodePemesanan,
+            'kursi' => null, // Since seat selection is bypassed
+            'waktu' => $waktu,
+            'total' => $totalPrice, // Use calculated total price
+            'rute_id' => $rute->id,
+            'penumpang_id' => Auth::user()->id
+        ]);
+    
+        return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+    }    
 
     public function sendWhatsAppMessage_2($destination, $message)
     {
