@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Mail;
 use Exception;
 use TCPDF;
+use App\Mail\EmailNotification; // Assuming you have a Mailable class defined for the email notification
 
 
 class LaporanController extends Controller
@@ -73,14 +74,30 @@ class LaporanController extends Controller
         $destination = $penumpang->username; // Replace with the destination number
         $message = '[NOTIFIKASI VOS] Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah dikonfirmasi.'; 
 
-        // Call sendSMS method
-        $response = $this->sendWhatsAppMessage_2($destination, $message);
+        $messageEmail = 'Pembayaran sudah diterima dan diverifikasi. <br> Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah sudah terkonfirmasi. <br><br>
+        berikut adalah ringkasan e-tiket anda: <br>
+        Kode Booking : '. $pemesanan->kode . '<br>
+        Nama Event : Interval | Pre-Competition Concert <br>
+        Waktu : '. $pemesanan->waktu . '<br>
+        Jumlah Kursi : '. $pemesanan->kursi . '<br>
+        '; 
 
-        if ($response) {
-            echo "WA SUCCESS";
-        } else {
-            echo "WA FAILED";
-        }
+        // Call sendSMS method
+        //$response = $this->sendWhatsAppMessage_2($destination, $message);
+
+        //if ($response) {
+        //    echo "WA SUCCESS";
+        //} else {
+        //    echo "WA FAILED";
+        //}
+
+        // Send email
+        $emailData = [
+            'subject' => '[VOS] Pesanan anda sudah dikonfirmasi! - Kode Booking : ' . $pemesanan->kode ,
+            'content' => $messageEmail
+        ];
+        Mail::to(Auth::user()->email)->send(new EmailNotification($emailData));
+
 
         return redirect()->back()->with('success', 'Pembayaran Ticket Success!');
     }

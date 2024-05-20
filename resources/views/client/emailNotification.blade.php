@@ -10,6 +10,6 @@
     
     <p>{{ $content }}</p>
     
-    <p>Mohon dapat hadir pada venue event tepat waktu, dan mohon untuk tidak membawa anak kecil dalam ruangan konser <br> Silahkan hubungi admin.</p>
+    <p>Mohon untuk tidak membalas email ini.</p>
 </body>
 </html>
