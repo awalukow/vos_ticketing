@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmailNotification; // Assuming you have a Mailable class defined for the email notification
 
 class PemesananController extends Controller
 {
@@ -391,6 +393,30 @@ public function pesan($kursi, $encodedData)
     $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
 
+    // Send WhatsApp message
+    $destination = Auth::user()->username; 
+    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
+Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
+Username : '.Auth::user()->username.' 
+Password : password12345678';
+
+    $message_blank = '[NOTIFIKASI VOS]';
+
+    // Send WhatsApp message and handle error
+    $response = $this->sendWhatsAppMessage_2($destination, $message);
+    //if ($response !== '200') {
+    //    return redirect()->back()->with('error', 'Gagal mengirim pesan Whatsapp. Mohon coba beberapa saat lagi, atau hubungi admin. Error Code: ' . $response);
+    //}
+
+    // Send email
+    $emailData = [
+        'subject' => '[VOS] Pesanan Tiket Konser VOS anda telah berhasil - Kode Booking : ' . $kodePemesanan ,
+        'content' => $message // You can customize the email content as per your requirements
+    ];
+    Mail::to(Auth::user()->email)->send(new EmailNotification($emailData));
+
+
     // Create the booking
     Pemesanan::create([
         'kode' => $kodePemesanan,
@@ -401,22 +427,12 @@ public function pesan($kursi, $encodedData)
         'penumpang_id' => Auth::user()->id
     ]);
 
-    // Send WhatsApp message
-    $destination = Auth::user()->username; 
-    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
-    Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
-    Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
-    Username : '.Auth::user()->username.' 
-    Password : password12345678';
-
-    $message_blank = '[NOTIFIKASI VOS]';
-    $this->sendWhatsAppMessage_2($destination, $message);
+    // Send success message
     $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
 
     // Redirect to the transaction page with success message
     return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
 }
-
 
 public function pesan__CANCELEDAGAIN($kursi, $encodedData)
 {
@@ -485,9 +501,7 @@ public function pesan__CANCELEDAGAIN($kursi, $encodedData)
     return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
 }
 
-
-
-    public function pesan_28329873($kursi, $encodedData)
+public function pesan_28329873($kursi, $encodedData)
 {
     // Decode the JSON string from the URL parameter
     $dataArray = json_decode(urldecode($encodedData), true);
@@ -554,8 +568,7 @@ public function pesan__CANCELEDAGAIN($kursi, $encodedData)
     return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
 }
 
-
-    public function pesan__canceled20052024($kursi, $encodedData)
+public function pesan__canceled20052024($kursi, $encodedData)
 {
     // Decode the JSON string from the URL parameter
     $selectedSeats = json_decode(urldecode($kursi), true);
@@ -625,8 +638,7 @@ public function pesan__CANCELEDAGAIN($kursi, $encodedData)
     return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
 }
   
-        
-    public function pesan__($data)
+public function pesan__($data)
     {
         $d = Crypt::decrypt($data);
         $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
