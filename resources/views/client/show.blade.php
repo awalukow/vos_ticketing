@@ -141,22 +141,26 @@
     $('#ticketModal').modal('show');
   });
 
-  // Increment ticket count
-  $(document).on('click', '#incrementBtn', function() {
-    if (currentCount < maxSeats) {
-      $('#ticketCount').val(currentCount + 1);
-      selectedCount = currentCount + 1; // Update the selected count
-    }
-  });
 
-  // Decrement ticket count
-  $(document).on('click', '#decrementBtn', function() {
-    var currentCount = parseInt($('#ticketCount').val());
-    if (currentCount > 1) {
-      $('#ticketCount').val(currentCount - 1);
-      selectedCount = currentCount - 1; // Update the selected count
-    }
-  });
+
+  // Increment ticket count
+    $(document).on('click', '#incrementBtn', function() {
+        var currentCount = parseInt($('#ticketCount').val());
+        var maxSeats = parseInt($('#maxSeats').text());
+        if (currentCount < maxSeats) {
+            $('#ticketCount').val(currentCount + 1);
+            selectedCount = currentCount + 1; // Update the selected count
+        }
+    });
+
+    // Decrement ticket count
+    $(document).on('click', '#decrementBtn', function() {
+        var currentCount = parseInt($('#ticketCount').val());
+        if (currentCount > 1) {
+            $('#ticketCount').val(currentCount - 1);
+            selectedCount = currentCount - 1; // Update the selected count
+        }
+    });
 
  // Confirm ticket selection
 $(document).on('click', '#confirmBtn', function() {
