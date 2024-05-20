@@ -57,7 +57,7 @@ class LaporanController extends Controller
         $pemesanan = Pemesanan::find($id);
         $penumpang = DB::table('users')
                     ->join('pemesanan', 'users.id', '=', 'pemesanan.penumpang_id')
-                    ->select('users.username')
+                    ->select('users.username', 'users.email')
                     ->where('pemesanan.kode', '=', $pemesanan->kode)
                     ->first(); // Retrieve the first result
         // Check if the booking exists
