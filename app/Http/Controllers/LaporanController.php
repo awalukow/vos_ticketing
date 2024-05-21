@@ -72,7 +72,7 @@ class LaporanController extends Controller
 
         // Define $destination and $message for WA
         $destination = $penumpang->username; // Replace with the destination number
-        $message = '[NOTIFIKASI VOS] Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah dikonfirmasi.'; 
+        $message = '[NOTIFIKASI VOS] Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah dikonfirmasi. Info Hub: http://wa.me/6285156651097'; 
 
         $messageEmail = 'Pembayaran sudah diterima dan diverifikasi. <br> Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah sudah terkonfirmasi. <br><br>
         berikut adalah ringkasan e-tiket anda: <br>
