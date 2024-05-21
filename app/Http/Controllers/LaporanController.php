@@ -83,13 +83,13 @@ class LaporanController extends Controller
         '; 
 
         // Call sendSMS method
-        //$response = $this->sendWhatsAppMessage_2($destination, $message);
+        $response = $this->sendWhatsAppMessage_2($destination, $message);
 
-        //if ($response) {
-        //    echo "WA SUCCESS";
-        //} else {
-        //    echo "WA FAILED";
-        //}
+        if ($response) {
+            echo "WA SUCCESS";
+        } else {
+            echo "WA FAILED";
+        }
 
         // Send email
         $emailData = [
