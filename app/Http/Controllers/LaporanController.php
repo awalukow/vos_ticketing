@@ -103,8 +103,8 @@ class LaporanController extends Controller
         $messageEmail = 'Pembayaran sudah diterima dan diverifikasi. <br> Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah sudah terkonfirmasi. <br><br>
         berikut adalah ringkasan e-tiket anda: <br>
         Kode Booking : '. $pemesanan->kode . '<br>
-        Nama Event : '. $pemesanan->rute->category->name . ' <br>
-        Waktu : '. $pemesanan->rute->jam . '<br>
+        Nama Event : Interval | Pre-Competition Concert <br>
+        Waktu : '. $pemesanan->waktu . '<br>
         Jumlah Kursi : '. $pemesanan->kursi . '<br>
         '; 
 
