@@ -104,7 +104,6 @@ class LaporanController extends Controller
         berikut adalah ringkasan e-tiket anda: <br>
         Kode Booking : '. $pemesanan->kode . '<br>
         Nama Event : Interval | Pre-Competition Concert <br>
-        Waktu : '. $pemesanan->waktu . '<br>
         Jumlah Kursi : '. $pemesanan->kursi . '<br>
         '; 
 
