@@ -25,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/edit/name', [App\Http\Controllers\UserController::class, 'name'])->name('edit.name');
     Route::post('/edit/password', [App\Http\Controllers\UserController::class, 'password'])->name('edit.password');
     Route::get('/transaksi/{kode}', [App\Http\Controllers\LaporanController::class, 'show'])->name('transaksi.show');
+    Route::post('/upload-bukti-pembayaran/{id}', [App\Http\Controllers\LaporanController::class, 'uploadBuktiPembayaran'])->name('upload.bukti.pembayaran');
 
     Route::middleware(['petugas'])->group(function () {
         Route::get('/pembayaran/{id}', [App\Http\Controllers\LaporanController::class, 'pembayaran'])->name('pembayaran');
@@ -58,6 +59,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/history', [App\Http\Controllers\LaporanController::class, 'history'])->name('history');
         Route::get('/{id}/{data}', [App\Http\Controllers\PemesananController::class, 'show'])->name('show');
         Route::get('/encrypt-data', [App\Http\Controllers\PemesananController::class, 'encryptData'])->name('encryptData');
-
+        //Route::post('/upload-bukti-pembayaran/{id}', [LaporanController::class, 'uploadBuktiPembayaran'])->name('upload.bukti.pembayaran');
     });
 });

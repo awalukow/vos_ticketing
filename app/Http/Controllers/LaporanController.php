@@ -52,6 +52,31 @@ class LaporanController extends Controller
         return redirect()->back()->with('success', 'Pembayaran Ticket Success!');
     }
 
+    public function uploadBuktiPembayaran(Request $request, $id)
+    {
+        $request->validate([
+            'bukti_pembayaran' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048',
+        ]);
+
+        $transaksi = Pemesanan::find($id);
+        if (!$transaksi) {
+            return redirect()->back()->with('error', 'Transaksi tidak ditemukan');
+        }
+
+        // Store the uploaded file in the public disk
+        $file = $request->file('bukti_pembayaran');
+        $filePath = $file->store('bukti_pembayaran', 'public');
+
+        // Save the file path to the database
+        $transaksi->bukti_pembayaran = $filePath;
+        $transaksi->status_pembayaran = 'Menunggu Verifikasi';
+        $transaksi->save();
+
+        return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi.');
+    }
+
+
+
     public function pembayaran($id)
     {
         $pemesanan = Pemesanan::find($id);
@@ -68,6 +93,7 @@ class LaporanController extends Controller
         // Verify the payment
         $pemesanan->status = 'Sudah Bayar';
         $pemesanan->petugas_id = Auth::user()->id;
+        $pemesanan->status_pembayaran = 'Sudah Verifikasi';
         $pemesanan->save();
 
         // Define $destination and $message for WA

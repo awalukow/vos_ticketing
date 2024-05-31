@@ -397,6 +397,7 @@ public function pesan($kursi, $encodedData)
     $destination = Auth::user()->username; 
     $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
 Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
+
 Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
 Username : '.Auth::user()->username.' 
 Password : password12345678';

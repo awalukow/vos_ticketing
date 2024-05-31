@@ -160,7 +160,7 @@
       }
 
       // Build confirmation message
-      var confirmationMessage = "<li><strong>Nama User:</strong> " + name + "</li>";
+      var confirmationMessage = "<li><strong>Nama Lengkap:</strong> " + name + "</li>";
       confirmationMessage += "<li><strong>Nomor Telepon:</strong> " + username + "</li>";
       confirmationMessage += "<li><strong>Email:</strong> " + email + "</li>";
 

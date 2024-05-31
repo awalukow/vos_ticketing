@@ -63,18 +63,6 @@
         </div>
         <div class="card-body">
           <div class="font-weight-bold h4 text-center" style="margin-bottom: 0">{{ $data->rute->transportasi->category->name }}<i class="fas fa-long-arrow-alt-right mx-2" style="color: #858796;"></i>{{$data->rute->tujuan}}</div>
-          <!--<div class="row no-gutters align-items-center justify-content-center">
-            <div class="col-auto font-weight-bold h5" style="margin-bottom: 0">
-              {{ $data->rute->start }}
-            </div>
-            <div class="col px-3">
-              <div style="border-top: 1px solid black"></div>
-            </div>
-            <div class="col-auto text-right font-weight-bold h5" style="margin-bottom: 0">
-              {{ $data->rute->end }}
-            </div>
-          </div>
-          -->
         </div>
         <div class="card-body">
           <div class="row no-gutters align-items-center justify-content-center">
@@ -83,19 +71,18 @@
               <h3 class="font-weight-bold">{{ $data->kode }}</h3>
             </div>
             <div class="col-auto">
-              <!--{!! DNS1D::getBarcodeHTML($data->kode, "C128", 1.2, 45) !!}-->
               {!! DNS2D::getBarcodeHTML(redirect('/transaksi/'.$data->kode)->getTargetUrl(), "QRCODE", 5,5) !!}
             </div>
-
-
           </div>
           <p style="margin-bottom: 0; margin-top: 5px;">Jadwal Event</p>
           <h5 class="font-weight-bold text-center">
+            <div>{{ $data->rute->transportasi->category->name }}</div>
             <div>
-              {{ date('l, d F Y', strtotime($data->event_date)) }}
+              <!--{{ date('l, d F Y', strtotime($data->event_date)) }}-->
+              Sabtu, 20 Juli 2024
             </div>
             <div>
-              {{ date('H:i', strtotime($data->event_date)) }} WIB
+              {{ date('H:i', strtotime($data->rute->jam)) }} WIB
             </div>
           </h5>
         </div>
@@ -117,18 +104,34 @@
               <td>Harga</td>
               <td class="text-right">Rp. {{ number_format($data->total, 0, ',', '.') }}</td>
             </tr>
+            @if ($data->status_pembayaran == null)
             <tr>
               <td>Status Pembayaran</td>
               <td class="text-right">{{ $data->status }}</td>
             </tr>
+            @elseif ($data->status_pembayaran != null)
+            <tr>
+              <td>Status Pembayaran</td>
+              <td class="text-right">{{ $data->status_pembayaran }}</td>
+            </tr>
+            @endif
           </table>
         </div>
+
+        <div class="card-body">
+          @if (Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
+            <a href="{{ asset('storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+          @else
+          <a class="btn btn-secondary btn-block btn-sm text-white" disabled>Lihat Bukti Pembayaran</a>
+          @endif
+          </div>
+
         @if ($data->status == "Belum Bayar" && Auth::user()->level != "Penumpang")
           <div class="card-body">
             <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white">Verifikasi</a>
           </div>
         @endif
-        @if ($data->status == "Belum Bayar" && Auth::user()->level == "Penumpang")
+        @if ($data->status == "Belum Bayar" && Auth::user()->level == "Penumpang" &&  $data->status_pembayaran == null)
         <div>
             <h5 class="font-weight-bold text-center">
               <div><br>
@@ -140,10 +143,30 @@
             </h5>
           </div>
           <div class="card-body">
-            <a href="https://api.whatsapp.com/send?phone=6285156651097&text=Halo%20Admin%2C%20saya%20sudah%20melakukan%20pembelian%20tiket%20konser%20dengan%20kode%3A%20{{ $data->kode }}%20%5BBukti%20Bayar%20Dilampirkan%5D" target=_blank class="btn btn-success btn-block btn-sm text-white">Kirim Bukti Bayar</a>
+            <form action="{{ route('upload.bukti.pembayaran', $data->id) }}" method="POST" enctype="multipart/form-data">
+              @csrf
+              <div class="form-group">
+                <label for="bukti_pembayaran">Upload Bukti Pembayaran</label>
+                <input type="file" class="form-control" name="bukti_pembayaran" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block btn-sm text-white">Upload</button>
+            </form>
           </div>
         @endif
-        @if ($data->status == "Sudah Bayar" && Auth::user()->level == "Penumpang")
+        @if (($data->status == "Belum Bayar" && $data->status_pembayaran == "Menunggu Verifikasi") && Auth::user()->level == "Penumpang")
+        <div>
+            <h5 class="font-weight-bold text-center">
+              <div><br>
+                Berhasil mengirim bukti pembayaran. Mohon menunggu verifikasi pembayaran
+              </div>
+            </h5>
+          </div>
+          <div class="card-body">
+              <a href="{{ asset('storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+              <a href="https://api.whatsapp.com/send?phone=6285156651097" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
+          </div>
+        @endif
+        @if (($data->status == "Sudah Bayar") && Auth::user()->level == "Penumpang")
         <div>
             <h5 class="font-weight-bold text-center">
               <div><br>
@@ -152,7 +175,8 @@
             </h5>
           </div>
           <div class="card-body">
-            <a href="https://api.whatsapp.com/send?phone=6285156651097" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
+              <a href="{{ asset('storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+              <a href="https://api.whatsapp.com/send?phone=6285156651097" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
           </div>
         @endif
       </div>

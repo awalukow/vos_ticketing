@@ -18,7 +18,8 @@ class Pemesanan extends Model
         'status',
         'rute_id',
         'penumpang_id',
-        'petugas_id'
+        'petugas_id',
+        'bukti_pembayaran'
     ];
 
     public function rute()
