@@ -395,17 +395,24 @@ public function pesan($kursi, $encodedData)
 
     // Send WhatsApp message
     $destination = Auth::user()->username; 
-    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
 Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
 
 Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
 Username : '.Auth::user()->username.' 
 Password : password12345678';
 
+    // Send admin WhatsApp message
+    $destination = '6285156651097';
+    $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
+Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
+
     $message_blank = '[NOTIFIKASI VOS]';
 
     // Send WhatsApp message and handle error
     $response = $this->sendWhatsAppMessage_2($destination, $message);
+    // WA si Admin
+    $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
     // Send success message
     $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
     //if ($response !== '200') {
