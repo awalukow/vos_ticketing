@@ -121,7 +121,7 @@
         <div class="card-body">
           @if (Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
             <a href="{{ asset('storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
-          @else
+          @elseif (Auth::usere()->level != "Penumpang" && $data->status_pembayaran == null)
           <a class="btn btn-secondary btn-block btn-sm text-white" disabled>Lihat Bukti Pembayaran</a>
           @endif
           </div>
