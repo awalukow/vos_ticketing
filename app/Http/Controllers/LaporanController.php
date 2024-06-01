@@ -55,7 +55,7 @@ class LaporanController extends Controller
     public function uploadBuktiPembayaran(Request $request, $id)
     {
         $request->validate([
-            'bukti_pembayaran' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'bukti_pembayaran' => 'required|file|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $transaksi = Pemesanan::find($id);
