@@ -406,27 +406,29 @@ Pesanan anda dapat dilacak melalui http://ticket.voiceofsoulchoirindonesia.com/t
 Username : '.Auth::user()->username.' 
 Password : password12345678';
 
-    // Send admin WhatsApp message
-    $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
-Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
 
+$message_blank = '[NOTIFIKASI VOS]';
+
+// Send WhatsApp message and handle error
+$response = $this->sendWhatsAppMessage_2($destination, $message);
+
+    // Send admin WhatsApp message
     // WA si Admin
+    error_log(env('APP_ENV'));
     if (env('APP_ENV')!='production'){
         $destinationAdmin = '6285156651097'; //dev
+        $messageAdmin = '[NOTIFIKASI VOS DEVELOPMENT] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
+Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
         $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
     }
     else{
         $destinationAdmin = '6285823536364'; //jean
         $destinationAdmin2 = '6287780553668'; //tiara
+        $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
+Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
         $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
         $responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
     }
-
-    $message_blank = '[NOTIFIKASI VOS]';
-
-    // Send WhatsApp message and handle error
-    $response = $this->sendWhatsAppMessage_2($destination, $message);
-
     // Send success message
     $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
     //if ($response !== '200') {
