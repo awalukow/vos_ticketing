@@ -30,7 +30,7 @@
             </div>
         </div>
     </li>
-    @endif
+  @endif
   <!-- Nav Item - Verifikasi -->
   <li class="nav-item">
     <a class="nav-link" href="{{ route('petugas') }}">

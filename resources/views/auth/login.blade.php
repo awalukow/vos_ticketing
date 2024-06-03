@@ -1,6 +1,13 @@
 @extends('layouts.app')
 @section('title', 'Login')
 @section('content')
+  <style>
+    .bg-gradient-primary {
+        background-color: #df4e6f;
+        background-image: linear-gradient(180deg, #df4e55 10%, #200b38 100%);
+        background-size: cover;
+    }
+  </style>
   <div class="col-xl-5 col-lg-6 col-md-9">
     <div class="card o-hidden border-0 shadow-lg my-5">
       <div class="card-body p-0">

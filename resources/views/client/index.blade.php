@@ -41,6 +41,18 @@
       right: 1px;
       width: 20px;
     }
+
+    .btn-primary {
+      color: #fff;
+      background-color: #a81d20;
+      border-color: #a81d20;
+    }
+
+    .btn-primary:hover {
+        color: #fff;
+        background-color: #6c1111;
+        border-color: #6c1111;
+    }
   </style>
 @endsection
 @section('content')

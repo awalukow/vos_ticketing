@@ -15,7 +15,8 @@
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
   <!-- Custom styles for this template-->
   <link href="{{ asset('vendor/toastr/toastr.min.css') }}" rel="stylesheet"/>
-  <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet"/>
+  
   @guest
   @else
     @if (Auth::user()->level != 'Admin')
@@ -38,6 +39,12 @@
 
         .navbar a.title .title-text {
           display: inline;
+        }
+
+        .bg-gradient-primary {
+            background-color: #970b0b;
+            background-image: linear-gradient(180deg, #b71e1e 10%, #601d2f 100%);
+            background-size: cover;
         }
       </style>
     @endif
