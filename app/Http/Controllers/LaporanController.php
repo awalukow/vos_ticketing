@@ -98,13 +98,21 @@ class LaporanController extends Controller
 
         // Define $destination and $message for WA
         $destination = $penumpang->username; // Replace with the destination number
-        $message = '[NOTIFIKASI VOS] Tiket konser INTERVAL | VOS Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah dikonfirmasi. Info Hub: http://wa.me/6285156651097'; 
+        $message = '*[NOTIFIKASI VOS] PEMBAYARAN BERHASIL*
+Tiket konser INTERVAL | VOS Pre Competition Concert, 20 Juli 2024.
 
-        $messageEmail = 'Pembayaran sudah diterima dan diverifikasi. <br> Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah sudah terkonfirmasi. <br><br>
-        berikut adalah ringkasan e-tiket anda: <br>
-        Kode Booking : '. $pemesanan->kode . '<br>
-        Nama Event : Interval | Pre-Competition Concert <br>
-        Jumlah Kursi : '. $pemesanan->kursi . '<br>
+Kode booking: ' . $pemesanan->kode . ' 
+Jumlah Tiket: ' . $pemesanan->kursi . '
+Total Biaya: ' . $pemesanan->total . '
+Status Pembayaran: *BERHASIL*
+
+untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)'; 
+
+        $messageEmail = 'Pembayaran sudah diterima dan diverifikasi. <br> Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah sudah terkonfirmasi. 
+        berikut adalah ringkasan e-tiket anda: 
+        Kode Booking : '. $pemesanan->kode . '
+        Nama Event : Interval | Pre-Competition Concert 
+        Jumlah Kursi : '. $pemesanan->kursi . '
         '; 
 
         // Call sendSMS method

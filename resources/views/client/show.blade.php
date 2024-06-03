@@ -84,18 +84,19 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="ticketModalLabel">Select Number of Tickets</h5>
+          <h5 class="modal-title" id="ticketModalLabel">Masukkan jumlah tiket</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="ticketCount">Number of Available Seats:</label>
+            <label for="ticketCount">Tempat Duduk Tersedia:</label>
             <span id="maxSeats"></span>
+            <div><label style="color: red;">Maksimal 5 per User</label></div>
           </div>
           <div class="form-group">
-            <label for="ticketCount">Number of Tickets:</label>
+            <label for="ticketCount">Jumlah Tiket:</label>
             <div class="input-group">
               <div class="input-group-prepend">
                 <button id="decrementBtn" class="btn btn-secondary" type="button">-</button>
@@ -136,53 +137,51 @@
     selectedRuteId = $(this).data('rute-id'); // Set the selected route ID
     selectedWaktu = $(this).data('waktu'); // Set the selected time
     selectedData = $(this).data('rute'); // Set the selected data
-    $('#maxSeats').text(maxSeats);
+    $('#maxSeats').text(maxSeats); // Display the actual available seats
     $('#ticketCount').val(selectedCount); // Set the current count
     $('#ticketModal').modal('show');
   });
 
-
-
   // Increment ticket count
-    $(document).on('click', '#incrementBtn', function() {
-        var currentCount = parseInt($('#ticketCount').val());
-        var maxSeats = parseInt($('#maxSeats').text());
-        if (currentCount < maxSeats) {
-            $('#ticketCount').val(currentCount + 1);
-            selectedCount = currentCount + 1; // Update the selected count
-        }
-    });
-
-    // Decrement ticket count
-    $(document).on('click', '#decrementBtn', function() {
-        var currentCount = parseInt($('#ticketCount').val());
-        if (currentCount > 1) {
-            $('#ticketCount').val(currentCount - 1);
-            selectedCount = currentCount - 1; // Update the selected count
-        }
-    });
-
- // Confirm ticket selection
-$(document).on('click', '#confirmBtn', function() {
-  // Disable the Confirm button
-  $('#confirmBtn, .btn-secondary').prop('disabled', true);
-
-  // Show loading animation
-  $('.loading-overlay').css('display', 'flex');
-  
-  var url = "{{ route('pesan', ['kursi' => ':kursi', 'data' => ':data']) }}";
-  url = url.replace(':kursi', selectedCount);
-
-  // Encrypt data using a route
-  $.get("{{ route('encryptData') }}", { data: selectedData }, function(encryptedData) {
-    url = url.replace(':data', encryptedData);
-    // Attach an event listener to keep the loading animation displayed until page navigation begins
-    $(window).on('beforeunload', function() {
-      $('.loading-overlay').css('display', 'block');
-    });
-    window.location.href = url;
+  $(document).on('click', '#incrementBtn', function() {
+    var currentCount = parseInt($('#ticketCount').val());
+    var maxSeats = parseInt($('#maxSeats').text());
+    if (currentCount < Math.min(maxSeats, 5)) { // Ensure the count does not exceed 5
+      $('#ticketCount').val(currentCount + 1);
+      selectedCount = currentCount + 1; // Update the selected count
+    }
   });
-});
+
+  // Decrement ticket count
+  $(document).on('click', '#decrementBtn', function() {
+    var currentCount = parseInt($('#ticketCount').val());
+    if (currentCount > 1) {
+      $('#ticketCount').val(currentCount - 1);
+      selectedCount = currentCount - 1; // Update the selected count
+    }
+  });
+
+  // Confirm ticket selection
+  $(document).on('click', '#confirmBtn', function() {
+    // Disable the Confirm button
+    $('#confirmBtn, .btn-secondary').prop('disabled', true);
+
+    // Show loading animation
+    $('.loading-overlay').css('display', 'flex');
+    
+    var url = "{{ route('pesan', ['kursi' => ':kursi', 'data' => ':data']) }}";
+    url = url.replace(':kursi', selectedCount);
+
+    // Encrypt data using a route
+    $.get("{{ route('encryptData') }}", { data: selectedData }, function(encryptedData) {
+      url = url.replace(':data', encryptedData);
+      // Attach an event listener to keep the loading animation displayed until page navigation begins
+      $(window).on('beforeunload', function() {
+        $('.loading-overlay').css('display', 'block');
+      });
+      window.location.href = url;
+    });
+  });
 
 </script>
 @endsection

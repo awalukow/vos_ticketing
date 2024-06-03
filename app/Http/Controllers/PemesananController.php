@@ -380,6 +380,10 @@ Password : password12345678';
 
 public function pesan($kursi, $encodedData)
 {
+    if($kursi > 5){
+        Log::info('Pemesanan Melebihi Batas');
+        return redirect()->route('store')->with('error', 'Pemesanan melebihi batas maksimal 5 tiket');
+    }
     // Decrypt the data
     $data = Crypt::decrypt($encodedData);
 
@@ -396,14 +400,16 @@ public function pesan($kursi, $encodedData)
     // Send WhatsApp message
     $destination = Auth::user()->username; 
     $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
-Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
+Mohon segera mengirimkan bukti transfer di website dan ke CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668) 
 
-Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
+Pesanan anda dapat dilacak melalui http://ticket.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
 Username : '.Auth::user()->username.' 
 Password : password12345678';
 
     // Send admin WhatsApp message
-    $destinationAdmin = '6281221335557';
+    //$destinationAdmin = '6285156651097'; //dev
+    $destinationAdmin = '6285823536364'; //jean
+    $destinationAdmin2 = '6287780553668'; //tiara
     $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
 
@@ -413,6 +419,7 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
     $response = $this->sendWhatsAppMessage_2($destination, $message);
     // WA si Admin
     $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+    $responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
     // Send success message
     $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
     //if ($response !== '200') {
