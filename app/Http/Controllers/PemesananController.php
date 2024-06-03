@@ -407,9 +407,9 @@ Username : '.Auth::user()->username.'
 Password : password12345678';
 
     // Send admin WhatsApp message
-    $destinationAdmin = '6285156651097'; //dev
-    //$destinationAdmin = '6285823536364'; //jean
-    //$destinationAdmin2 = '6287780553668'; //tiara
+    //$destinationAdmin = '6285156651097'; //dev
+    $destinationAdmin = '6285823536364'; //jean
+    $destinationAdmin2 = '6287780553668'; //tiara
     $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
 
@@ -419,7 +419,7 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
     $response = $this->sendWhatsAppMessage_2($destination, $message);
     // WA si Admin
     $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
-    //$responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
+    $responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
     // Send success message
     $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
     //if ($response !== '200') {
