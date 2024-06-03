@@ -120,7 +120,7 @@
 
         <div class="card-body">
           @if (Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
-            <a href="{{ asset('storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+            <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
           @elseif (Auth::user()->level != "Penumpang" && $data->status_pembayaran == null)
           <a class="btn btn-secondary btn-block btn-sm text-white" disabled>Lihat Bukti Pembayaran</a>
           @endif
@@ -162,7 +162,7 @@
             </h5>
           </div>
           <div class="card-body">
-              <a href="{{ asset('storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+              <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
               <a href="https://api.whatsapp.com/send?phone=6285156651097" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
           </div>
         @endif
@@ -175,7 +175,7 @@
             </h5>
           </div>
           <div class="card-body">
-              <a href="{{ asset('storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+              <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
               <a href="https://api.whatsapp.com/send?phone=6285156651097" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
           </div>
         @endif
