@@ -40,14 +40,15 @@
         .navbar a.title .title-text {
           display: inline;
         }
-
-        .bg-gradient-primary {
+      </style>
+    @endif
+    <style>
+      .bg-gradient-primary {
             background-color: #970b0b;
             background-image: linear-gradient(180deg, #b71e1e 10%, #601d2f 100%);
             background-size: cover;
         }
-      </style>
-    @endif
+    </style>
   @endguest
 
   @yield('styles')
