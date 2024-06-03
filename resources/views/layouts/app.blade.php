@@ -115,7 +115,7 @@
               <div class="title-icon rotate-n-15">
                 <i class="fas fa-ticket-alt"></i>
               </div>
-              <div class="title-text mx-3">Ticket</div>
+              <div class="title-text mx-3">e-Ticket VOS</div>
             </a>
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto">

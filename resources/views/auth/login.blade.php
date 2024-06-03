@@ -45,6 +45,7 @@
                 <button type="button" id="loginButton" class="btn btn-primary btn-user btn-block">
                   {{ __('Login') }}
                 </button>
+               
               </form>
               <hr>
             </div>

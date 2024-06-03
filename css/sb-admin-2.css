@@ -2462,20 +2462,20 @@ fieldset:disabled a.btn {
 
 .btn-success {
   color: #fff;
-  background-color: #1cc88a;
-  border-color: #1cc88a;
+  background-color: #992626;
+  border-color: #992626;
 }
 
 .btn-success:hover {
   color: #fff;
-  background-color: #17a673;
-  border-color: #169b6b;
+  background-color: #641616;
+  border-color: #641616;
 }
 
 .btn-success:focus, .btn-success.focus {
   color: #fff;
-  background-color: #17a673;
-  border-color: #169b6b;
+  background-color: #992626;
+  border-color: #992626;
   box-shadow: 0 0 0 0.2rem rgba(62, 208, 156, 0.5);
 }
 

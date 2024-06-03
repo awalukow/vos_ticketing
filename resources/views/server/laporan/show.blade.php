@@ -47,7 +47,7 @@
     @else
     <div class="col-12">
     @endif
-      <div class="card shadow h-100" style="border-top: .25rem solid #4e73df">
+      <div class="card shadow h-100" style="border-top: .25rem solid #b11e1f">
         <div class="card-body">
           <div class="row no-gutters align-items-center justify-content-center">
             <div class="col h5 font-weight-bold" style="margin-bottom: 0">Detail Pemesanan</div>

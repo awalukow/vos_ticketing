@@ -2,7 +2,14 @@
 @section('title', 'Sign up')
 
 @section('content')
-<section class="vh-100" style="background-color: #eee;">
+<style>
+  .bg-gradient-primary {
+            background-color: #970b0b;
+            background-image: linear-gradient(180deg, #b71e1e 10%, #601d2f 100%);
+            background-size: cover;
+        }
+</style>
+<section class="vh-100" >
   <div class="container h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col-lg-12 col-xl-11">
@@ -59,10 +66,13 @@
                   <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
                     <button type="button" class="btn btn-primary btn-lg" id="submitButton">Continue</button>
                   </div>
+                  <div class="text-center">
+                    <a class="medium" href="{{ route('login') }}">Login!</a>
+                  </div>
                 </form>
               </div>
               <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
-                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp"
+                <img src="{{ asset('img/interval.png') }}"
                   class="img-fluid" alt="Sample image">
               </div>
             </div>
