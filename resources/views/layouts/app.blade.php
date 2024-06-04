@@ -7,7 +7,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Ticket - @yield('title')</title>
+  <title>VOS e-Ticket - @yield('title')</title>
   <link rel="shortcut icon" href="{{ asset('img/favicon.png') }}">
 
   <!-- Custom fonts for this template-->
@@ -47,6 +47,12 @@
             background-color: #970b0b;
             background-image: linear-gradient(180deg, #b71e1e 10%, #601d2f 100%);
             background-size: cover;
+        }
+
+        .custom-logo {
+            height: 40px; /* Adjust the height as needed */
+            width: auto; /* Maintain aspect ratio */
+            /* Additional styles as needed */
         }
     </style>
   @endguest
@@ -90,8 +96,8 @@
             <div class="container my-auto">
               <div class="copyright text-center my-auto">
                 <span>
-                  Copyright &copy; 2020
-                  @if (date('Y') != '2020')
+                  Copyright &copy; 2023
+                  @if (date('Y') != '2023')
                     - {{ date('Y') }}
                   @endif
                   &nbsp; All rights reserved • by
@@ -112,9 +118,11 @@
         <nav class="navbar navbar-expand navbar-light topbar mb-4">
           <div class="container">
             <a class="title" href="{{ url('/') }}">
-              <div class="title-icon rotate-n-15">
-                <i class="fas fa-ticket-alt"></i>
-              </div>
+              <!--<div class="title-icon rotate-n-15">
+                <i class="fas fa-ticket-alt"></i>-->
+                <div class="sidebar-brand-icon">
+                  <img src="{{ asset('img/favicon.png') }}" alt="Logo" class="custom-logo">
+                </div>
               <div class="title-text mx-3">e-Ticket VOS</div>
             </a>
             <!-- Topbar Navbar -->

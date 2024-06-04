@@ -1,8 +1,17 @@
+<style>
+    .custom-logo {
+      height: 40px; /* Adjust the height as needed */
+      width: auto; /* Maintain aspect ratio */
+      /* Additional styles as needed */
+  }
+</style>
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
   <!-- Sidebar - Brand -->
   <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('home') }}">
-    <div class="sidebar-brand-icon rotate-n-15">
-      <i class="fas fa-ticket-alt"></i>
+  <div class="sidebar-brand-icon">
+    <!--<div class="sidebar-brand-icon rotate-n-15">-->
+      <!--<i class="fas fa-ticket-alt"></i>-->
+      <img src="{{ asset('img/favicon.png') }}" alt="Logo" class="custom-logo">
     </div>
     <div class="sidebar-brand-text mx-3">Ticket</div>
   </a>
