@@ -22,6 +22,12 @@ class LaporanController extends Controller
         return view('server.laporan.index', compact('pemesanan'));
     }
 
+    public function transaksi_pending()
+    {
+        $pemesanan = Pemesanan::with('rute', 'penumpang')->where('status','=','Belum Bayar')->orderBy('created_at', 'desc')->get();
+        return view('server.laporan.index', compact('pemesanan'));
+    }
+
     public function petugas()
     {
         return view('client.petugas');

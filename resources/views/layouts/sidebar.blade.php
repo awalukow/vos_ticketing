@@ -52,6 +52,12 @@
       <i class="fas fa-shopping-cart"></i>
       <span>Transaksi</span></a>
   </li>
+  <!-- Nav Item - Transaksi Pending -->
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('transaksi_pending') }}">
+      <i class="fa-solid fa-cart-plus"></i>
+      <span>Transaksi Pending</span></a>
+  </li>
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">
   <!-- Sidebar Toggler (Sidebar) -->

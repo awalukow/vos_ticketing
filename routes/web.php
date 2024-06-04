@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('/rute', App\Http\Controllers\RuteController::class);
             Route::resource('/user', App\Http\Controllers\UserController::class);
             Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+            Route::get('/transaksi-pending', [App\Http\Controllers\LaporanController::class, 'transaksi_pending'])->name('transaksi_pending');
         });
 
         Route::middleware(['superadmin'])->group(function () {
@@ -47,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('/transportasi', App\Http\Controllers\TransportasiController::class);
             Route::resource('/rute', App\Http\Controllers\RuteController::class);
             Route::resource('/user', App\Http\Controllers\UserController::class);
-            Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+            Route::get('/transaksi-pending', [App\Http\Controllers\LaporanController::class, 'transaksi_pending'])->name('transaksi_pending');
         });
     });
 
