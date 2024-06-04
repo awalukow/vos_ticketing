@@ -176,7 +176,7 @@
           </div>
           <div class="card-body">
               <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
-              <a href="https://api.whatsapp.com/send?phone=6285156651097" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
+              <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
           </div>
         @endif
       </div>
