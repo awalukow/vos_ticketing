@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 
-Route::get('/fastRegister', [App\Http\Controllers\Auth\RegisterController::class, 'showFastRegistrationForm'])->name('fast-register');
-Route::post('/fastRegister', [App\Http\Controllers\Auth\RegisterController::class, 'fastRegister'])->name('fast-register');
+Route::get('/signup', [App\Http\Controllers\Auth\RegisterController::class, 'showFastRegistrationForm'])->name('fast-register');
+Route::post('/signup', [App\Http\Controllers\Auth\RegisterController::class, 'fastRegister'])->name('fast-register');
 
 
 Route::middleware(['auth'])->group(function () {
