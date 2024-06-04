@@ -415,7 +415,8 @@ Password : password12345678';
 
         $messageAdmin = '[NOTIFIKASI VOS DEVELOPMENT] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
-        //$responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+        //
+        $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
     }
     else{
         $destinationAdmin = '6285823536364'; //jean
@@ -431,15 +432,19 @@ Password : password12345678';
 
         $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
-        //$responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
-        //$responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
+        //
+        $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+        //
+        $responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
     }
 
 
-    ////$response = $this->sendWhatsAppMessage_2($destination, $message);
+    //// 
+    $response = $this->sendWhatsAppMessage_2($destination, $message);
 
     // kirim WA Template
-    ////$this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
+    //// 
+    $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
     //if ($response !== '200') {
     //    return redirect()->back()->with('error', 'Gagal mengirim pesan Whatsapp. Mohon coba beberapa saat lagi, atau hubungi admin. Error Code: ' . $response);
     //}
