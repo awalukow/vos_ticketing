@@ -456,7 +456,8 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
         'subject' => '[VOS] Pesanan Masuk - Kode Booking : ' . $kodePemesanan ,
         'content' => $message // You can customize the email content as per your requirements
     ];
-    Mail::to("axcellentwalukow@gmail.com")->send(new EmailNotification($emailData));
+    Mail::to("jeansengkey10@gmail.com")->send(new EmailNotification($emailData)); //jean
+    
 
 
     // Create the booking
