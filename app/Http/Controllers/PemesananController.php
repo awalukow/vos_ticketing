@@ -452,13 +452,15 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
     Mail::to(Auth::user()->email)->send(new EmailNotification($emailData));
 
     // Send email admin
-    $emailData = [
+    $emailDataAdmin = [
         'subject' => '[VOS] Pesanan Masuk - Kode Booking : ' . $kodePemesanan ,
-        'content' => $message // You can customize the email content as per your requirements
+        'content' => $messageAdmin // You can customize the email content as per your requirements
     ];
-    Mail::to("jeansengkey10@gmail.com")->send(new EmailNotification($emailData)); //jean
-    
-
+    if (env('APP_ENV')!='production'){
+        Mail::to("jeansengkey10@gmail.com")->send(new EmailNotification($emailDataAdmin)); //jean
+        Mail::to("jen.tenmury@gmail.com")->send(new EmailNotification($emailDataAdmin)); //tiara
+    }
+    Mail::to("cs@voiceofsoulchoirindonesia.com")->send(new EmailNotification($emailData)); //cs
 
     // Create the booking
     Pemesanan::create([
