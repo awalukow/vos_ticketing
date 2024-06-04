@@ -108,7 +108,7 @@ Status Pembayaran: *BERHASIL*
 
 untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)'; 
 
-        $messageEmail = 'Pembayaran sudah diterima dan diverifikasi. <br> Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah sudah terkonfirmasi. 
+        $messageEmail = 'Pembayaran sudah diterima dan diverifikasi. Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah sudah terkonfirmasi. 
         berikut adalah ringkasan e-tiket anda: 
         Kode Booking : '. $pemesanan->kode . '
         Nama Event : Interval | Pre-Competition Concert 
