@@ -397,7 +397,33 @@ public function pesan($kursi, $encodedData)
     $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
 
-    // Send WhatsApp message
+    $message_blank = '[NOTIFIKASI VOS]';
+
+    // Send WhatsApp message and handle error
+    $response = $this->sendWhatsAppMessage_2($destination, $message);
+
+    // Send admin WhatsApp message
+    // WA si Admin
+    error_log(env('APP_ENV'));
+    if (env('APP_ENV')!='production'){
+        $destinationAdmin = '6285156651097'; //dev
+        // Send WhatsApp message
+    $destination = Auth::user()->username; 
+    $message = '[NOTIFIKASI VOS DEVELOPMENT] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+Mohon segera mengirimkan bukti transfer di website dan ke CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668) 
+
+Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
+Username : '.Auth::user()->username.' 
+Password : password12345678';
+
+        $messageAdmin = '[NOTIFIKASI VOS DEVELOPMENT] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
+Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
+        $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+    }
+    else{
+        $destinationAdmin = '6285823536364'; //jean
+        $destinationAdmin2 = '6287780553668'; //tiara
+        // Send WhatsApp message
     $destination = Auth::user()->username; 
     $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
 Mohon segera mengirimkan bukti transfer di website dan ke CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668) 
@@ -406,24 +432,6 @@ Pesanan anda dapat dilacak melalui http://ticket.voiceofsoulchoirindonesia.com/t
 Username : '.Auth::user()->username.' 
 Password : password12345678';
 
-
-$message_blank = '[NOTIFIKASI VOS]';
-
-// Send WhatsApp message and handle error
-$response = $this->sendWhatsAppMessage_2($destination, $message);
-
-    // Send admin WhatsApp message
-    // WA si Admin
-    error_log(env('APP_ENV'));
-    if (env('APP_ENV')!='production'){
-        $destinationAdmin = '6285156651097'; //dev
-        $messageAdmin = '[NOTIFIKASI VOS DEVELOPMENT] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
-Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
-        $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
-    }
-    else{
-        $destinationAdmin = '6285823536364'; //jean
-        $destinationAdmin2 = '6287780553668'; //tiara
         $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
         $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
