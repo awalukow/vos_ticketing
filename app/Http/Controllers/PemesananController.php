@@ -399,9 +399,6 @@ public function pesan($kursi, $encodedData)
 
     $message_blank = '[NOTIFIKASI VOS]';
 
-    // Send WhatsApp message and handle error
-    $response = $this->sendWhatsAppMessage_2($destination, $message);
-
     // Send admin WhatsApp message
     // WA si Admin
     error_log(env('APP_ENV'));
@@ -437,7 +434,11 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
         $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
         $responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
     }
-    // Send success message
+
+
+    $response = $this->sendWhatsAppMessage_2($destination, $message);
+    
+    // kirim WA Template
     $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
     //if ($response !== '200') {
     //    return redirect()->back()->with('error', 'Gagal mengirim pesan Whatsapp. Mohon coba beberapa saat lagi, atau hubungi admin. Error Code: ' . $response);
