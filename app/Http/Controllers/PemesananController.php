@@ -436,10 +436,10 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
     }
 
 
-    //$response = $this->sendWhatsAppMessage_2($destination, $message);
+    ////$response = $this->sendWhatsAppMessage_2($destination, $message);
 
     // kirim WA Template
-    $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
+    ////$this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
     //if ($response !== '200') {
     //    return redirect()->back()->with('error', 'Gagal mengirim pesan Whatsapp. Mohon coba beberapa saat lagi, atau hubungi admin. Error Code: ' . $response);
     //}
