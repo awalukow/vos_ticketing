@@ -54,7 +54,9 @@
               <td>Kode Pemesanan</td>
               <td>Kelas</td>
               <td>Nama Pemesan</td>
-              <td>Tanggal Event</td>
+              <td>Kontak Pemesan</td>
+              <td>Tanggal Pemesanan</td>
+              <td>Verified By</td>
               <th>Action</th>
             </tr>
           </thead>
@@ -63,18 +65,20 @@
               <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>
-                  <h5 class="card-title">{!! DNS1D::getBarcodeHTML($data->kode, "C128", 2, 30) !!}</h5>
-                  <p class="card-text">
+                  <!--<h5 class="card-title">{!! DNS1D::getBarcodeHTML($data->kode, "C128", 2, 30) !!}</h5>-->
+                  <!--<p class="card-text">
                     <small class="text-muted">
-                      {{ $data->kode }}
+                      
                     </small>
-                  </p>
+                  </p>-->
+                  {{ $data->kode }}
                 </td>
                 <td>
                   <h5 class="card-title">{{ $data->rute->tujuan }}</h5>
                   <p class="card-text">
                     <small class="text-muted">
-                      {{ $data->rute->start }} - {{ $data->rute->end }}
+                      <!--{{ $data->rute->start }} - {{ $data->rute->end }}-->
+                      {{ $data->rute->transportasi->category->name }}
                     </small>
                   </p>
                 </td>
@@ -82,15 +86,33 @@
                   <h5 class="card-title">{{ $data->penumpang->name }}</h5>
                   <p class="card-text">
                     <small class="text-muted">
-                      Kode Kursi : {{ $data->kursi }}
+                      Jumlah Kursi : {{ $data->kursi }}
                     </small>
                   </p>
                 </td>
                 <td>
-                  <h5 class="card-title">{{ date('l, d F Y', strtotime($data->waktu)) }}</h5>
+                  <h10 class="card-text">{{ $data->penumpang->username }}</h5><br>
+                  <h10  class="card-text"><small>{{ $data->penumpang->email }}</small></h5>
+                </td>
+                <td>
+                  <h5 class="card-title">{{ date('d F Y', strtotime($data->created_at)) }}</h5>
                   <p class="card-text">
                     <small class="text-muted">
-                      {{ date('H:i', strtotime($data->waktu)) }} WIB
+                      {{ date('H:i', strtotime($data->created_at)) }} WIB
+                    </small>
+                  </p>
+                </td>
+                <td>
+                  <!--<h5 class="card-title">{!! DNS1D::getBarcodeHTML($data->kode, "C128", 2, 30) !!}</h5>-->
+                  <!--<p class="card-text">
+                    <small class="text-muted">
+                      
+                    </small>
+                  </p>-->
+                  {{ optional($data->petugas)->name ?? '-' }}
+                  <p class="card-text">
+                    <small class="text-muted">
+                      Status : {{ $data->status_pembayaran == 'Menunggu Verifikasi' ? $data->status_pembayaran : $data->status }}
                     </small>
                   </p>
                 </td>
@@ -99,6 +121,11 @@
                     href="{{ route('transaksi.show', $data->kode) }}"
                     class="btn btn-info btn-circle"
                     ><i class="fas fa-search-plus"></i
+                  ></a>
+                  <a
+                    href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}"
+                    class="btn btn-info btn-circle"
+                    ><i class="fa-brands fa-whatsapp"></i
                   ></a>
                 </td>
               </tr>

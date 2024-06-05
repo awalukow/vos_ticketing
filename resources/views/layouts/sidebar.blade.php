@@ -13,7 +13,11 @@
       <!--<i class="fas fa-ticket-alt"></i>-->
       <img src="{{ asset('img/favicon.png') }}" alt="Logo" class="custom-logo">
     </div>
-    <div class="sidebar-brand-text mx-3">Ticket</div>
+    @if(auth()->user()->level != 'Petugas')
+    <div class="sidebar-brand-text mx-3">Admin</div>
+    @else
+    <div class="sidebar-brand-text mx-3">Petugas</div>
+    @endif
   </a>
   <!-- Divider -->
   <hr class="sidebar-divider my-0">
