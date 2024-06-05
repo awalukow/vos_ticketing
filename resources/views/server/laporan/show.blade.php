@@ -104,15 +104,21 @@
               <td>Harga</td>
               <td class="text-right">Rp. {{ number_format($data->total, 0, ',', '.') }}</td>
             </tr>
-            @if ($data->status_pembayaran == null)
+            @if ($data->status_pembayaran == null || $data->status_pembayaran == "Sudah Verifikasi")
             <tr>
               <td>Status Pembayaran</td>
-              <td class="text-right">{{ $data->status }}</td>
+              <td class="text-right" style="color: {{ $data->status == 'Belum Bayar' ? 'red' : 'green' }};">{{ $data->status }}</td>
             </tr>
-            @elseif ($data->status_pembayaran != null)
+            @elseif ($data->status_pembayaran == "Menunggu Verifikasi")
             <tr>
               <td>Status Pembayaran</td>
               <td class="text-right">{{ $data->status_pembayaran }}</td>
+            </tr>
+            @endif
+            @if ($data->referral != null)
+            <tr>
+              <td>Referral Singer</td>
+              <td class="text-right" style="text-transform: uppercase;">{{ $data->referral }}</td>
             </tr>
             @endif
           </table>
@@ -130,7 +136,8 @@
           <div class="card-body">
             <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Verifikasi</a>
           </div>
-          @if (Auth::user()->level != "Penumpang")
+        @endif
+        @if (Auth::user()->level != "Penumpang")
           <div class="card-body">
               <div class="row">
                   <div class="col-12">
@@ -154,7 +161,6 @@
               </div>
           </div>
           @endif
-        @endif
         
         @if ($data->status == "Belum Bayar" && Auth::user()->level == "Penumpang" &&  $data->status_pembayaran == null)
         <div>
