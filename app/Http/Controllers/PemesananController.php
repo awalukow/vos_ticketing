@@ -440,7 +440,7 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
 
 
     //// 
-    $response = $this->sendWhatsAppMessage_2($destination, $message);
+    $response = $this->sendWhatsAppMessage_2($destinationAdmin, $message);
 
     // kirim WA Template
     //// 
