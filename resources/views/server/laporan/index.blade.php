@@ -112,7 +112,7 @@
                   {{ optional($data->petugas)->name ?? '-' }}
                   <p class="card-text" >
                     <small class="text-muted" >
-                    <a style="color: {{ $data->status == 'Belum Bayar' ? 'red' : ($data->status_pembayaran == 'Menunggu Verifikasi' ? 'yellow' : 'green') }};">
+                    <a style="color: {{ $data->status_pembayaran == 'Menunggu Verifikasi' ? '#231d96' : ($data->status == 'Belum Bayar' ? 'red' : 'green') }};">
                         Status: {{ $data->status_pembayaran == 'Menunggu Verifikasi' ? $data->status_pembayaran : $data->status }}
                     </a>
                     </small>
