@@ -86,7 +86,7 @@
                   <h5 class="card-title">{{ $data->penumpang->name }}</h5>
                   <p class="card-text">
                     <small class="text-muted">
-                      Jumlah Kursi : {{ $data->kursi }}
+                      Jumlah Seat : {{ $data->kursi }}
                     </small>
                   </p>
                 </td>
