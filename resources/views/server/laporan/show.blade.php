@@ -128,9 +128,34 @@
 
         @if ($data->status == "Belum Bayar" && Auth::user()->level != "Penumpang")
           <div class="card-body">
-            <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white">Verifikasi</a>
+            <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Verifikasi</a>
           </div>
+          @if (Auth::user()->level != "Penumpang")
+          <div class="card-body">
+              <div class="row">
+                  <div class="col-12">
+                      <h5>Hubungi Pembeli</h5>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}" target="_blank" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-brands fa-whatsapp"></i> Whatsapp
+                      </a>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="mailto:{{$data->penumpang->email}}" target="_blank" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-regular fa-envelope"></i> Email
+                      </a>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="tel:+{{$data->penumpang->username}}" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-solid fa-phone"></i> Telepon
+                      </a>
+                  </div>
+              </div>
+          </div>
+          @endif
         @endif
+        
         @if ($data->status == "Belum Bayar" && Auth::user()->level == "Penumpang" &&  $data->status_pembayaran == null)
         <div>
             <h5 class="font-weight-bold text-center">
