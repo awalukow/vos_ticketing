@@ -36,28 +36,28 @@
                   </div>
                 </div>
               @else
-                <a href="#" class="card-link ticketSelection" data-kursi="{{ $data['kursi'] }}" data-rute-id="{{ $data['id'] }}" data-waktu="{{ $data['waktu'] }}" data-rute="{{ json_encode($data) }}">
-                  <div class="card o-hidden border-0 shadow h-100 py-2">
-                    <div class="card-body">
-                      <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                          <div class="font-weight-bold text-gray-800 text-uppercase mb-1">{{ $data['tujuan'] }}</div>
-                          <div class="h5 mb-0 font-weight-bold text-primary mb-1">{{ $data['kategori'] }} - {{ $data['waktu'] }}</div>
-                          <small class="text-muted">{{ $data['transportasi'] }} ({{ $data['kode'] }})</small>
-                        </div>
-                        <div class="col-auto text-right">
-                          <div class="h5 mb-0 font-weight-bold text-primary">Rp. {{ number_format($data['harga'], 0, ',', '.') }}</div>
-                          <small class="text-muted">/Orang</small>
-                          @if ($data['kursi'] < 50)
-                            <p class="text-primary" style="margin: 0;"><small>{{ $data['kursi'] }} Kursi Tersedia</small></p>
-                          @else
-                            <p class="text-primary" style="margin: 0;"><small>> 50 Kursi Tersedia</small></p>
-                          @endif
-                        </div>
+              <a href="#" class="card-link ticketSelection" data-kursi="{{ $data['kursi'] }}" data-rute-id="{{ $data['id'] }}" data-waktu="{{ $data['waktu'] }}" data-harga="{{ $data['harga'] }}" data-rute="{{ json_encode($data) }}">
+                <div class="card o-hidden border-0 shadow h-100 py-2">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col mr-2">
+                        <div class="font-weight-bold text-gray-800 text-uppercase mb-1">{{ $data['tujuan'] }}</div>
+                        <div class="h5 mb-0 font-weight-bold text-primary mb-1">{{ $data['kategori'] }} - {{ $data['waktu'] }}</div>
+                        <small class="text-muted">{{ $data['transportasi'] }} ({{ $data['kode'] }})</small>
+                      </div>
+                      <div class="col-auto text-right">
+                        <div class="h5 mb-0 font-weight-bold text-primary">Rp. {{ number_format($data['harga'], 0, ',', '.') }}</div>
+                        <small class="text-muted">/Orang</small>
+                        @if ($data['kursi'] < 50)
+                          <p class="text-primary" style="margin: 0;"><small>{{ $data['kursi'] }} Kursi Tersedia</small></p>
+                        @else
+                          <p class="text-primary" style="margin: 0;"><small>> 50 Kursi Tersedia</small></p>
+                        @endif
                       </div>
                     </div>
                   </div>
-                </a>
+                </div>
+              </a>
               @endif
             </div>
           @endforeach
@@ -95,7 +95,7 @@
             <span id="maxSeats"></span>
             <div><label style="color: red;">Maksimal 5 per User</label></div>
           </div>
-          <div class="form-group">
+          <div class="form-group-ticket">
             <label for="ticketCount">Jumlah Tiket:</label>
             <div class="input-group">
               <div class="input-group-prepend">
@@ -126,62 +126,81 @@
 
 @section('script')
 <script>
-  var selectedCount = 1; // Store selected count globally
-  var selectedRuteId; // To store the selected route ID
-  var selectedWaktu; // To store the selected time
-  var selectedData; // To store the selected data
+    var selectedCount = 1; // Store selected count globally
+    var selectedRuteId; // To store the selected route ID
+    var selectedWaktu; // To store the selected time
+    var selectedData; // To store the selected data
 
-  // Show modal when ticket selection is clicked
-  $(document).on('click', '.ticketSelection', function() {
-    var maxSeats = $(this).data('kursi');
-    selectedRuteId = $(this).data('rute-id'); // Set the selected route ID
-    selectedWaktu = $(this).data('waktu'); // Set the selected time
-    selectedData = $(this).data('rute'); // Set the selected data
-    $('#maxSeats').text(maxSeats); // Display the actual available seats
-    $('#ticketCount').val(selectedCount); // Set the current count
-    $('#ticketModal').modal('show');
-  });
+    // Show modal when ticket selection is clicked
+    $(document).on('click', '.ticketSelection', function() {
+        var maxSeats = $(this).data('kursi');
+        selectedRuteId = $(this).data('rute-id'); // Set the selected route ID
+        selectedWaktu = $(this).data('waktu'); // Set the selected time
+        selectedData = $(this).data('rute'); // Set the selected data
+        var harga = $(this).data('harga'); // Get the ticket price
 
-  // Increment ticket count
-  $(document).on('click', '#incrementBtn', function() {
-    var currentCount = parseInt($('#ticketCount').val());
-    var maxSeats = parseInt($('#maxSeats').text());
-    if (currentCount < Math.min(maxSeats, 5)) { // Ensure the count does not exceed 5
-      $('#ticketCount').val(currentCount + 1);
-      selectedCount = currentCount + 1; // Update the selected count
-    }
-  });
+        $('#maxSeats').text(maxSeats); // Display the actual available seats
+        $('#ticketCount').val(selectedCount); // Set the current count
 
-  // Decrement ticket count
-  $(document).on('click', '#decrementBtn', function() {
-    var currentCount = parseInt($('#ticketCount').val());
-    if (currentCount > 1) {
-      $('#ticketCount').val(currentCount - 1);
-      selectedCount = currentCount - 1; // Update the selected count
-    }
-  });
+        // Remove existing referral textbox if it exists
+        $('#referralGroup').remove();
 
-  // Confirm ticket selection
-  $(document).on('click', '#confirmBtn', function() {
-    // Disable the Confirm button
-    $('#confirmBtn, .btn-secondary').prop('disabled', true);
+        // Add the referral textbox if the price is greater than 150,000
+        if (harga >= 150000) {
+            var referralHtml = `
+                <div class="form-group mb-3" id="referralGroup">
+                    <label for="referral">Referral:</label>
+                    <input type="text" id="referral" name="referral" class="form-control" placeholder="Masukkan Nama Referral">
+                </div>
+            `;
+            $(referralHtml).insertAfter('.form-group-ticket');
+        }
 
-    // Show loading animation
-    $('.loading-overlay').css('display', 'flex');
-    
-    var url = "{{ route('pesan', ['kursi' => ':kursi', 'data' => ':data']) }}";
-    url = url.replace(':kursi', selectedCount);
-
-    // Encrypt data using a route
-    $.get("{{ route('encryptData') }}", { data: selectedData }, function(encryptedData) {
-      url = url.replace(':data', encryptedData);
-      // Attach an event listener to keep the loading animation displayed until page navigation begins
-      $(window).on('beforeunload', function() {
-        $('.loading-overlay').css('display', 'block');
-      });
-      window.location.href = url;
+        $('#ticketModal').modal('show');
     });
-  });
 
+    // Increment ticket count
+    $(document).on('click', '#incrementBtn', function() {
+        var currentCount = parseInt($('#ticketCount').val());
+        var maxSeats = parseInt($('#maxSeats').text());
+        if (currentCount < Math.min(maxSeats, 5)) { // Ensure the count does not exceed 5
+            $('#ticketCount').val(currentCount + 1);
+            selectedCount = currentCount + 1; // Update the selected count
+        }
+    });
+
+    // Decrement ticket count
+    $(document).on('click', '#decrementBtn', function() {
+        var currentCount = parseInt($('#ticketCount').val());
+        if (currentCount > 1) {
+            $('#ticketCount').val(currentCount - 1);
+            selectedCount = currentCount - 1; // Update the selected count
+        }
+    });
+
+    // Confirm ticket selection
+    $(document).on('click', '#confirmBtn', function() {
+        // Disable the Confirm button
+        $('#confirmBtn, .btn-secondary').prop('disabled', true);
+
+        // Show loading animation
+        $('.loading-overlay').css('display', 'flex');
+
+        var referral = $('#referral').val(); // Get the referral value
+        var url = "{{ route('pesan', ['kursi' => ':kursi', 'data' => ':data', 'referral' => ':referral']) }}";
+        url = url.replace(':kursi', selectedCount);
+
+        // Encrypt data using a route
+        $.get("{{ route('encryptData') }}", { data: selectedData }, function(encryptedData) {
+            url = url.replace(':data', encryptedData);
+            url = url.replace(':referral', referral ? referral : ''); // Add referral to the URL
+            // Attach an event listener to keep the loading animation displayed until page navigation begins
+            $(window).on('beforeunload', function() {
+                $('.loading-overlay').css('display', 'block');
+            });
+            window.location.href = url;
+        });
+    });
 </script>
+
 @endsection

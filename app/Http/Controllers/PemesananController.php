@@ -378,7 +378,7 @@ Password : password12345678';
     return Crypt::encrypt($request->data);
 }
 
-public function pesan($kursi, $encodedData)
+public function pesan($kursi, $encodedData, $referral = null)
 {
     if($kursi > 5){
         Log::info('Pemesanan Melebihi Batas');
@@ -405,8 +405,8 @@ public function pesan($kursi, $encodedData)
     if (env('APP_ENV')!='production'){
         $destinationAdmin = '6285156651097'; //dev
         // Send WhatsApp message
-    $destination = Auth::user()->username; 
-    $message = '[NOTIFIKASI VOS DEVELOPMENT] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+        $destination = Auth::user()->username; 
+        $message = '[NOTIFIKASI VOS DEVELOPMENT] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
 Mohon segera mengirimkan bukti transfer di website dan ke CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668) 
 
 Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
@@ -415,15 +415,13 @@ Password : password12345678';
 
         $messageAdmin = '[NOTIFIKASI VOS DEVELOPMENT] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
-        //
         $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
-    }
-    else{
+    } else {
         $destinationAdmin = '6285823536364'; //jean
         $destinationAdmin2 = '6287780553668'; //tiara
         // Send WhatsApp message
-    $destination = Auth::user()->username; 
-    $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+        $destination = Auth::user()->username; 
+        $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
 Mohon segera mengirimkan bukti transfer di website dan ke CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668) 
 
 Pesanan anda dapat dilacak melalui http://ticket.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
@@ -432,22 +430,14 @@ Password : password12345678';
 
         $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan '.$kodePemesanan.' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
-        //
         $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
-        //
         $responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
     }
 
-
-    //// 
     $response = $this->sendWhatsAppMessage_2($destinationAdmin, $message);
 
     // kirim WA Template
-    //// 
     $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
-    //if ($response !== '200') {
-    //    return redirect()->back()->with('error', 'Gagal mengirim pesan Whatsapp. Mohon coba beberapa saat lagi, atau hubungi admin. Error Code: ' . $response);
-    //}
 
     // Send email
     $emailData = [
@@ -461,7 +451,7 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
         'subject' => '[VOS] Pesanan Masuk - Kode Booking : ' . $kodePemesanan ,
         'content' => $messageAdmin // You can customize the email content as per your requirements
     ];
-    if (env('APP_ENV')!='production'){
+    if (env('APP_ENV') != 'production') {
         Mail::to("jeansengkey10@gmail.com")->send(new EmailNotification($emailDataAdmin)); //jean
         Mail::to("jen.tenmury@gmail.com")->send(new EmailNotification($emailDataAdmin)); //tiara
     }
@@ -474,12 +464,14 @@ Nomor Kontak Pembeli : https://wa.me/'.Auth::user()->username.'';
         'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
         'total' => $total,
         'rute_id' => $rute->id,
-        'penumpang_id' => Auth::user()->id
+        'penumpang_id' => Auth::user()->id,
+        'referral' => $referral // Insert referral value into the database
     ]);
 
     // Redirect to the transaction page with success message
     return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
 }
+
 
 public function pesan__CANCELEDAGAIN($kursi, $encodedData)
 {

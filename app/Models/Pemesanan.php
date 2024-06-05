@@ -19,7 +19,8 @@ class Pemesanan extends Model
         'rute_id',
         'penumpang_id',
         'petugas_id',
-        'bukti_pembayaran'
+        'bukti_pembayaran',
+        'referral'
     ];
 
     public function rute()
