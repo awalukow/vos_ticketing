@@ -88,7 +88,7 @@
           <div class="card-body">
             <div class="row no-gutters align-items-center">
               <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{ $rute->tujuan }}</div>
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{$rute->transportasi->category->name}} | {{ $rute->tujuan }}</div>
                 <div class="h5 mb-0 font-weight-bold text-gray-800">Lunas : {{ $rute->tickets_sold }} kursi</div>
                 <div><small class="text-muted">Belum Lunas: {{ $rute->unpaid_seat }} kursi</small></div>
                 <div><small class="text-muted">Sisa Kursi: {{ $rute->sisa_kursi }} kursi</small></div>
