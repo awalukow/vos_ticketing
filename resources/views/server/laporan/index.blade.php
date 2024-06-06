@@ -98,7 +98,7 @@
                   <h5 class="card-title">{{ date('d F Y', strtotime($data->created_at)) }}</h5>
                   <p class="card-text">
                     <small class="text-muted">
-                      {{ date('H:i', strtotime($data->created_at)) }} WIB
+                      {{ date('H:i', strtotime($data->created_at) + 7*3600) }} WIB
                     </small>
                   </p>
                 </td>
