@@ -91,7 +91,7 @@
                   </p>
                 </td>
                 <td>
-                  <h10 class="card-text">{{ $data->penumpang->username }}</h5><br>
+                  <h10 class="card-text">+{{ $data->penumpang->username }}</h5><br>
                   <h10  class="card-text"><small>{{ $data->penumpang->email }}</small></h5>
                 </td>
                 <td>
