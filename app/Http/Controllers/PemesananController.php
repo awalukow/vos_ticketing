@@ -427,11 +427,16 @@ public function pesan($kursi, $encodedData, $referral = null)
         // Send WhatsApp message
         $destination = Auth::user()->username;
         $message = '[NOTIFIKASI VOS DEVELOPMENT] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
-Mohon segera mengirimkan bukti transfer di website dan ke CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668) 
+Mohon segera melakukan pembayaran tiket ke rekening: 
+BCA 3420184785 a.n Ratno Juniarto MS 
+dengan nominal : ' . $total . '
+bukti transfer dapat dikirim melalui website e-Ticket VOS 
 
-Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/' . $kodePemesanan . ' dengan login: 
+Pesanan anda dapat dilacak melalui http://ticket.voiceofsoulchoirindonesia.com/transaksi/' . $kodePemesanan . ' dengan login: 
 Username : ' . Auth::user()->username . ' 
-Password : password12345678';
+Password : password12345678
+
+CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668)';
 
         $messageAdmin = '[NOTIFIKASI VOS DEVELOPMENT] Tabea.! Pesanan baru dengan kode pesanan ' . $kodePemesanan . ' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
@@ -442,11 +447,16 @@ Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
         // Send WhatsApp message
         $destination = Auth::user()->username;
         $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
-Mohon segera mengirimkan bukti transfer di website dan ke CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668) 
+Mohon segera melakukan pembayaran tiket ke rekening: 
+BCA 3420184785 a.n Ratno Juniarto MS 
+dengan nominal : ' . $total . '
+bukti transfer dapat dikirim melalui website e-Ticket VOS 
 
 Pesanan anda dapat dilacak melalui http://ticket.voiceofsoulchoirindonesia.com/transaksi/' . $kodePemesanan . ' dengan login: 
 Username : ' . Auth::user()->username . ' 
-Password : password12345678';
+Password : password12345678
+
+CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668)';
 
         $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan ' . $kodePemesanan . ' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
