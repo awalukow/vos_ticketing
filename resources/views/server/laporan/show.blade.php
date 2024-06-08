@@ -169,7 +169,9 @@
                 Silahkan lakukan pembayaran ke Rekening
               </div>
               <div>
-                BCA 3420184785 a.n Ratno Juniarto MS <br> Dengan Nominal Rp. {{ number_format($data->total, 0, ',', '.') }}
+                  BCA 3420184785 a.n Ratno Juniarto MS <br>
+                  Dengan Nominal Rp. {{ number_format($data->total, 0, ',', '.') }}<br>
+                  batas waktu pembayaran <u>{{ \Carbon\Carbon::parse($data->created_at)->addDays(3)->locale('id')->isoFormat('LLLL') }}</u>
               </div>
             </h5>
           </div>
