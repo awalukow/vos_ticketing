@@ -122,7 +122,7 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
         '; 
 
         // Call sendSMS method
-        ////$response = $this->sendWhatsAppMessage_2($destination, $message);
+        $response = $this->sendWhatsAppMessage_2($destination, $message);
 
         /*    
         if ($response) {

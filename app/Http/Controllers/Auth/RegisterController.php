@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Hash;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use App\Http\Controllers\LaporanController;
+use Mail;
+use Exception;
+use TCPDF;
+use App\Mail\EmailNotification;
+
 
 class RegisterController extends Controller
 {
@@ -68,6 +74,28 @@ class RegisterController extends Controller
     {
         $password = $data['password'] ? $data['password'] : 'password12345678';
 
+        //if (env('APP_ENV') == 'production') {
+            // Define $destination and $message for WA
+            $laporanController = new LaporanController();
+            $destination = $data['username']; // Replace with the destination number
+            $message = '*[NOTIFIKASI VOS] REGISTRASI BERHASIL*
+Anda telah berhasil melakukan pendaftaran akun sistem e-Ticket VOS
+
+username: ' . $data['username'] . ' 
+Password Default: *password12345678*
+Segera lakukan perubahan password pada menu pengaturan '.url('/pengaturan').'
+
+untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)'; 
+            $response = $laporanController->sendWhatsAppMessage_2($destination, $message);
+
+            // Send email
+            $emailData = [
+                'subject' => '[VOS] Pendaftaran Berhasil!',
+                'content' => $message
+            ];
+            Mail::to($data['email'])->send(new EmailNotification($emailData));
+        //}   
+
         return User::create([
             'name' => $data['name'],
             'username' => $data['username'],
@@ -76,6 +104,7 @@ class RegisterController extends Controller
             'email' => $data['email']
         ]);
     }
+    
     
     public function showFastRegistrationForm()
     {
