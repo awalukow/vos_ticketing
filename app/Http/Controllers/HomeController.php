@@ -35,7 +35,7 @@ class HomeController extends Controller
     public function index()
     {
         $ruteCount = Rute::count();
-        $pendapatan = Pemesanan::where('status', 'Sudah Bayar')->where('expired_date','>', now())->sum('total');
+        $pendapatan = Pemesanan::where('status', 'Sudah Bayar')->sum('total');
         $rute_table = Rute::with('transportasi.category')->get();
         $transportasiCount = Transportasi::count();
         $userCount = User::count();
