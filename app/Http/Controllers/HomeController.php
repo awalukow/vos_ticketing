@@ -40,17 +40,17 @@ class HomeController extends Controller
         $transportasiCount = Transportasi::count();
         $userCount = User::count();
         $pendingTicketCount = Pemesanan::where('status', 'Belum Bayar')->where('expired_date','>', now())->count();
-        $paidTicketCount = Pemesanan::where('status', 'Sudah Bayar')->where('expired_date','>', now())->sum('kursi');
+        $paidTicketCount = Pemesanan::where('status', 'Sudah Bayar')->sum('kursi');
 
         // Add calculations for each route
         foreach ($rute_table as $rute) {
             // Total tickets sold and revenue for this route
-            $rute->tickets_sold = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->where('expired_date','>', now())->sum('kursi');
+            $rute->tickets_sold = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->sum('kursi');
             $rute->nominal_terjual = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->where('expired_date','>', now())->sum('total');
 
             // Calculate remaining seats for this route
             $total_seats = $rute->transportasi->jumlah;
-            $sold_seats = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->where('expired_date','>', now())->sum('kursi');
+            $sold_seats = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->sum('kursi');
             $rute->unpaid_seat = Pemesanan::where('rute_id', $rute->id)->where('status', 'Belum Bayar')->where('expired_date','>', now())->sum('kursi');
             $rute->sisa_kursi = $total_seats - $sold_seats - $rute->unpaid_seat;
         }
