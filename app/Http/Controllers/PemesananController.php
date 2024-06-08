@@ -432,7 +432,7 @@ BCA 3420184785 a.n Ratno Juniarto MS
 dengan nominal : ' . $total . '
 bukti transfer dapat dikirim melalui website e-Ticket VOS 
 
-Pesanan anda dapat dilacak melalui http://ticket.voiceofsoulchoirindonesia.com/transaksi/' . $kodePemesanan . ' dengan login: 
+Pesanan anda dapat dilacak melalui ' . url('/transaksi/' . $kodePemesanan) . '  dengan login: 
 Username : ' . Auth::user()->username . ' 
 Password : password12345678
 
@@ -452,7 +452,7 @@ BCA 3420184785 a.n Ratno Juniarto MS
 dengan nominal : ' . $total . '
 bukti transfer dapat dikirim melalui website e-Ticket VOS 
 
-Pesanan anda dapat dilacak melalui http://ticket.voiceofsoulchoirindonesia.com/transaksi/' . $kodePemesanan . ' dengan login: 
+Pesanan anda dapat dilacak melalui ' . url('/transaksi/' . $kodePemesanan) . ' dengan login: 
 Username : ' . Auth::user()->username . ' 
 Password : password12345678
 
