@@ -46,7 +46,7 @@ class HomeController extends Controller
         foreach ($rute_table as $rute) {
             // Total tickets sold and revenue for this route
             $rute->tickets_sold = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->sum('kursi');
-            $rute->nominal_terjual = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->where('expired_date','>', now())->sum('total');
+            $rute->nominal_terjual = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->sum('total');
 
             // Calculate remaining seats for this route
             $total_seats = $rute->transportasi->jumlah;
