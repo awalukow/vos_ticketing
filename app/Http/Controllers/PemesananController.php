@@ -411,8 +411,9 @@ public function pesan($kursi, $encodedData, $referral = null)
             'total' => $total,
             'rute_id' => $rute->id,
             'penumpang_id' => Auth::user()->id,
-            'referral' => $referral // Insert referral value into the database
-        ]);
+            'referral' => $referral, // Insert referral value into the database
+            'expired_date' => Carbon::now()->addDays(3) // Set expired_date to today + 3 days
+        ]);        
 
         // Commit the transaction
         DB::commit();
