@@ -104,15 +104,20 @@
               <td>Harga</td>
               <td class="text-right">Rp. {{ number_format($data->total, 0, ',', '.') }}</td>
             </tr>
-            @if ($data->status_pembayaran == null || $data->status_pembayaran == "Sudah Verifikasi")
+            @if ( ($data->expired_date >= now()) && $data->status_pembayaran == null || $data->status_pembayaran == "Sudah Verifikasi")
             <tr>
               <td>Status Pembayaran</td>
               <td class="text-right" style="color: {{ $data->status == 'Belum Bayar' ? 'red' : 'green' }};">{{ $data->status }}</td>
             </tr>
-            @elseif ($data->status_pembayaran == "Menunggu Verifikasi")
+            @elseif ( ($data->expired_date >= now()) && $data->status_pembayaran == "Menunggu Verifikasi")
             <tr>
               <td>Status Pembayaran</td>
               <td class="text-right">{{ $data->status_pembayaran }}</td>
+            </tr>
+            @else
+            <tr>
+              <td>Status Pembayaran</td>
+              <td class="text-right">TIKET EXPIRED</td>
             </tr>
             @endif
             @if ($data->referral != null)
@@ -125,19 +130,19 @@
         </div>
 
         <div class="card-body">
-          @if (Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
+          @if (($data->expired_date >= now()) && Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
             <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
-          @elseif (Auth::user()->level != "Penumpang" && $data->status_pembayaran == null)
+          @elseif (($data->expired_date >= now()) && Auth::user()->level != "Penumpang" && $data->status_pembayaran == null)
           <a class="btn btn-secondary btn-block btn-sm text-white" disabled>Lihat Bukti Pembayaran</a>
           @endif
           </div>
 
-        @if ($data->status == "Belum Bayar" && Auth::user()->level != "Penumpang")
+        @if (($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level != "Penumpang")
           <div class="card-body">
             <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Verifikasi</a>
           </div>
         @endif
-        @if (Auth::user()->level != "Penumpang")
+        @if (($data->expired_date >= now()) && Auth::user()->level != "Penumpang")
           <div class="card-body">
               <div class="row">
                   <div class="col-12">
@@ -162,7 +167,7 @@
           </div>
           @endif
         
-        @if ($data->status == "Belum Bayar" && Auth::user()->level == "Penumpang" &&  $data->status_pembayaran == null)
+        @if (($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level == "Penumpang" &&  $data->status_pembayaran == null)
         <div>
             <h5 class="font-weight-bold text-center">
               <div><br>
@@ -186,7 +191,7 @@
             </form>
           </div>
         @endif
-        @if (($data->status == "Belum Bayar" && $data->status_pembayaran == "Menunggu Verifikasi") && Auth::user()->level == "Penumpang")
+        @if (($data->expired_date >= now()) && ($data->status == "Belum Bayar" && $data->status_pembayaran == "Menunggu Verifikasi") && Auth::user()->level == "Penumpang")
         <div>
             <h5 class="font-weight-bold text-center">
               <div><br>
@@ -199,7 +204,7 @@
               <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
           </div>
         @endif
-        @if (($data->status == "Sudah Bayar") && Auth::user()->level == "Penumpang")
+        @if (($data->expired_date >= now()) && ($data->status == "Sudah Bayar") && Auth::user()->level == "Penumpang")
         <div>
             <h5 class="font-weight-bold text-center">
               <div><br>
@@ -210,6 +215,34 @@
           <div class="card-body">
               <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
               <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
+          </div>
+        @endif
+        @if($data->expired_date < now() && Auth::user()->level == "Penumpang")
+        <div class="card-body">
+              <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
+        </div>
+        @elseif($data->expired_date < now() && Auth::user()->level != "Penumpang")
+        <div class="card-body">
+              <div class="row">
+                  <div class="col-12">
+                      <h5>Hubungi Pembeli</h5>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}" target="_blank" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-brands fa-whatsapp"></i> Whatsapp
+                      </a>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="mailto:{{$data->penumpang->email}}" target="_blank" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-regular fa-envelope"></i> Email
+                      </a>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="tel:+{{$data->penumpang->username}}" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-solid fa-phone"></i> Telepon
+                      </a>
+                  </div>
+              </div>
           </div>
         @endif
       </div>
