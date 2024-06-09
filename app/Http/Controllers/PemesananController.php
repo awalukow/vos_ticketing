@@ -441,7 +441,7 @@ CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668)';
 
         $messageAdmin = '[NOTIFIKASI VOS DEVELOPMENT] Tabea.! Pesanan baru dengan kode pesanan ' . $kodePemesanan . ' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
-        $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+        //$responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
     } else {
         $destinationAdmin = '6285823536364'; // jean
         $destinationAdmin2 = '6287780553668'; // tiara
@@ -461,11 +461,11 @@ CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668)';
 
         $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan ' . $kodePemesanan . ' sudah diterima. Mohon segera dikonfirmasi!
 Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
-        $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
-        $responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
+        //$responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+        //$responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
     }
 
-    $response = $this->sendWhatsAppMessage_2($destination, $message);
+    //$response = $this->sendWhatsAppMessage_2($destination, $message);
 
     // kirim WA Template
     //$this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
