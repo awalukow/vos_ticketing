@@ -18,7 +18,7 @@ class LaporanController extends Controller
 {
     public function index()
     {
-        $pemesanan = Pemesanan::with('rute', 'penumpang', 'petugas')->orderBy('created_at', 'desc')->get();
+        $pemesanan = Pemesanan::with('rute', 'penumpang', 'petugas')->where('rowstatus','>=',0)->orderBy('created_at', 'desc')->get();
         return view('server.laporan.index', compact('pemesanan'));
     }
 
@@ -27,6 +27,7 @@ class LaporanController extends Controller
         $pemesanan = Pemesanan::with('rute', 'penumpang')
         ->where('status','=','Belum Bayar')
         ->where('expired_date','>', now())
+        ->where('rowstatus','>=',0)
         ->orderBy('created_at', 'desc')->get();
         return view('server.laporan.index', compact('pemesanan'));
     }
@@ -43,7 +44,7 @@ class LaporanController extends Controller
 
     public function show($id)
     {
-        $data = Pemesanan::with('rute.transportasi.category', 'penumpang')->where('kode', $id)->first();
+        $data = Pemesanan::with('rute.transportasi.category', 'penumpang')->where('kode', $id)->where('rowstatus','>=',0)->first();
         if ($data) {
             return view('server.laporan.show', compact('data'));
         } else {
