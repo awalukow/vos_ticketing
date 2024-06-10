@@ -178,7 +178,7 @@ class PemesananController extends Controller
                                             ->where('expired_date','>', now())
                                             ->sum('kursi');
             if ($val->transportasi && $val->transportasi->category_id == $category->id) {
-                $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan;
+                $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan - $pemesanan_pending;
                 $dataRute[] = [
                     'harga' => $val->harga,
                     'start' => $val->start,
