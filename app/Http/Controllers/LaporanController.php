@@ -151,9 +151,10 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
     {
         //$pemesanan = Pemesanan::with('rute.transportasi')->where('penumpang_id', Auth::user()->id)->orderBy('created_at', 'desc')->get();
         $pemesanan = Pemesanan::with(['rute.transportasi.category'])
-    ->where('penumpang_id', Auth::user()->id)
-    ->orderBy('created_at', 'desc')
-    ->get();
+        ->where('penumpang_id', Auth::user()->id)
+        ->where('rowstatus', '>=', '0')
+        ->orderBy('created_at', 'desc')
+        ->get();
 
         return view('client.history', compact('pemesanan'));
     }
