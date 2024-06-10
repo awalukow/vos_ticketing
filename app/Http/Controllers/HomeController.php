@@ -50,7 +50,12 @@ class HomeController extends Controller
 
             // Calculate remaining seats for this route
             $total_seats = $rute->transportasi->jumlah;
-            $sold_seats = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->where('rowstatus','>=',0)->sum('kursi');
+            $sold_seats = Pemesanan::where('rute_id', $rute->id)
+                                    ->where(function ($query) {
+                                        $query->where('status', 'Sudah Bayar')
+                                            ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
+                                    })
+                                    ->where('rowstatus','>=',0)->sum('kursi');
             $rute->unpaid_seat = Pemesanan::where('rute_id', $rute->id)->where('status', 'Belum Bayar')->where('rowstatus','>=',0)->where('expired_date','>', now())->sum('kursi');
             $rute->sisa_kursi = $total_seats - $sold_seats - $rute->unpaid_seat;
         }
