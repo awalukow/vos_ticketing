@@ -147,50 +147,56 @@ class PemesananController extends Controller
 
      
     public function show($id, $data)
-{
-    // Decrypt the data
-    $data = Crypt::decrypt($data);
+    {
+        // Decrypt the data
+        $data = Crypt::decrypt($data);
 
-    // Find the category based on the decrypted data
-    $category = Category::find($data['category']);
-    
-    // Fetch relevant route data based on the category
-    $rute = Rute::with('transportasi')->get();
+        // Find the category based on the decrypted data
+        $category = Category::find($data['category']);
+        
+        // Fetch relevant route data based on the category
+        $rute = Rute::with('transportasi')->get();
 
-    // Initialize an empty array to store route data
-    $dataRute = [];
+        // Initialize an empty array to store route data
+        $dataRute = [];
 
-    // Iterate over route data and filter based on category
-    foreach ($rute as $val) {
-        //$pemesanan = Pemesanan::where('rute_id', $val->id)->count();
-        $pemesanan = Pemesanan::where('rute_id', $val->id)->sum('kursi');
-        if ($val->transportasi && $val->transportasi->category_id == $category->id) {
-            $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan;
-            $dataRute[] = [
-                'harga' => $val->harga,
-                'start' => $val->start,
-                'end' => $val->end,
-                'tujuan' => $val->tujuan,
-                'transportasi' => $val->transportasi->name,
-                'kode' => $val->transportasi->kode,
-                'kursi' => $kursi,
-                'waktu' => date("h:i A", strtotime($val->jam)),
-                'event_date' => date("h:i A", strtotime($val->jam)),
-                'id' => $val->id,
-                'kategori' => $category->name
-            ];
+        // Iterate over route data and filter based on category
+        foreach ($rute as $val) {
+            //$pemesanan = Pemesanan::where('rute_id', $val->id)->count();
+            $pemesanan = Pemesanan::where('rute_id', $val->id)
+                                    ->where(function ($query) {
+                                        $query->where('status', 'like', 'Sudah Dibayar')
+                                            ->orWhere('status_pembayaran', 'like', 'Menunggu Verifikasi');
+                                    })
+                                    ->where('rowstatus', '>=', 0)
+                                    ->sum('kursi');
+            if ($val->transportasi && $val->transportasi->category_id == $category->id) {
+                $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan;
+                $dataRute[] = [
+                    'harga' => $val->harga,
+                    'start' => $val->start,
+                    'end' => $val->end,
+                    'tujuan' => $val->tujuan,
+                    'transportasi' => $val->transportasi->name,
+                    'kode' => $val->transportasi->kode,
+                    'kursi' => $kursi,
+                    'waktu' => date("h:i A", strtotime($val->jam)),
+                    'event_date' => date("h:i A", strtotime($val->jam)),
+                    'id' => $val->id,
+                    'kategori' => $category->name
+                ];
+            }
         }
-    }
-    
-    // Sort the data if needed
-    sort($dataRute);
-    
-    // Encode the decrypted data as a JSON string
-    $dataString = json_encode($data);
+        
+        // Sort the data if needed
+        sort($dataRute);
+        
+        // Encode the decrypted data as a JSON string
+        $dataString = json_encode($data);
 
-    // Pass the necessary variables to the view
-    return view('client.show', compact('id', 'dataRute', 'dataString'));
-}
+        // Pass the necessary variables to the view
+        return view('client.show', compact('id', 'dataRute', 'dataString'));
+    }
 
     
 
