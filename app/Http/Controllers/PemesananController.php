@@ -165,8 +165,8 @@ class PemesananController extends Controller
             //$pemesanan = Pemesanan::where('rute_id', $val->id)->count();
             $pemesanan = Pemesanan::where('rute_id', $val->id)
                                     ->where(function ($query) {
-                                        $query->where('status', 'like', 'Sudah Dibayar')
-                                            ->orWhere('status_pembayaran', 'like', 'Menunggu Verifikasi');
+                                        $query->where('status', 'Sudah Dibayar')
+                                            ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
                                     })
                                     ->where('rowstatus', '>=', 0)
                                     ->sum('kursi');
