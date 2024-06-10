@@ -166,7 +166,7 @@ class PemesananController extends Controller
             //Blok semua pesanan yang sudah lunas dan masih dalam verifikasi pembayaran
             $pemesanan = Pemesanan::where('rute_id', $val->id)
                                     ->where(function ($query) {
-                                        $query->where('status', 'Sudah Dibayar')
+                                        $query->where('status', 'Sudah Bayar')
                                             ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
                                     })
                                     ->where('rowstatus','>=',0)
