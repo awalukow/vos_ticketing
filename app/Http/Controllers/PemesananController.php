@@ -163,13 +163,20 @@ class PemesananController extends Controller
         // Iterate over route data and filter based on category
         foreach ($rute as $val) {
             //$pemesanan = Pemesanan::where('rute_id', $val->id)->count();
+            //Blok semua pesanan yang sudah lunas dan masih dalam verifikasi pembayaran
             $pemesanan = Pemesanan::where('rute_id', $val->id)
                                     ->where(function ($query) {
                                         $query->where('status', 'Sudah Dibayar')
                                             ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
                                     })
-                                    ->where('rowstatus', '>=', 0)
+                                    ->where('rowstatus','>=',0)
                                     ->sum('kursi');
+            //Blok semua seat yang belum bayar tapi masih dalam rentang waktu pembayaran
+            $pemesanan_pending = Pemesanan::where('rute_id', $val->id)
+                                            ->where('status', 'Belum Bayar')
+                                            ->where('rowstatus','>=',0)
+                                            ->where('expired_date','>', now())
+                                            ->sum('kursi');
             if ($val->transportasi && $val->transportasi->category_id == $category->id) {
                 $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan;
                 $dataRute[] = [
