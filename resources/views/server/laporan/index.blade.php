@@ -54,9 +54,13 @@
               <td>Kode Pemesanan</td>
               <td>Kelas</td>
               <td>Nama Pemesan</td>
+              @unless(request()->is('ticket-gereja'))
               <td>Kontak Pemesan</td>
+              @endunless
               <td>Tanggal Pemesanan</td>
+              @unless(request()->is('ticket-gereja'))
               <td>Verified By</td>
+              @endunless
               <th>Action</th>
             </tr>
           </thead>
@@ -90,10 +94,12 @@
                     </small>
                   </p>
                 </td>
+                @unless(request()->is('ticket-gereja'))
                 <td>
                   <h10 class="card-text">+{{ $data->penumpang->username }}</h5><br>
                   <h10  class="card-text"><small>{{ $data->penumpang->email }}</small></h5>
                 </td>
+                @endunless
                 <td>
                   <h5 class="card-title">{{ date('d F Y', strtotime($data->created_at)) }}</h5>
                   <p class="card-text">
@@ -102,6 +108,7 @@
                     </small>
                   </p>
                 </td>
+                @unless(request()->is('ticket-gereja'))
                 <td>
                   <!--<h5 class="card-title">{!! DNS1D::getBarcodeHTML($data->kode, "C128", 2, 30) !!}</h5>-->
                   <!--<p class="card-text">
@@ -109,20 +116,21 @@
                       
                     </small>
                   </p>-->
-                  {{ optional($data->petugas)->name ?? '-' }}
-                  <p class="card-text" >
-                    <small class="text-muted" >
-                      @if($data->expired_date > now() || $data -> status == "Sudah Bayar" || $data->status_pembayaran != null)
-                    <a style="color: {{ $data->status_pembayaran == 'Menunggu Verifikasi' ? '#231d96' : ($data->status == 'Belum Bayar' ? 'red' : 'green') }};">
-                        Status: {{ $data->status_pembayaran == 'Menunggu Verifikasi' ? $data->status_pembayaran : $data->status }}
-                    </a>
-                      @elseif($data->expired_date < now() && ($data -> status != "Sudah Bayar" || $data->status_pembayaran == null))
-                    <a style="color: #290506;">
-                        Status: TICKET EXIPRED
-                    </a>
-                      @endif
-                    </small>
-                  </p>
+                    {{ optional($data->petugas)->name ?? '-' }}
+                    <p class="card-text">
+                        <small class="text-muted">
+                            @if($data->expired_date > now() || $data->status == "Sudah Bayar" || $data->status_pembayaran != null)
+                                <a style="color: {{ $data->status_pembayaran == 'Menunggu Verifikasi' ? '#231d96' : ($data->status == 'Belum Bayar' ? 'red' : 'green') }};">
+                                    Status: {{ $data->status_pembayaran == 'Menunggu Verifikasi' ? $data->status_pembayaran : $data->status }}
+                                </a>
+                            @elseif($data->expired_date < now() && ($data->status != "Sudah Bayar" || $data->status_pembayaran == null))
+                                <a style="color: #290506;">
+                                    Status: TICKET EXPIRED
+                                </a>
+                            @endif
+                        </small>
+                    </p>
+                @endunless
                 </td>
                 <td>
                   <a

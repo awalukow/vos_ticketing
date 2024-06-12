@@ -62,6 +62,12 @@
       <i class="fa-solid fa-cart-plus"></i>
       <span>Transaksi Pending</span></a>
   </li>
+   <!-- Nav Item - Transaksi Gereja -->
+   <li class="nav-item">
+    <a class="nav-link" href="{{ route('ticket_gereja') }}">
+      <i class="fa-solid fa-church"></i>
+      <span>Tiket Gereja</span></a>
+  </li>
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">
   <!-- Sidebar Toggler (Sidebar) -->

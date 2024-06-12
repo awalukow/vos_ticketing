@@ -18,7 +18,7 @@ class LaporanController extends Controller
 {
     public function index()
     {
-        $pemesanan = Pemesanan::with('rute', 'penumpang', 'petugas')->where('rowstatus','>=',0)->orderBy('created_at', 'desc')->get();
+        $pemesanan = Pemesanan::with('rute', 'penumpang', 'petugas')->where('rowstatus','>=',0)->where('isChurch','!=', '1')->orderBy('created_at', 'desc')->get();
         return view('server.laporan.index', compact('pemesanan'));
     }
 
@@ -27,6 +27,16 @@ class LaporanController extends Controller
         $pemesanan = Pemesanan::with('rute', 'penumpang')
         ->where('status','=','Belum Bayar')
         ->where('expired_date','>', now())
+        ->where('rowstatus','>=',0)
+        ->where('isChurch','!=', '1')
+        ->orderBy('created_at', 'desc')->get();
+        return view('server.laporan.index', compact('pemesanan'));
+    }
+
+    public function ticket_gereja()
+    {
+        $pemesanan = Pemesanan::with('rute', 'penumpang')
+        ->where('isChurch','=', '1')
         ->where('rowstatus','>=',0)
         ->orderBy('created_at', 'desc')->get();
         return view('server.laporan.index', compact('pemesanan'));
@@ -126,7 +136,7 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
         '; 
 
         // Call sendSMS method
-        $response = $this->sendWhatsAppMessage_2($destination, $message);
+        //$response = $this->sendWhatsAppMessage_2($destination, $message);
 
         /*    
         if ($response) {

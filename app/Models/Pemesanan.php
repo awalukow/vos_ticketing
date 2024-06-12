@@ -22,7 +22,8 @@ class Pemesanan extends Model
         'bukti_pembayaran',
         'referral',
         'expired_date',
-        'rowstatus'
+        'rowstatus',
+        'isChurch'
     ];
 
     public function rute()
