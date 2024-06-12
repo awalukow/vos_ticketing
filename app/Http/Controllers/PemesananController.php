@@ -176,6 +176,7 @@ class PemesananController extends Controller
                                             ->where('status', 'Belum Bayar')
                                             ->where('rowstatus','>=',0)
                                             ->where('expired_date','>', now())
+                                            ->where('isChurch','!=', '1')
                                             ->sum('kursi');
             if ($val->transportasi && $val->transportasi->category_id == $category->id) {
                 $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan - $pemesanan_pending;

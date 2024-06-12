@@ -39,7 +39,7 @@ class HomeController extends Controller
         $rute_table = Rute::with('transportasi.category')->get();
         $transportasiCount = Transportasi::count();
         $userCount = User::count();
-        $pendingTicketCount = Pemesanan::where('status', 'Belum Bayar')->where('rowstatus','>=',0)->where('expired_date','>', now())->count();
+        $pendingTicketCount = Pemesanan::where('status', 'Belum Bayar')->where('rowstatus','>=',0)->where('expired_date','>', now())->where('isChurch','!=', '1')->count();
         $paidTicketCount = Pemesanan::where('status', 'Sudah Bayar')->where('rowstatus','>=',0)->sum('kursi');
 
         // Add calculations for each route
@@ -56,7 +56,7 @@ class HomeController extends Controller
                                             ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
                                     })
                                     ->where('rowstatus','>=',0)->sum('kursi');
-            $rute->unpaid_seat = Pemesanan::where('rute_id', $rute->id)->where('status', 'Belum Bayar')->where('rowstatus','>=',0)->where('expired_date','>', now())->sum('kursi');
+            $rute->unpaid_seat = Pemesanan::where('rute_id', $rute->id)->where('status', 'Belum Bayar')->where('rowstatus','>=',0)->where('expired_date','>', now())->where('isChurch','!=', '1')->sum('kursi');
             $rute->sisa_kursi = $total_seats - $sold_seats - $rute->unpaid_seat;
         }
 
