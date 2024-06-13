@@ -142,7 +142,7 @@
           @endif
           </div>
 
-        @if ((($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level != "Penumpang") || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isChurch == 1))
+        @if ((($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level != "Penumpang" && $data->status_pembayaran == "Menunggu Verifikasi") || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isChurch == 1))
           <div class="card-body">
             <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Verifikasi</a>
           </div>
@@ -242,7 +242,7 @@
         <div class="card-body">
               <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
         </div>
-        @elseif($data->expired_date < now() && Auth::user()->level != "Penumpang" && $data->isChurch = 0)
+        @elseif($data->expired_date < now() && Auth::user()->level != "Penumpang" && $data->isChurch == 0)
         <div class="card-body">
               <div class="row">
                   <div class="col-12">
