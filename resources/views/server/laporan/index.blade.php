@@ -100,7 +100,6 @@
                   <h10 class="card-text">+{{ $data->penumpang->username }}</h5><br>
                   <h10  class="card-text"><small>{{ $data->penumpang->email }}</small></h5>
                 </td>
-                @endunless
                 <td>
                   <h5 class="card-title">{{ date('d F Y', strtotime($data->created_at)) }}</h5>
                   <p class="card-text">
@@ -109,6 +108,7 @@
                     </small>
                   </p>
                 </td>
+                @endunless
                 <td>
                   <h5 class="card-title">{{ date('d F Y', strtotime($data->expired_date)) }}</h5>
                   <p class="card-text">
