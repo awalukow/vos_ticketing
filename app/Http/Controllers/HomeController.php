@@ -94,7 +94,7 @@ class HomeController extends Controller
                                                   })
                                                   ->sum('kursi');
             
-            $rute->sisa_kursi = $total_seats - $sold_seats - $rute->unpaid_seat - $unpaid_seat_church;
+            $rute->sisa_kursi = $total_seats - $sold_seats - $rute->unpaid_seat - $rute->unpaid_seat_church;
         }
     
         // Collect church data
