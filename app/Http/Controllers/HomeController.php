@@ -108,6 +108,10 @@ class HomeController extends Controller
             $church->unsold_qty = Pemesanan::where('referral', $referral)
                                            ->where('status', 'Belum Bayar')
                                            ->where('isChurch', '1')
+                                           ->where(function ($query) {
+                                            $query->where('expired_date', '>', now())
+                                                    ->orWhereNull('expired_date');
+                                            })
                                            ->count();
             $expired_date = Pemesanan::where('referral', $referral)
                           ->distinct()
