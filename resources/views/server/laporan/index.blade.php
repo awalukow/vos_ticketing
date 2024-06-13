@@ -58,8 +58,8 @@
               <td>Kontak Pemesan</td>
               @endunless
               <td>Tanggal Pemesanan</td>
-              @unless(request()->is('ticket-gereja'))
               <td>Tanggal Expired</td>
+              @unless(request()->is('ticket-gereja'))
               <td>Verified By</td>
               @endunless
               <th>Action</th>
@@ -109,7 +109,6 @@
                     </small>
                   </p>
                 </td>
-                @unless(request()->is('ticket-gereja'))
                 <td>
                   <h5 class="card-title">{{ date('d F Y', strtotime($data->expired_date)) }}</h5>
                   <p class="card-text">
@@ -119,6 +118,7 @@
                   </p>
                 </td>
                 <td>
+                @unless(request()->is('ticket-gereja'))
                   <!--<h5 class="card-title">{!! DNS1D::getBarcodeHTML($data->kode, "C128", 2, 30) !!}</h5>-->
                   <!--<p class="card-text">
                     <small class="text-muted">
