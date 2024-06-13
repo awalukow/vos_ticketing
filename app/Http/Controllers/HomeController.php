@@ -7,6 +7,7 @@ use App\Models\Rute;
 use App\Models\Transportasi;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -34,42 +35,105 @@ class HomeController extends Controller
 
     public function index()
     {
-        $ruteCount = Rute::count();
-        $pendapatan = Pemesanan::where('status', 'Sudah Bayar')->where('rowstatus','>=',0)->sum('total');
+        // Temp list table
         $rute_table = Rute::with('transportasi.category')->get();
+        $church_reference_table = Pemesanan::where('isChurch', '1')
+                                            ->distinct()
+                                            ->pluck('referral')
+                                            ->toArray();
+        $ruteCount = Rute::count();
+        $pendapatan = Pemesanan::where('status', 'Sudah Bayar')->where('rowstatus', '>=', 0)->sum('total');
         $transportasiCount = Transportasi::count();
         $userCount = User::count();
-        $pendingTicketCount = Pemesanan::where('status', 'Belum Bayar')->where('rowstatus','>=',0)->where('isChurch','!=', '1')->where('expired_date','>', now())->count();
-        $paidTicketCount = Pemesanan::where('status', 'Sudah Bayar')->where('rowstatus','>=',0)->sum('kursi');
-
+        $pendingTicketCount = Pemesanan::where('status', 'Belum Bayar')
+                                       ->where('rowstatus', '>=', 0)
+                                       ->where('isChurch', '!=', '1')
+                                       ->where('expired_date', '>', now())
+                                       ->count();
+        $paidTicketCount = Pemesanan::where('status', 'Sudah Bayar')
+                                    ->where('rowstatus', '>=', 0)
+                                    ->sum('kursi');
+    
         // Add calculations for each route
         foreach ($rute_table as $rute) {
             // Total tickets sold and revenue for this route
-            $rute->tickets_sold = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->where('rowstatus','>=',0)->sum('kursi');
-            $rute->nominal_terjual = Pemesanan::where('rute_id', $rute->id)->where('status', 'Sudah Bayar')->where('rowstatus','>=',0)->sum('total');
-
+            $rute->tickets_sold = Pemesanan::where('rute_id', $rute->id)
+                                            ->where('status', 'Sudah Bayar')
+                                            ->where('rowstatus', '>=', 0)
+                                            ->sum('kursi');
+            $rute->nominal_terjual = Pemesanan::where('rute_id', $rute->id)
+                                               ->where('status', 'Sudah Bayar')
+                                               ->where('rowstatus', '>=', 0)
+                                               ->sum('total');
+    
             // Calculate remaining seats for this route
             $total_seats = $rute->transportasi->jumlah;
             $sold_seats = Pemesanan::where('rute_id', $rute->id)
-                                    ->where(function ($query) {
-                                        $query->where('status', 'Sudah Bayar')
-                                            ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
-                                    })
-                                    ->where('rowstatus','>=',0)->sum('kursi');
-            $rute->unpaid_seat = Pemesanan::where('rute_id', $rute->id)->where('status', 'Belum Bayar')->where('rowstatus','>=',0)->sum('kursi');
+                                   ->where(function ($query) {
+                                       $query->where('status', 'Sudah Bayar')
+                                             ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
+                                   })
+                                   ->where('rowstatus', '>=', 0)
+                                   ->sum('kursi');
+            $rute->unpaid_seat = Pemesanan::where('rute_id', $rute->id)
+                                           ->where('status', 'Belum Bayar')
+                                           ->where('rowstatus', '>=', 0)
+                                           ->sum('kursi');
             $rute->unpaid_seat_church = Pemesanan::where('rute_id', $rute->id)
-                                                    ->where('status', 'Belum Bayar')
-                                                    ->where('rowstatus', '>=', 0)
-                                                    ->where('isChurch', '1')
-                                                    ->where(function ($query) {
-                                                        $query->where('expired_date', '>', now())
+                                                  ->where('status', 'Belum Bayar')
+                                                  ->where('rowstatus', '>=', 0)
+                                                  ->where('isChurch', '1')
+                                                  ->where(function ($query) {
+                                                      $query->where('expired_date', '>', now())
                                                             ->orWhereNull('expired_date');
-                                                    })
-                                                    ->sum('kursi');
-        
+                                                  })
+                                                  ->sum('kursi');
+            
             $rute->sisa_kursi = $total_seats - $sold_seats - $rute->unpaid_seat;
         }
+    
+        // Collect church data
+        $churches = [];
+    
+        foreach ($church_reference_table as $referral) {
+            $church = new \stdClass();
+            $church->sold_qty = Pemesanan::where('referral', $referral)
+                                         ->where('status', 'Sudah Bayar')
+                                         ->where('isChurch', '1')
+                                         ->count();
+            $church->sold_nominal = Pemesanan::where('referral', $referral)
+                                             ->where('status', 'Sudah Bayar')
+                                             ->where('isChurch', '1')
+                                             ->sum('total');
+            $church->unsold_qty = Pemesanan::where('referral', $referral)
+                                           ->where('status', 'Belum Bayar')
+                                           ->where('isChurch', '1')
+                                           ->count();
+            $expired_date = Pemesanan::where('referral', $referral)
+                          ->distinct()
+                          ->where('isChurch', '1')
+                          ->select(DB::raw('DATE(expired_date) as expired_date'))
+                          ->pluck('expired_date')
+                          ->first();
+            
+            if($referral){
+                $church->name = $referral;
+            } else {
+                $church->name = 'Belum Teralokasi';
+            }
 
-        return view('server.home', compact('ruteCount', 'pendapatan', 'rute_table', 'transportasiCount', 'userCount', 'pendingTicketCount', 'paidTicketCount'));
+            if ($expired_date) {
+                $church->expiry_date = \Carbon\Carbon::parse($expired_date)->format('d-M-Y');
+                $church->isExpired = \Carbon\Carbon::parse($expired_date)->isPast();
+            } else {
+                $church->expiry_date = null;
+                $church->isExpired = true;
+            }
+
+            $churches[] = $church;
+        }
+    
+        return view('server.home', compact('ruteCount', 'pendapatan', 'rute_table', 'transportasiCount', 'userCount', 'pendingTicketCount', 'paidTicketCount', 'churches'));
     }
+    
 }
