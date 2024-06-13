@@ -160,32 +160,6 @@
             </form>
           </div>
         @endif
-
-
-        @if (($data->expired_date >= now()) && Auth::user()->level != "Penumpang")
-          <div class="card-body">
-              <div class="row">
-                  <div class="col-12">
-                      <h5>Hubungi Pembeli</h5>
-                  </div>
-                  <div class="col-md-4 mb-3">
-                      <a href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}" target="_blank" class="btn btn-success btn-block btn-sm text-white">
-                          <i class="fa-brands fa-whatsapp"></i> Whatsapp
-                      </a>
-                  </div>
-                  <div class="col-md-4 mb-3">
-                      <a href="mailto:{{$data->penumpang->email}}" target="_blank" class="btn btn-success btn-block btn-sm text-white">
-                          <i class="fa-regular fa-envelope"></i> Email
-                      </a>
-                  </div>
-                  <div class="col-md-4 mb-3">
-                      <a href="tel:+{{$data->penumpang->username}}" class="btn btn-success btn-block btn-sm text-white">
-                          <i class="fa-solid fa-phone"></i> Telepon
-                      </a>
-                  </div>
-              </div>
-          </div>
-          @endif
         
         @if (($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level == "Penumpang" &&  $data->status_pembayaran == null)
         <div>
@@ -242,7 +216,7 @@
         <div class="card-body">
               <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
         </div>
-        @elseif($data->expired_date < now() && Auth::user()->level != "Penumpang" && $data->isChurch == 0)
+        @elseif(Auth::user()->level != "Penumpang" && $data->isChurch == 0)
         <div class="card-body">
               <div class="row">
                   <div class="col-12">
