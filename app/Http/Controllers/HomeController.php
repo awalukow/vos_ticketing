@@ -124,9 +124,14 @@ class HomeController extends Controller
 
             if ($expired_date) {
                 $church->expiry_date = \Carbon\Carbon::parse($expired_date)->format('d-M-Y');
-                $church->isExpired = \Carbon\Carbon::parse($expired_date)->isPast();
             } else {
                 $church->expiry_date = null;
+            }
+
+            if($expired_date < NOW()){
+                $church->isExpired = false;
+            }
+            else {
                 $church->isExpired = true;
             }
 
