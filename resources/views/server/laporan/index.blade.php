@@ -88,7 +88,13 @@
                   </p>
                 </td>
                 <td>
-                  <h5 class="card-title">{{ $data->penumpang->name }}</h5>
+                  @if(!$data->referral){
+                    <h5 class="card-title">{{ $data->penumpang->name }}</h5>
+                  }
+                  @else{
+                    <h5 class="card-title">{{ $data->referral }}</h5>
+                  }
+                  @endif
                   <p class="card-text">
                     <small class="text-muted">
                       Jumlah Tiket : {{ $data->kursi }}
