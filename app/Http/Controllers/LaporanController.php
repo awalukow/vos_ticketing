@@ -20,7 +20,10 @@ class LaporanController extends Controller
     {
         $pemesanan = Pemesanan::with('rute', 'penumpang', 'petugas')
                                 ->where('rowstatus','>=',0)
-                                ->where('isChurch','!=', '1')
+                                ->where(function ($query) {
+                                    $query->where('isChurch','!=', '1')
+                                        ->orWhere('isChurch', null);
+                                })
                                 ->orderBy('created_at', 'desc')->get();
         return view('server.laporan.index', compact('pemesanan'));
     }
