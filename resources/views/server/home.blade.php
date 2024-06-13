@@ -78,8 +78,9 @@
                 <div class="h5 mb-0 font-weight-bold text-gray-800">Lunas : {{ $rute->tickets_sold }} kursi</div>
                 <div><small class="text-muted">Belum Lunas: {{ $rute->unpaid_seat }} kursi</small></div>
                 <div><small class="text-muted">Sisa Kursi: {{ $rute->sisa_kursi }} kursi</small></div>
-                <small class="text-muted">Nominal Terjual: Rp. {{ number_format($rute->nominal_terjual, 0, ',', '.') }}</small>
-              </div>
+                <div><small class="text-muted">Nominal Terjual: Rp. {{ number_format($rute->nominal_terjual, 0, ',', '.') }}</small></div>
+                <small class="text-muted">Sisa Alokasi Kursi Gereja: {{ $rute->unpaid_seat_church }}</small>
+              </div> 
             </div>
           </div>
         </div>

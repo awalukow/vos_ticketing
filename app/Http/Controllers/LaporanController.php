@@ -18,7 +18,10 @@ class LaporanController extends Controller
 {
     public function index()
     {
-        $pemesanan = Pemesanan::with('rute', 'penumpang', 'petugas')->where('rowstatus','>=',0)->where('isChurch','!=', '1')->orderBy('created_at', 'desc')->get();
+        $pemesanan = Pemesanan::with('rute', 'penumpang', 'petugas')
+                                ->where('rowstatus','>=',0)
+                                ->where('isChurch','!=', '1')
+                                ->orderBy('created_at', 'desc')->get();
         return view('server.laporan.index', compact('pemesanan'));
     }
 
@@ -37,7 +40,12 @@ class LaporanController extends Controller
     {
         $pemesanan = Pemesanan::with('rute', 'penumpang')
         ->where('isChurch','=', '1')
+        ->where(function ($query) {
+            $query->where('expired_date', '>',now())
+                ->orWhere('expired_date', null);
+        })
         ->where('rowstatus','>=',0)
+        //->where('expired_date','>', now())
         ->orderBy('created_at', 'desc')->get();
         return view('server.laporan.index', compact('pemesanan'));
     }
