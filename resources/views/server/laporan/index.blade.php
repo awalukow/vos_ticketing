@@ -146,11 +146,13 @@
                 @endunless
                 </td>
                 <td>
+                @unless(request()->is('ticket-gereja'))
                   <a
                     href="{{ route('transaksi.show', $data->kode) }}"
                     class="btn btn-info btn-circle"
                     ><i class="fas fa-search-plus"></i
                   ></a>
+                  @endunless
                   <a
                     href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}"
                     class="btn btn-info btn-circle"
