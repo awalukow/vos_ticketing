@@ -120,7 +120,11 @@
                 <div class="h5 mb-0 font-weight-bold text-gray-800">Lunas : {{ $church->sold_qty }} kursi</div>
                 <div><small class="text-muted">Nominal Terjual: Rp. {{ number_format($church->sold_nominal, 0, ',', '.') }}</small></div>
                 <div><small class="text-muted">Sisa Kursi: {{ $church->unsold_qty }} kursi</small></div>
-                <div><small class="text-muted">Tanggal Expired: {{ $church->expiry_date }}</small></div>
+                @if(!$church->isExpired)
+                    <div><small class="text-muted">Tanggal Expired: {{ $church->expiry_date }}</small></div>
+                @else
+                    <div><small class="text-muted" style="color: red;">Tanggal Expired: {{ $church->expiry_date }}</small></div>
+                @endif
               </div> 
             </div>
           </div>
