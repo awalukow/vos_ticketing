@@ -175,7 +175,10 @@ class PemesananController extends Controller
             $pemesanan_pending = Pemesanan::where('rute_id', $val->id)
                                             ->where('status', 'Belum Bayar')
                                             ->where('rowstatus','>=',0)
-                                            ->where('expired_date','>', now())
+                                            ->where(function ($query) {
+                                                $query->where('expired_date', '>', now())
+                                                      ->orWhereNull('expired_date');
+                                            })
                                             //->where('isChurch','!=', '1')
                                             ->sum('kursi');
             if ($val->transportasi && $val->transportasi->category_id == $category->id) {

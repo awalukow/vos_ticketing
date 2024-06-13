@@ -78,6 +78,11 @@ class HomeController extends Controller
             $rute->unpaid_seat = Pemesanan::where('rute_id', $rute->id)
                                            ->where('status', 'Belum Bayar')
                                            ->where('rowstatus', '>=', 0)
+                                           ->where('isChurch', '0')
+                                           ->where(function ($query) {
+                                                $query->where('expired_date', '>', now())
+                                                    ->orWhereNull('expired_date');
+                                            })
                                            ->sum('kursi');
             $rute->unpaid_seat_church = Pemesanan::where('rute_id', $rute->id)
                                                   ->where('status', 'Belum Bayar')
@@ -89,7 +94,7 @@ class HomeController extends Controller
                                                   })
                                                   ->sum('kursi');
             
-            $rute->sisa_kursi = $total_seats - $sold_seats - $rute->unpaid_seat;
+            $rute->sisa_kursi = $total_seats - $sold_seats - $rute->unpaid_seat - $unpaid_seat_church;
         }
     
         // Collect church data
