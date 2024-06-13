@@ -56,8 +56,8 @@
               <td>Nama Pemesan</td>
               @unless(request()->is('ticket-gereja'))
               <td>Kontak Pemesan</td>
-              @endunless
               <td>Tanggal Pemesanan</td>
+              @endunless
               <td>Tanggal Expired</td>
               @unless(request()->is('ticket-gereja'))
               <td>Verified By</td>
