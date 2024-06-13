@@ -88,10 +88,10 @@
                   </p>
                 </td>
                 <td>
-                  @if(!$data->referral)
-                    <h5 class="card-title">{{ $data->penumpang->name }}</h5>
-                  @else
+                  @if($data->referral && request()->is('ticket-gereja'))
                     <h5 class="card-title">{{ $data->referral }}</h5>
+                  @else
+                    <h5 class="card-title">{{ $data->penumpang->name }}</h5>
                   @endif
                   <p class="card-text">
                     <small class="text-muted">
