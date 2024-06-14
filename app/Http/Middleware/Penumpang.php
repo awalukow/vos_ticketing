@@ -22,6 +22,8 @@ class Penumpang
             return redirect('/petugas');
         } else if ($request->user()->level == "SuperAdmin") {
             return redirect('/home');
+        } else if ($request->user()->level == "AdminChurch") {
+            return redirect('/home');
         } else {
             return $next($request);
         }
