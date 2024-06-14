@@ -132,7 +132,12 @@ class HomeController extends Controller
                 $church->expiry_date = null;
             }
 
-            $church->isExpired = $expired_date < now();
+            if($expired_date < NOW()){
+                $church->isExpired = false;
+            }
+            else {
+                $church->isExpired = true;
+            }
 
             $churches[] = $church;
         }
