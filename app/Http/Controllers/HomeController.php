@@ -8,15 +8,10 @@ use App\Models\Transportasi;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
- 
     /**
      * Show the application dashboard.
      *
@@ -114,16 +109,16 @@ class HomeController extends Controller
                                            ->where('status', 'Belum Bayar')
                                            ->where('isChurch', '1')
                                            ->where(function ($query) {
-                                            $query->where('expired_date', '>', now())
-                                                    ->orWhereNull('expired_date');
-                                            })
+                                               $query->where('expired_date', '>', now())
+                                                     ->orWhereNull('expired_date');
+                                           })
                                            ->count();
             $expired_date = Pemesanan::where('referral', $referral)
-                          ->distinct()
-                          ->where('isChurch', '1')
-                          ->select(DB::raw('DATE(expired_date) as expired_date'))
-                          ->pluck('expired_date')
-                          ->first();
+                                     ->distinct()
+                                     ->where('isChurch', '1')
+                                     ->select(DB::raw('DATE(expired_date) as expired_date'))
+                                     ->pluck('expired_date')
+                                     ->first();
             
             if($referral){
                 $church->name = $referral;
@@ -132,22 +127,34 @@ class HomeController extends Controller
             }
 
             if ($expired_date) {
-                $church->expiry_date = \Carbon\Carbon::parse($expired_date)->format('d-M-Y');
+                $church->expiry_date = Carbon::parse($expired_date)->format('d-M-Y');
             } else {
                 $church->expiry_date = null;
             }
 
-            if($expired_date < NOW()){
-                $church->isExpired = false;
-            }
-            else {
-                $church->isExpired = true;
-            }
+            $church->isExpired = $expired_date < now();
 
             $churches[] = $church;
         }
-    
-        return view('server.home', compact('ruteCount', 'pendapatan', 'rute_table', 'transportasiCount', 'userCount', 'pendingTicketCount', 'paidTicketCount', 'churches'));
+
+        // Separate 'Belum Teralokasi' church from the rest
+        $belumTerdeteksi = [];
+        $otherChurches = [];
+
+        foreach ($churches as $church) {
+            if ($church->name == 'Belum Teralokasi') {
+                $belumTerdeteksi[] = $church;
+            } else {
+                $otherChurches[] = $church;
+            }
+        }
+
+        // Merge arrays, putting 'Belum Teralokasi' at the end
+        $sortedChurches = array_merge($otherChurches, $belumTerdeteksi);
+
+        return view('server.home', compact(
+            'ruteCount', 'pendapatan', 'rute_table', 'transportasiCount', 'userCount', 
+            'pendingTicketCount', 'paidTicketCount', 'sortedChurches'
+        ));
     }
-    
 }
