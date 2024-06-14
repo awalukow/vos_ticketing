@@ -105,7 +105,7 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $data->name }}</td>
                 <td>{{ $data->username }}</td>
-                <td>{{ $data->level }}</td>
+                <td>{{ $data->level == 'Penumpang' ? 'Customer' : $data->level }}</td>
                 <td>
                   <form
                     action="{{ route('user.destroy', $data->id) }}"
@@ -188,7 +188,8 @@
                 <option value="" disabled selected>-- Pilih Level User --</option>
                 <option value="Admin">Admin</option>
                 <option value="Petugas">Petugas</option>
-                <option value="Penumpang">Penumpang</option>
+                <option value="Penumpang">Customer</option>
+                <option value="AdminChurch">Admin Gereja</option>
               </select>
             </div>
             <div class="form-group">
