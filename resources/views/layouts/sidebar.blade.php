@@ -44,6 +44,7 @@
         </div>
     </li>
   @endif
+  @if(auth()->user()->level == 'SuperAdmin' || auth()->user()->level == 'Admin')
   <!-- Nav Item - Verifikasi -->
   <li class="nav-item">
     <a class="nav-link" href="{{ route('petugas') }}">
@@ -61,6 +62,7 @@
     <a class="nav-link" href="{{ route('transaksi_pending') }}">
       <i class="fa-solid fa-cart-plus"></i>
       <span>Transaksi Pending</span></a>
+  @endif
   </li>
    <!-- Nav Item - Transaksi Gereja -->
    <li class="nav-item">
