@@ -54,56 +54,49 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['string', 'max:255', 'unique:users'],
-            'password' => ['nullable','string', 'min:8', 'confirmed'],
-            'email' => ['string', 'max:255']
-        ]);
-    }
-
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\Models\User
-     */
     protected function create(array $data)
     {
         $password = $data['password'] ? $data['password'] : 'password12345678';
-
-        //if (env('APP_ENV') == 'production') {
-            // Define $destination and $message for WA
-            $laporanController = new LaporanController();
-            $destination = $data['username']; // Replace with the destination number
-            $message = '*[NOTIFIKASI VOS] REGISTRASI BERHASIL*
-Anda telah berhasil melakukan pendaftaran akun sistem e-Ticket VOS
-
-username: ' . $data['username'] . ' 
-Password Default: *password12345678*
-Segera lakukan perubahan password pada menu pengaturan '.url('/pengaturan').'
-
-untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)'; 
-            $response = $laporanController->sendWhatsAppMessage_2($destination, $message);
-
-            // Send email
-            $emailData = [
-                'subject' => '[VOS] Pendaftaran Berhasil!',
-                'content' => $message
-            ];
-            Mail::to($data['email'])->send(new EmailNotification($emailData));
-        //}   
-
-        return User::create([
+    
+        $user = User::create([
             'name' => $data['name'],
             'username' => $data['username'],
             'password' => Hash::make($password),
             'level' => 'Penumpang',
             'email' => $data['email']
         ]);
+    
+        // Check if user creation was successful
+        if ($user) {
+            // Define $destination and $message for WA
+            $laporanController = new LaporanController();
+            $destination = $data['username']; // Replace with the destination number
+            $message = '*[NOTIFIKASI VOS] REGISTRASI BERHASIL*
+Anda telah berhasil melakukan pendaftaran akun sistem e-Ticket VOS
+    
+username: ' . $data['username'] . ' 
+Password: ' . $data['password'] . ' 
+Anda dapat melakukan perubahan password pada menu pengaturan '.url('/pengaturan').'
+    
+untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)'; 
+    
+            // Send email
+            $emailData = [
+                'subject' => '[VOS] Pendaftaran Berhasil!',
+                'content' => $message
+            ];
+    
+            //send command
+            $response = $laporanController->sendWhatsAppMessage_2($destination, $message);
+            Mail::to($data['email'])->send(new EmailNotification($emailData));
+            
+            return $user;
+        } else {
+            // Return an error if user creation fails
+            return response()->json(['error' => 'User creation failed'], 500);
+        }
     }
+    
     
     
     public function showFastRegistrationForm()
