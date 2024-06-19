@@ -56,11 +56,27 @@
                     </div>
                   </div>
 
-                  <div class="form-group" hidden>
-                    <input type="password" class="form-control form-control-user" name="password" value="" placeholder="Password">
+                  <div class="d-flex flex-row align-items-center mb-4">
+                  <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                        <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password" value="" placeholder="Password">
+                        @error('password')
+                        <span class="invalid-feedback" role="alert">
+                           <strong>{{ $message }}</strong>
+                        </span>
+                      @enderror
+                    </div>
+                  </div>
+                <div class="d-flex flex-row align-items-center mb-4">
+                <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
+                <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                    <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password_confirmation" value="" placeholder="Confirm Password">
+                    @error('password')
+                        <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                        </span>
+                      @enderror
                 </div>
-                <div class="form-group" hidden>
-                    <input type="password" class="form-control form-control-user" name="password_confirmation" value="" placeholder="Confirm Password">
                 </div>
 
                   <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
@@ -123,10 +139,20 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Kembali</button>
         <button type="button" class="btn btn-primary" id="confirmButton">Lanjutkan</button>
+
+        <div class="loading-overlay" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <span class="ml-2">Loading...</span>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+
+
 @endsection
 
 @section('script')
@@ -189,6 +215,16 @@
           username = '62' + username.substring(1);
           document.getElementsByName('username')[0].value = username; // Update the input field value
       }
+
+      // Disable the Confirm button
+      $('#confirmButton, .btn-secondary').prop('disabled', true);
+      // Show loading overlay
+      document.querySelector('.loading-overlay').style.display = 'flex';
+
+      // Attach an event listener to keep the loading animation displayed until page navigation begins
+      window.addEventListener('beforeunload', function() {
+          document.querySelector('.loading-overlay').style.display = 'block';
+      });
 
       // Submit the form
       document.getElementById('registerForm').submit();

@@ -12,6 +12,7 @@
 
   <!-- Custom fonts for this template-->
   <script src="https://kit.fontawesome.com/84b32aa51b.js" crossorigin="anonymous"></script>
+  <!--<script src="https://kit.fontawesome.com/7d60766448.js" crossorigin="anonymous"></script>-->
   <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
   <!-- Custom styles for this template-->
@@ -42,6 +43,8 @@
           display: inline;
         }
       </style>
+
+
     @endif
     <style>
       .bg-gradient-primary {
