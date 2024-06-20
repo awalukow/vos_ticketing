@@ -134,20 +134,23 @@
           </table>
         </div>
 
+        <!-- Button Cek Bukti Bayar Untuk admin-->
         <div class="card-body">
-          @if (($data->expired_date >= now()) && Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
+          @if (Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
             <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
           @elseif ((($data->expired_date >= now()) && Auth::user()->level != "Penumpang" && $data->status_pembayaran == null) || ($data->status == "Belum Bayar" && $data->isChurch == 1))
           <a class="btn btn-secondary btn-block btn-sm text-white" disabled>Lihat Bukti Pembayaran</a>
           @endif
           </div>
 
+        <!-- Button Verifikasi Jika "Menunggu Verifikasi" dan Gereja Belum Bayar Khusus Admin-->
         @if ((($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level != "Penumpang" && $data->status_pembayaran == "Menunggu Verifikasi") || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isChurch == 1))
           <div class="card-body">
             <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Verifikasi</a>
           </div>
         @endif
 
+        <!-- Button Upload bukti bayar untuk gereja-->
         @if ($data->status == "Belum Bayar" && $data->status_pembayaran == null && $data->isChurch == 1)
           <div class="card-body">
             <form action="{{ route('upload.bukti.pembayaran', $data->id) }}" method="POST" enctype="multipart/form-data">
@@ -161,6 +164,7 @@
           </div>
         @endif
         
+        <!-- Button Upload bukti bayar untuk customer online-->
         @if (($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level == "Penumpang" &&  $data->status_pembayaran == null)
         <div>
             <h5 class="font-weight-bold text-center">
@@ -186,7 +190,9 @@
             </form>
           </div>
         @endif
-        @if (($data->expired_date >= now()) && ($data->status == "Belum Bayar" && $data->status_pembayaran == "Menunggu Verifikasi") && Auth::user()->level == "Penumpang")
+
+        <!-- Button cek bukti pembayaran Customer Online-->
+        @if (($data->status == "Belum Bayar" && $data->status_pembayaran == "Menunggu Verifikasi") && Auth::user()->level == "Penumpang")
         <div>
             <h5 class="font-weight-bold text-center">
               <div><br>
@@ -199,7 +205,8 @@
               <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
           </div>
         @endif
-        @if (($data->expired_date >= now()) && ($data->status == "Sudah Bayar") && Auth::user()->level == "Penumpang")
+        <!-- Button Upload bukti bayar untuk customer khusus yang sudah bayar-->
+        @if (($data->status == "Sudah Bayar") && Auth::user()->level == "Penumpang")
         <div>
             <h5 class="font-weight-bold text-center">
               <div><br>
@@ -212,10 +219,13 @@
               <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
           </div>
         @endif
+
+        <!-- Untuk customer Online, jika sudah expired maka munculkan Hubungi admin-->
         @if($data->expired_date < now() && Auth::user()->level == "Penumpang")
         <div class="card-body">
               <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
         </div>
+        <!--Jika admin, alternatif yang diatas, muntulin hubungi pembeli-->
         @elseif(Auth::user()->level != "Penumpang" && $data->isChurch == 0)
         <div class="card-body">
               <div class="row">
