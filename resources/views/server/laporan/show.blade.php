@@ -143,21 +143,41 @@
           @endif
           </div>
 
-        <!-- Button Verifikasi Jika "Menunggu Verifikasi" dan Gereja Belum Bayar Khusus Admin-->
-        @if ((($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level != "Penumpang" && $data->status_pembayaran == "Menunggu Verifikasi") || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isChurch == 1))
+        <!-- Button Verifikasi Jika "Menunggu Verifikasi", Gereja Belum Bayar Khusus Admin, dan Tiket Fisik Blm bayar-->
+        @if ((($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level != "Penumpang" && $data->status_pembayaran == "Menunggu Verifikasi") || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isChurch == 1) || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isFisik == 1))
           <div class="card-body">
             <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Verifikasi</a>
           </div>
         @endif
 
         <!-- Button Upload bukti bayar untuk gereja-->
-        @if ($data->status == "Belum Bayar" && $data->status_pembayaran == null && $data->isChurch == 1)
+        @if (Auth::user()->level != "Penumpang" && $data->status == "Belum Bayar" && $data->status_pembayaran == null && $data->isChurch == 1)
           <div class="card-body">
             <form action="{{ route('upload.bukti.pembayaran', $data->id) }}" method="POST" enctype="multipart/form-data">
               @csrf
               <div class="form-group">
                 <label for="bukti_pembayaran">Upload Bukti Pembayaran</label>
                 <input type="file" class="form-control" name="bukti_pembayaran" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block btn-sm text-white">Upload</button>
+            </form>
+          </div>
+        @endif
+
+        <!-- Button Upload bukti bayar untuk gereja-->
+        @if (Auth::user()->level != "Penumpang" && $data->status == "Belum Bayar" && $data->status_pembayaran == null && $data->isFisik == 1)
+        <div class="card-body">
+            <form action="{{ route('upload.bukti.pembayaran.fisik', $data->id) }}" method="POST" enctype="multipart/form-data">
+              @csrf
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="bukti_pembayaran">Upload Bukti Pembayaran</label>
+                  <input type="file" class="form-control" name="bukti_pembayaran" required>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="referral">Identitas Pembeli</label>
+                  <input type="text" class="form-control" name="referral" placeholder="Format: Nama-NomorHP" required>
+                </div>
               </div>
               <button type="submit" class="btn btn-primary btn-block btn-sm text-white">Upload</button>
             </form>
@@ -226,7 +246,7 @@
               <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
         </div>
         <!--Jika admin, alternatif yang diatas, muntulin hubungi pembeli-->
-        @elseif(Auth::user()->level != "Penumpang" && $data->isChurch == 0)
+        @elseif(Auth::user()->level != "Penumpang" && $data->isChurch == 0 && $data->isFisik == 0)
         <div class="card-body">
               <div class="row">
                   <div class="col-12">

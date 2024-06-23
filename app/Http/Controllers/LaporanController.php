@@ -56,6 +56,20 @@ class LaporanController extends Controller
         return view('server.laporan.index', compact('pemesanan'));
     }
 
+    public function ticket_fisik()
+    {
+        $pemesanan = Pemesanan::with('rute', 'penumpang')
+        ->where('isFisik','=', '1')
+        ->where(function ($query) {
+            $query->where('expired_date', '>',now())
+                ->orWhere('expired_date', null);
+        })
+        ->where('rowstatus','>=',0)
+        //->where('expired_date','>', now())
+        ->orderBy('created_at', 'desc')->get();
+        return view('server.laporan.index', compact('pemesanan'));
+    }
+
     public function petugas()
     {
         return view('client.petugas');
@@ -86,6 +100,33 @@ class LaporanController extends Controller
         return redirect()->back()->with('success', 'Pembayaran Ticket Success!');
     }
 
+    public function uploadBuktiPembayaranFisik(Request $request, $id)
+    {
+        $request->validate([
+            'bukti_pembayaran' => 'required|file|mimes:jpeg,png,jpg|max:2048',
+            'referral' => 'required|string|max:255',  // Add validation rule for referral
+        ]);
+
+        $transaksi = Pemesanan::find($id);
+        if (!$transaksi) {
+            return redirect()->back()->with('error', 'Transaksi tidak ditemukan');
+        }
+
+        // Store the uploaded file in the public disk
+        $file = $request->file('bukti_pembayaran');
+        $filePath = $file->store('bukti_pembayaran', 'public');
+
+        // Save the file path and referral to the database
+        $transaksi->bukti_pembayaran = $filePath;
+        $transaksi->status_pembayaran = 'Sudah Verifikasi';
+        $transaksi->referral = $request->input('referral');
+        $transaksi->status = 'Sudah Bayar'; 
+        $transaksi->save();
+
+        return redirect()->back()->with('success', 'Verifikasi Berhasil.');
+    }
+
+
     public function uploadBuktiPembayaran(Request $request, $id)
     {
         $request->validate([
@@ -103,7 +144,13 @@ class LaporanController extends Controller
 
         // Save the file path to the database
         $transaksi->bukti_pembayaran = $filePath;
-        $transaksi->status_pembayaran = 'Menunggu Verifikasi';
+        if($transaksi->isChurch){
+            $transaksi->status_pembayaran = 'Sudah Verifikasi';
+            $transaksi->status = 'Sudah Bayar'; 
+        }
+        else{   z aDX
+            $transaksi->status_pembayaran = 'Menunggu Verifikasi';
+        }
         $transaksi->save();
 
         return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi.');

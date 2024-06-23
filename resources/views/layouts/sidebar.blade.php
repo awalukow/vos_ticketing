@@ -63,6 +63,7 @@
       <i class="fa-solid fa-cart-plus"></i>
       <span>Transaksi Pending</span></a>
   @endif
+  @if(auth()->user()->level == 'SuperAdmin' || auth()->user()->level == 'Admin' || auth()->user()->level == 'AdminChurch')
   </li>
    <!-- Nav Item - Transaksi Gereja -->
    <li class="nav-item">
@@ -70,6 +71,14 @@
       <i class="fa-solid fa-church"></i>
       <span>Tiket Gereja</span></a>
   </li>
+  </li>
+   <!-- Nav Item - Transaksi Gereja -->
+   <li class="nav-item">
+    <a class="nav-link" href="{{ route('ticket_fisik') }}">
+      <i class="fa-solid fa-ticket"></i>
+      <span>Tiket Fisik</span></a>
+  </li>
+  @endif
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">
   <!-- Sidebar Toggler (Sidebar) -->

@@ -23,7 +23,8 @@ class Pemesanan extends Model
         'referral',
         'expired_date',
         'rowstatus',
-        'isChurch'
+        'isChurch',
+        'isFisik'
     ];
 
     public function rute()

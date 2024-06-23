@@ -54,12 +54,14 @@
               <td>Kode Pemesanan</td>
               <td>Kelas</td>
               <td>Nama Pemesan</td>
-              @unless(request()->is('ticket-gereja'))
+              @unless((request()->is('ticket-gereja') || request()->is('ticket-fisik')))
               <td>Kontak Pemesan</td>
               <td>Tanggal Pemesanan</td>
               @endunless
+              @unless(request()->is('ticket-fisik'))
               <td>Tanggal Expired</td>
-              @unless(request()->is('ticket-gereja'))
+              @endunless
+              @unless((request()->is('ticket-gereja') || request()->is('ticket-fisik')))
               <td>Verified By</td>
               @endunless
               <th>Action</th>
@@ -88,7 +90,7 @@
                   </p>
                 </td>
                 <td>
-                  @if($data->referral && request()->is('ticket-gereja'))
+                  @if($data->referral && (request()->is('ticket-gereja') || request()->is('ticket-fisik')))
                     <h5 class="card-title">{{ $data->referral }}</h5>
                   @else
                     <h5 class="card-title">{{ $data->penumpang->name }}</h5>
@@ -99,7 +101,7 @@
                     </small>
                   </p>
                 </td>
-                @unless(request()->is('ticket-gereja'))
+                @unless((request()->is('ticket-gereja') || request()->is('ticket-fisik')))
                 <td>
                   <h10 class="card-text">+{{ $data->penumpang->username }}</h5><br>
                   <h10  class="card-text"><small>{{ $data->penumpang->email }}</small></h5>
@@ -113,6 +115,7 @@
                   </p>
                 </td>
                 @endunless
+                @unless(request()->is('ticket-fisik'))
                 <td>
                   <h5 class="card-title">{{ date('d F Y', strtotime($data->expired_date)) }}</h5>
                   <p class="card-text">
@@ -121,7 +124,8 @@
                     </small>
                   </p>
                 </td>
-                @unless(request()->is('ticket-gereja'))
+                @endunless
+                @unless((request()->is('ticket-gereja') || request()->is('ticket-fisik')))
                 <td>
                   <!--<h5 class="card-title">{!! DNS1D::getBarcodeHTML($data->kode, "C128", 2, 30) !!}</h5>-->
                   <!--<p class="card-text">
@@ -151,7 +155,7 @@
                     class="btn btn-info btn-circle"
                     ><i class="fas fa-search-plus"></i
                   ></a>
-                  @unless(request()->is('ticket-gereja'))
+                  @unless((request()->is('ticket-gereja') || request()->is('ticket-fisik')))
                   <a
                     href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}"
                     class="btn btn-info btn-circle"
