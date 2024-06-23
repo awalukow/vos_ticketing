@@ -148,7 +148,7 @@ class LaporanController extends Controller
             $transaksi->status_pembayaran = 'Sudah Verifikasi';
             $transaksi->status = 'Sudah Bayar'; 
         }
-        else{   z aDX
+        else{
             $transaksi->status_pembayaran = 'Menunggu Verifikasi';
         }
         $transaksi->save();
