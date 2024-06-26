@@ -119,7 +119,6 @@
               <td>Status Pembayaran</td>
               <td class="text-right">TIKET GEREJA</td>
             </tr>
-            @else
             @elseif ( $data->isFisik == 1)
             <tr>
               <td>Status Pembayaran</td>
