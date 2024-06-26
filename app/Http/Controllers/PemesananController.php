@@ -431,7 +431,8 @@ public function pesan($kursi, $encodedData, $referral = null)
             'referral' => $referral, // Insert referral value into the database
             'expired_date' => Carbon::now()->addDays(3), // Set expired_date to today + 3 days
             'rowstatus' => 0,
-            'isChurch' => false
+            'isChurch' => false,
+            'isFisik' => false,
         ]);        
 
         // Commit the transaction

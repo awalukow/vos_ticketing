@@ -22,7 +22,8 @@ class LaporanController extends Controller
                                 ->where('rowstatus','>=',0)
                                 ->where(function ($query) {
                                     $query->where('isChurch','!=', '1')
-                                        ->orWhere('isChurch', null);
+                                        ->orWhere('isChurch', null)
+                                        ->orWhere('isFisik','0');
                                 })
                                 ->orderBy('created_at', 'desc')->get();
         return view('server.laporan.index', compact('pemesanan'));
