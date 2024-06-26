@@ -10,6 +10,7 @@
     
     <p>{{ $content }}</p>
     
+    <p>Harap tunjukkan email ini atau screenshoot tiket ke petugas di Venue sebagai tiket masuk.</p>
     <p>Mohon untuk tidak membalas email ini.</p>
 </body>
 </html>
