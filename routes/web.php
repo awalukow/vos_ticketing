@@ -18,7 +18,8 @@ Auth::routes();
 
 Route::get('/signup', [App\Http\Controllers\Auth\RegisterController::class, 'showFastRegistrationForm'])->name('fast-register');
 Route::post('/signup', [App\Http\Controllers\Auth\RegisterController::class, 'fastRegister'])->name('fast-register');
-
+Route::get('/adminRegister', [App\Http\Controllers\Auth\RegisterController::class, 'showAdminRegistrationForm'])->name('admin-register');
+Route::post('/adminRegister', [App\Http\Controllers\Auth\RegisterController::class, 'fastRegister'])->name('admin-register');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/pengaturan', [App\Http\Controllers\UserController::class, 'create'])->name('pengaturan');
@@ -27,7 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/transaksi/{kode}', [App\Http\Controllers\LaporanController::class, 'show'])->name('transaksi.show');
     Route::post('/upload-bukti-pembayaran/{id}', [App\Http\Controllers\LaporanController::class, 'uploadBuktiPembayaran'])->name('upload.bukti.pembayaran');
     Route::post('/upload-bukti-pembayarans/{id}', [App\Http\Controllers\LaporanController::class, 'uploadBuktiPembayaranFisik'])->name('upload.bukti.pembayaran.fisik');
-
+    
     Route::middleware(['petugas'])->group(function () {
         Route::get('/pembayaran/{id}', [App\Http\Controllers\LaporanController::class, 'pembayaran'])->name('pembayaran');
         Route::get('/petugas', [App\Http\Controllers\LaporanController::class, 'petugas'])->name('petugas');
