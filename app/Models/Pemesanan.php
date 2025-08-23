@@ -13,11 +13,19 @@ class Pemesanan extends Model
         'kode',
         'kursi',
         'waktu',
+        'event_date',
         'total',
         'status',
         'rute_id',
         'penumpang_id',
-        'petugas_id'
+        'petugas_id',
+        'bukti_pembayaran',
+        'referral',
+        'expired_date',
+        'rowstatus',
+        'isChurch',
+        'isFisik',
+        'seatCheckin'
     ];
 
     public function rute()

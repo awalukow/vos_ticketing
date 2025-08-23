@@ -274,6 +274,129 @@ class PemesananController extends Controller
         return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
     }
 
+    public function pesan_BACKUP270424($kursi, $data)
+    {
+        $d = Crypt::decrypt($data);
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+        $rute = Rute::with('transportasi.category')->find($d['id']);
+
+        $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+
+        Pemesanan::Create([
+            'kode' => $kodePemesanan,
+            'kursi' => $kursi,
+            'waktu' => $waktu,
+            'total' => $rute->harga,
+            'rute_id' => $rute->id,
+            'penumpang_id' => Auth::user()->id
+        ]);
+
+        //return redirect('/')->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+        return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+    }
+
+    public function pesan_NOUSE($data)
+    {
+        $d = Crypt::decrypt($data);
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+        $rute = Rute::with('transportasi.category')->find($d['id']);
+
+        // Selecting a default seat (e.g., the first available seat)
+        $firstAvailableSeat = $rute->pemesanans()->count() + 1; // Assuming seats are numbered sequentially
+
+        $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+
+        Pemesanan::create([
+            'kode' => $kodePemesanan,
+            'kursi' => 'K' . $firstAvailableSeat, // Setting default seat
+            'waktu' => $waktu,
+            'total' => $rute->harga,
+            'rute_id' => $rute->id,
+            'penumpang_id' => Auth::user()->id
+        ]);
+
+        return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+    }
+
+    public function pesan_tempChange($kursi, $data)
+    {
+        //$d = Crypt::decrypt($data);
+        $dataKursi = json_decode($kursi, true); 
+        $dataArray = json_decode($data, true); 
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        
+        $rute = Rute::with('transportasi.category')->find($dataArray['id']);
+        $waktu = Carbon::parse($dataArray['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+        //$checkSeat = Pemesanan::with('kode')->find($kodePemesanan);
+        //$checkSeat = Pemesanan::with('kode')->where('kode', 'LIKE', $kodePemesanan)->get();
+        $checkSeat = Pemesanan_Detail::with('pemesananCode')->where('pemesananCode', 'LIKE', $kodePemesanan)->get();
+        
+        if ($checkSeat != null || $checkSeat != "") {
+            $temp_kursi = "";
+            $count = 0; 
+            $total_elements = count($dataKursi); 
+            
+            foreach ($dataKursi as $a){
+                $count++;
+                if ($count < $total_elements) {
+                    $temp_kursi .= $a . ", "; 
+                } else {
+                    $temp_kursi .= $a; 
+                }
+            }
+            $harga = $rute->harga * $count;
+            Pemesanan::create([
+                'kode' => $kodePemesanan,
+                'kursi' => $temp_kursi,
+                'waktu' => $waktu,
+                //'total' => $rute->harga,
+                'total' => $harga,
+                'rute_id' => $rute->id,
+                'penumpang_id' => Auth::user()->id
+            ]);
+
+            foreach ($dataKursi as $k) {
+                Pemesanan_Detail::create([
+                    'pemesananCode' => $kodePemesanan,
+                    'seatNumber' => $k,
+                    'category_id' => $rute->transportasi->category->id
+                ]);
+            }
+
+            // Define $destination and $message for WA
+            $destination = Auth::user()->username; 
+            $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+Mohon segera mengirimkan bukti transfer ke CS VOS (http://wa.me/6285156651097) 
+
+Pesanan anda dapat dilacak melalui http://dev-ticketing.voiceofsoulchoirindonesia.com/transaksi/'.$kodePemesanan.' dengan login: 
+Username : '.Auth::user()->username.' 
+Password : password12345678'; 
+            $message_blank = '[NOTIFIKASI VOS]';
+
+            // Call sendSMS method
+            $responseWA_2 = $this->sendWhatsAppMessage_2($destination, $message);
+            //sleep(3); // Add a 3-second delay
+            $response = $this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
+
+            
+            return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+        } else {
+            Log::info('Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
+            return redirect()->route('store')->with('error', 'Pemesanan dengan kode ' . $kodePemesanan . ' sudah ada.');
+        }
+    }
+
+    public function encryptData(Request $request)
+{
+    return Crypt::encrypt($request->data);
+}
+
 public function pesan($kursi, $encodedData, $referral = null)
 {
      if (is_string($kursi) && substr($kursi, 0, 1) === '[') {
@@ -416,17 +539,16 @@ Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
 
         // Log the error
         Log::error('Error creating Pemesanan: ' . $e->getMessage());
-        return redirect()->route('store')->with('error', 'Terjadi kesalahan saat memproses pemesanan. Silakan coba beberapa saat lagi.');
+        //return redirect()->route('store')->with('error', 'Terjadi kesalahan saat memproses pemesanan. Silakan coba beberapa saat lagi.');
         // For debugging only — don't use in production
-        /*return response()->make(
-            '<h1>Error Creating Pemesanan</h1>' .
-            '<p><strong>Message:</strong> ' . e($e->getMessage()) . '</p>' .
-            '<p><strong>File:</strong> ' . e($e->getFile()) . '</p>' .
-            '<p><strong>Line:</strong> ' . e($e->getLine()) . '</p>' .
-            '<pre>' . e($e->getTraceAsString()) . '</pre>',
-            500
-        );
-        */
+    return response()->make(
+        '<h1>Error Creating Pemesanan</h1>' .
+        '<p><strong>Message:</strong> ' . e($e->getMessage()) . '</p>' .
+        '<p><strong>File:</strong> ' . e($e->getFile()) . '</p>' .
+        '<p><strong>Line:</strong> ' . e($e->getLine()) . '</p>' .
+        '<pre>' . e($e->getTraceAsString()) . '</pre>',
+        500
+    );
     }
     // Redirect to the transaction page with success message
     return redirect('/transaksi/' . $kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');

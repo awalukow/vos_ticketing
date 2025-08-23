@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Login')
+@section('title', 'Reset Password')
 @section('content')
   <style>
     .bg-gradient-primary {
@@ -16,7 +16,7 @@
           <div class="col-12">
             <div class="p-5">
               <div class="text-center">
-                <h1 class="h4 text-gray-900 mb-4">Selamat Datang!</h1>
+                <h1 class="h4 text-gray-900 mb-4">Reset Password</h1>
               </div>
               <form id="loginForm" method="POST" action="{{ route('login') }}" class="user">
               @csrf

@@ -16,20 +16,24 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 
-Route::get('/fastRegister', [App\Http\Controllers\Auth\RegisterController::class, 'showFastRegistrationForm'])->name('fast-register');
-Route::post('/fastRegister', [App\Http\Controllers\Auth\RegisterController::class, 'fastRegister'])->name('fast-register');
-
+Route::get('/signup', [App\Http\Controllers\Auth\RegisterController::class, 'showFastRegistrationForm'])->name('fast-register');
+Route::post('/signup', [App\Http\Controllers\Auth\RegisterController::class, 'fastRegister'])->name('fast-register');
+Route::get('/adminRegister', [App\Http\Controllers\Auth\RegisterController::class, 'showAdminRegistrationForm'])->name('admin-register');
+Route::post('/adminRegister', [App\Http\Controllers\Auth\RegisterController::class, 'fastRegister'])->name('admin-register');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/pengaturan', [App\Http\Controllers\UserController::class, 'create'])->name('pengaturan');
     Route::post('/edit/name', [App\Http\Controllers\UserController::class, 'name'])->name('edit.name');
     Route::post('/edit/password', [App\Http\Controllers\UserController::class, 'password'])->name('edit.password');
     Route::get('/transaksi/{kode}', [App\Http\Controllers\LaporanController::class, 'show'])->name('transaksi.show');
-
+    Route::post('/upload-bukti-pembayaran/{id}', [App\Http\Controllers\LaporanController::class, 'uploadBuktiPembayaran'])->name('upload.bukti.pembayaran');
+    Route::post('/upload-bukti-pembayarans/{id}', [App\Http\Controllers\LaporanController::class, 'uploadBuktiPembayaranFisik'])->name('upload.bukti.pembayaran.fisik');
+    
     Route::middleware(['petugas'])->group(function () {
         Route::get('/pembayaran/{id}', [App\Http\Controllers\LaporanController::class, 'pembayaran'])->name('pembayaran');
         Route::get('/petugas', [App\Http\Controllers\LaporanController::class, 'petugas'])->name('petugas');
         Route::post('/petugas', [App\Http\Controllers\LaporanController::class, 'kode'])->name('petugas.kode');
+        Route::post('/updateCheckIn/{id}', [App\Http\Controllers\LaporanController::class, 'updateCheckIn'])->name('laporan.updateCheckIn');
 
         Route::middleware(['admin'])->group(function () {
             Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -38,6 +42,25 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('/rute', App\Http\Controllers\RuteController::class);
             Route::resource('/user', App\Http\Controllers\UserController::class);
             Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+            Route::get('/transaksi-pending', [App\Http\Controllers\LaporanController::class, 'transaksi_pending'])->name('transaksi_pending');
+            Route::get('/ticket-gereja', [App\Http\Controllers\LaporanController::class, 'ticket_gereja'])->name('ticket_gereja');
+            Route::get('/ticket-fisik', [App\Http\Controllers\LaporanController::class, 'ticket_fisik'])->name('ticket_fisik');
+        });
+
+        //For additional menus for Petugas
+        Route::middleware(['petugas'])->group(function () { 
+            Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+        });
+
+        Route::middleware(['adminchurch'])->group(function () {
+            //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+            //Route::resource('/category', App\Http\Controllers\CategoryController::class);
+            //Route::resource('/transportasi', App\Http\Controllers\TransportasiController::class);
+            //Route::resource('/rute', App\Http\Controllers\RuteController::class);
+            //Route::resource('/user', App\Http\Controllers\UserController::class);
+            //Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+            //Route::get('/transaksi-pending', [App\Http\Controllers\LaporanController::class, 'transaksi_pending'])->name('transaksi_pending');
+            Route::get('/ticket-gereja', [App\Http\Controllers\LaporanController::class, 'ticket_gereja'])->name('ticket_gereja');
         });
 
         Route::middleware(['superadmin'])->group(function () {
@@ -46,15 +69,33 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('/transportasi', App\Http\Controllers\TransportasiController::class);
             Route::resource('/rute', App\Http\Controllers\RuteController::class);
             Route::resource('/user', App\Http\Controllers\UserController::class);
-            Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+            Route::get('/transaksi-pending', [App\Http\Controllers\LaporanController::class, 'transaksi_pending'])->name('transaksi_pending');
+            Route::get('/ticket-gereja', [App\Http\Controllers\LaporanController::class, 'ticket_gereja'])->name('ticket_gereja');
+            Route::get('/ticket-fisik', [App\Http\Controllers\LaporanController::class, 'ticket_fisik'])->name('ticket_fisik');
+            Route::patch('user/{id}/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('user.changePassword');
+            Route::post('/cancelOrder/{id}', [App\Http\Controllers\LaporanController::class, 'cancelOrder'])->name('cancelOrder');
         });
     });
 
     Route::middleware(['penumpang'])->group(function () {
-        Route::get('/pesan/{kursi}/{data}', [App\Http\Controllers\PemesananController::class, 'pesan'])->name('pesan');
+        //Route::get('/pesan/{kursi}/{data}', [App\Http\Controllers\PemesananController::class, 'pesan'])->name('pesan');     
+        Route::get('/pesan/{kursi}/{data}/{referral?}', [App\Http\Controllers\PemesananController::class, 'pesan'])->name('pesan');
         Route::get('/cari/kursi/{data}', [App\Http\Controllers\PemesananController::class, 'edit'])->name('cari.kursi');
         Route::resource('/', App\Http\Controllers\PemesananController::class);
         Route::get('/history', [App\Http\Controllers\LaporanController::class, 'history'])->name('history');
         Route::get('/{id}/{data}', [App\Http\Controllers\PemesananController::class, 'show'])->name('show');
+        Route::get('/encrypt-data', [App\Http\Controllers\PemesananController::class, 'encryptData'])->name('encryptData');
+        //Route::post('/upload-bukti-pembayaran/{id}', [LaporanController::class, 'uploadBuktiPembayaran'])->name('upload.bukti.pembayaran');
+    });
+
+    Route::middleware(['superadmin'])->group(function () {
+        //Route::get('/pesan/{kursi}/{data}', [App\Http\Controllers\PemesananController::class, 'pesan'])->name('pesan');     
+        Route::get('/pesan/{kursi}/{data}/{referral?}', [App\Http\Controllers\PemesananController::class, 'pesan'])->name('pesan');
+        Route::get('/cari/kursi/{data}', [App\Http\Controllers\PemesananController::class, 'edit'])->name('cari.kursi');
+        Route::resource('/order', App\Http\Controllers\PemesananController::class);
+        Route::get('/history', [App\Http\Controllers\LaporanController::class, 'history'])->name('history');
+        Route::get('/{id}/{data}', [App\Http\Controllers\PemesananController::class, 'show'])->name('show');
+        Route::get('/encrypt-data', [App\Http\Controllers\PemesananController::class, 'encryptData'])->name('encryptData');
+        //Route::post('/upload-bukti-pembayaran/{id}', [LaporanController::class, 'uploadBuktiPembayaran'])->name('upload.bukti.pembayaran');
     });
 });

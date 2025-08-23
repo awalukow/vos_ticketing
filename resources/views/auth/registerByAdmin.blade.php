@@ -17,7 +17,7 @@
           <div class="card-body p-md-5">
             <div class="row justify-content-center">
               <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
-                <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
+                <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Signup by Admin</p>
                 <form method="POST" action="{{ route('register') }}" class="mx-1 mx-md-4" id="registerForm">
                   @csrf
                   <div class="d-flex flex-row align-items-center mb-4">
@@ -56,27 +56,12 @@
                     </div>
                   </div>
 
-                  <div class="d-flex flex-row align-items-center mb-4">
-                  <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
-                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                        <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password" value="" placeholder="Password">
-                        @error('password')
-                        <span class="invalid-feedback" role="alert">
-                           <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0" hidden>
+                        <input type="password" class="form-control form-control-user " name="password" value="" placeholder="Password">
+
                     </div>
-                  </div>
-                <div class="d-flex flex-row align-items-center mb-4">
-                <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
-                <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                    <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password_confirmation" value="" placeholder="Confirm Password">
-                    @error('password')
-                        <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                </div>
+                <div data-mdb-input-init class="form-outline flex-fill mb-0" hidden>
+                    <input type="password" class="form-control form-control-user " name="password_confirmation" value="" placeholder="Confirm Password">
                 </div>
 
                   <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">

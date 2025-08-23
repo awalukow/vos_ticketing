@@ -23,5 +23,10 @@ class Rute extends Model
         return $this->belongsTo('App\Models\Transportasi', 'transportasi_id');
     }
 
+    public function pemesanans()
+    {
+        return $this->hasMany('App\Models\Pemesanan', 'rute_id');
+    }
+
     protected $table = 'rute';
 }
