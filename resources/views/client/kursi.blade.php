@@ -4,6 +4,36 @@
 @section('styles')
   <style>
     a:hover { text-decoration: none; }
+    .showcase {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: #777;
+      list-style-type: none;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .showcase li {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 10px;
+    }
+    .screen {
+      background-color: #4b4a4aff;
+      height: 70px;
+      width: 100%;
+      margin: 15px 0;
+      transform: rotateX(-45deg);
+      box-shadow: 0 3px 10px rgba(255, 255, 255, 0.7);
+      
+      /* Centering the box horizontally */
+      position: relative;
+      left: 50%;
+      transform: rotateX(-45deg);
+    }
+
     .kursi {
       box-sizing: border-box; 
       border: 2px solid #858796;
@@ -48,6 +78,14 @@
       border-color: #aaa; 
       cursor: not-allowed; 
       color: #666; /* Optional: adjust for contrast */
+    }
+
+    .seatss.selected {
+      background-color: #007bff;
+    }
+
+    .seatss.occupied {
+      background-color: #858796;
     }
     #submitBtn { 
       position: fixed; 
@@ -125,6 +163,14 @@
     .seat-row {
       margin-bottom: 10px;
     }
+    .seatss {
+      background-color: #444451;
+      height: 12px;
+      width: 15px;
+      margin: 3px;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+    }
   </style>
 @endsection
 
@@ -134,6 +180,17 @@
       <a href="javascript:window.history.back();" class="text-white btn"><i class="fas fa-arrow-left mr-2"></i> Kembali</a>
 
       <!-- Combined seating layout with multiple rows in the same scrollable area -->
+      <br><br><br>
+        <ul class="showcase">
+          <li>
+            <div class="seatss selected"></div>
+            <small>Selected</small>
+          </li>
+          <li>
+            <div class="seatss occupied"></div>
+            <small>Occupied</small>
+          </li>
+        </ul>
       <div class="seating-layout">
         <!-- R Row (bottom row) -->
         <div class="seating-container seat-row">
@@ -1150,6 +1207,10 @@
             </div>
           @endif
           @endfor
+        </div>
+        <!-- Stage Row -->
+        <div class="screen" style="display: flex; justify-content: center; align-items: center; height: 100px; background-color: #333;">
+          <div style="color: white; font-size: 3em;">STAGE</div>
         </div>
       </div>
     </div>

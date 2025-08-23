@@ -247,7 +247,7 @@
                 Silahkan lakukan pembayaran ke Rekening
               </div>
               <div>
-                BCA 3420184785 a.n Ratno Juniarto MS <br>
+                Bank Jago XXX a.n Ratno Juniarto MS atau ke QRIS berikut XXX<br>
                 Dengan Nominal Rp. {{ number_format($data->total, 0, ',', '.') }}<br>
                 batas waktu pembayaran <u>{{ \Carbon\Carbon::parse($data->created_at)->addDays(3)->addHours(7)->locale('id')->isoFormat('LLLL') }}</u><br>
             </div>
