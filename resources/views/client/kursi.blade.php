@@ -25,19 +25,18 @@
       height: 70px;
       width: 100%;
       margin: 15px 0;
-      transform: rotateX(-45deg);
       box-shadow: 0 3px 10px rgba(255, 255, 255, 0.7);
-      
-      /* Centering the box horizontally */
+
+      /* Center horizontally */
       position: relative;
       left: 50%;
-      transform: rotateX(-45deg);
+      transform: translateX(-40%) rotateX(-45deg);
     }
-
+    
     .kursi {
       box-sizing: border-box; 
       border: 2px solid #858796;
-      width: 50%;  /* Reduced to 50% */
+      width: 100%%;  /* Reduced to 50% */
       height: 40px; /* Reduced to 50% of 80px */
       display: flex; 
       position: relative; 
@@ -49,7 +48,7 @@
       color: #3498db; /* Default Blue */
       border-top-left-radius: 15px; /* Reduced radius by 50% */
       border-top-right-radius: 15px; /* Reduced radius by 50% */
-}
+    }
 
 
     /* Gold text */
@@ -106,53 +105,52 @@
       min-width: max-content;
     }
     .seat-item {
-      width: 100px;
-      min-width: 100px;
+      width: 50px;
+      /* REMOVE or reduce min-width */
+      min-width: 0;
       flex-shrink: 0;
+      margin-right: 0; /* ensure no margin */
+      padding: 0;
     }
+
+   
     /* Empty spacer for the gap between seats 9 and 10 */
     .seat-spacer {
-      width: 500px; /* Width of 5 seats (R9-R13) */
-      min-width: 500px;
-      flex-shrink: 0;
-    }
-    /* Empty spacer for the gap between seats 9 and 10 */
-    .seat-spacer {
-      width: 500px; /* Width of 5 seats (R9-R13) */
-      min-width: 500px;
+      width: 290px; /* Width of 5 seats (R9-R13) */
+      min-width: 290px;
       flex-shrink: 0;
     }
 
     /* Empty spacer for the gap between seats 9 and 10 */
     .middle-seat-spacer {
-      width: 300px; /* Width of 5 seats (R9-R13) */
-      min-width: 300px;
+      width: 170px; /* Width of 5 seats (R9-R13) */
+      min-width: 170px;
       flex-shrink: 0;
     }
     /* Empty spacer for the gap between seats 9 and 10 */
     .middle-seat-spacer-after {
-      width: 190px; /* Width of 5 seats (R9-R13) */
-      min-width: 190px;
+      width: 110px; /* Width of 5 seats (R9-R13) */
+      min-width: 110px;
       flex-shrink: 0;
     }
     .seatK-spacer {
-      width: 100px; /* Width of 5 seats (R9-R13) */
-      min-width: 100px;
+      width: 50px; /* Width of 5 seats (R9-R13) */
+      min-width: 50px;
       flex-shrink: 0;
     }
     .seatK-spacer-after {
-      width: 60px; /* Width of 5 seats (R9-R13) */
-      min-width: 60px;
+      width: 50px; /* Width of 5 seats (R9-R13) */
+      min-width: 50px;
       flex-shrink: 0;
     }
     .seatJ-spacer {
-      width: 150px; /* Width of 5 seats (R9-R13) */
-      min-width: 150px;
+      width: 80px; /* Width of 5 seats (R9-R13) */
+      min-width: 80px;
       flex-shrink: 0;
     }
     .seatJ-spacer-after {
-      width: 120px; /* Width of 5 seats (R9-R13) */
-      min-width: 120px;
+      width: 80px; /* Width of 5 seats (R9-R13) */
+      min-width: 80px;
       flex-shrink: 0;
     }
     /* Hidden seat */
