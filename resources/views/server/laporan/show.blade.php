@@ -90,7 +90,7 @@
             <div>{{ $data->rute->transportasi->category->name }}</div>
             <div>
               <!--{{ date('l, d F Y', strtotime($data->event_date)) }}-->
-              Sabtu, 20 Juli 2024
+              Sabtu,  Juli 2024
             </div>
             <div>
               {{ date('H:i', strtotime($data->rute->jam)) }} WIB

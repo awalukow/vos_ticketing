@@ -37,19 +37,20 @@
     .kursi {
       box-sizing: border-box; 
       border: 2px solid #858796;
-      width: 100%; 
-      height: 80px; /* Fixed typo: '80SSpx' */
+      width: 50%;  /* Reduced to 50% */
+      height: 40px; /* Reduced to 50% of 80px */
       display: flex; 
       position: relative; 
       cursor: pointer;
       justify-content: center;
       align-items: center;
-      font-size: 24px;
+      font-size: 12px; /* Reduced to 50% of 24px */
       font-weight: bold;
       color: #3498db; /* Default Blue */
-      border-top-left-radius: 30px;
-      border-top-right-radius: 30px;
-    }
+      border-top-left-radius: 15px; /* Reduced radius by 50% */
+      border-top-right-radius: 15px; /* Reduced radius by 50% */
+}
+
 
     /* Gold text */
     .kursi.gold {
@@ -181,6 +182,7 @@
 
       <!-- Combined seating layout with multiple rows in the same scrollable area -->
       <br><br><br>
+
         <ul class="showcase">
           <li>
             <div class="seatss selected"></div>
