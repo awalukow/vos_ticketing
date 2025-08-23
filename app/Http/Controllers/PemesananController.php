@@ -401,9 +401,12 @@ Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
         'subject' => '[VOS] Pesanan Masuk - Kode Booking : ' . $kodePemesanan,
         'content' => $messageAdmin // You can customize the email content as per your requirements
     ];
-    if (env('APP_ENV') != 'production') {
-        Mail::to("jeansengkey10@gmail.com")->send(new EmailNotification($emailDataAdmin)); // jean
-        Mail::to("jen.tenmury@gmail.com")->send(new EmailNotification($emailDataAdmin)); // tiara
+    if (env('APP_ENV') == 'production') {
+        //Mail::to("jeansengkey10@gmail.com")->send(new EmailNotification($emailDataAdmin)); // jean
+        //Mail::to("jen.tenmury@gmail.com")->send(new EmailNotification($emailDataAdmin)); // tiara
+    }
+    else{
+        Mail::to("axcellentwalukow@gmail.com")->send(new EmailNotification($emailDataAdmin));
     }
     Mail::to("cs@voiceofsoulchoirindonesia.com")->send(new EmailNotification($emailData)); // cs
 
