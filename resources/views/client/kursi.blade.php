@@ -22,8 +22,8 @@
     }
     .screen {
       background-color: #4b4a4aff;
-      height: 70px;
-      width: 100%;
+      height: 30px;
+      width: 50%;
       margin: 15px 0;
       box-shadow: 0 3px 10px rgba(255, 255, 255, 0.7);
 
