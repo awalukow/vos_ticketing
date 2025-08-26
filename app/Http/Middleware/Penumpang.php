@@ -16,9 +16,10 @@ class Penumpang
      */
     public function handle(Request $request, Closure $next)
     {
-        if ($request->user()->level == "Admin") {
-            return redirect('/home');
-        } else if ($request->user()->level == "Petugas") {
+        //if ($request->user()->level == "Admin") {
+        //    return redirect('/home');
+        //} else 
+        if ($request->user()->level == "Petugas") {
             return redirect('/petugas');
         } else if ($request->user()->level == "SuperAdmin") {
             return redirect('/home');

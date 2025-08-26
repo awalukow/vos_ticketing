@@ -63,6 +63,18 @@
       background-color: #A5D6A7; /* Material Design Light Green 200 */
     }
 
+    /* vvip text */
+    .kursi.vvip {
+      color: #004b9bff;
+      background-color: #8e7cc3; /* Material Design Light Green 200 */
+    }
+
+    /* Google's BLUE text */
+    .kursi.undangan {
+      color: #004b9bff;
+      background-color: #00ffff; /* Material Design Light Green 200 */
+    }
+
     /* Silver text */
     .kursi.silver {
       color: #004b9bff; /* Optional: adjust for contrast */
@@ -413,9 +425,9 @@
             $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
             <div class="seat-item">
-              <div class="kursi platinum" onclick="toggleSeat(this)">
+              <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>M{{ $i }}</div>
               </div>
             </div>
@@ -436,9 +448,9 @@
             $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
             <div class="seat-item">
-              <div class="kursi platinum" onclick="toggleSeat(this)">
+              <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>M{{ $i }}</div>
               </div>
             </div>
@@ -525,33 +537,69 @@
          <!-- K Row -->
         <div class="seating-container seat-row">
           @for ($i = 1; $i <= 6; $i++)
+          @php
+            $array = array('kursi' => 'K' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
+                <div>K{{ $i }}</div>
+              </div>
+            </div>
+          @else
             <div class="seat-item">
               <div class="kursi reserved" style="background: #858796">
                 <div>K{{ $i }}</div>
               </div>
             </div>
+          @endif
           @endfor
 
           <!-- Spacer for the gap between K6 and K7 -->
           <div class="seatK-spacer"></div>
 
           @for ($i = 7; $i <= 14; $i++)
+          @php
+            $array = array('kursi' => 'K' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
+                <div>K{{ $i }}</div>
+              </div>
+            </div>
+          @else
             <div class="seat-item">
               <div class="kursi reserved" style="background: #858796">
                 <div>K{{ $i }}</div>
               </div>
             </div>
+          @endif
           @endfor
 
           <!-- Spacer for the gap between K7 and K8 -->
           <div class="seatK-spacer-after"></div>
 
           @for ($i = 15; $i <= 20; $i++)
+          @php
+            $array = array('kursi' => 'K' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
+                <div>K{{ $i }}</div>
+              </div>
+            </div>
+          @else
             <div class="seat-item">
               <div class="kursi reserved" style="background: #858796">
                 <div>K{{ $i }}</div>
               </div>
             </div>
+          @endif
           @endfor
         </div>
 
@@ -1109,36 +1157,73 @@
         
         <!-- B Row -->
         <div class="seating-container seat-row">
-          @for ($i = 1; $i <= 6; $i++)
-            <div class="seat-item">
-              <div class="kursi reserved" style="background: #858796">
-                <div>B{{ $i }}</div>
-              </div>
-            </div>
-          @endfor
+            @for ($i = 1; $i <= 6; $i++)
+            @php
+                $array = array('kursi' => 'B' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+                $cekData = json_encode($array);
+            @endphp
+            @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+                <div class="seat-item">
+                    <div class="kursi undangan" onclick="toggleSeat(this)">
+                        <div>B{{ $i }}</div>
+                    </div>
+                </div>
+            @else
+                <div class="seat-item">
+                    <div class="kursi reserved" style="background: #858796">
+                        <div>B{{ $i }}</div>
+                    </div>
+                </div>
+            @endif
+            @endfor
 
-          <!-- Spacer for the gap between B6 and B7 -->
-          <div class="seatJ-spacer"></div>
+            <!-- Spacer for the gap between B6 and B7 -->
+            <div class="seatJ-spacer"></div>
 
-          @for ($i = 7; $i <= 13; $i++)
-            <div class="seat-item">
-              <div class="kursi reserved" style="background: #858796">
-                <div>B{{ $i }}</div>
-              </div>
-            </div>
-          @endfor
+            @for ($i = 7; $i <= 13; $i++)
+            @php
+                $array = array('kursi' => 'B' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+                $cekData = json_encode($array);
+            @endphp
+            @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+                <div class="seat-item">
+                    <div class="kursi undangan" onclick="toggleSeat(this)">
+                        <div>B{{ $i }}</div>
+                    </div>
+                </div>
+            @else
+                <div class="seat-item">
+                    <div class="kursi reserved" style="background: #858796">
+                        <div>B{{ $i }}</div>
+                    </div>
+                </div>
+            @endif
+            @endfor
 
-          <!-- Spacer for the gap between B7 and B8 -->
-          <div class="seatJ-spacer-after"></div>
+            <!-- Spacer for the gap between B7 and B8 -->
+            <div class="seatJ-spacer-after"></div>
 
-          @for ($i = 14; $i <= 19; $i++)
-            <div class="seat-item">
-              <div class="kursi reserved" style="background: #858796">
-                <div>B{{ $i }}</div>
-              </div>
-            </div>
-          @endfor
+            @for ($i = 14; $i <= 19; $i++)
+            @php
+                $array = array('kursi' => 'B' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+                $cekData = json_encode($array);
+            @endphp
+            @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+                <div class="seat-item">
+                    <div class="kursi undangan" onclick="toggleSeat(this)">
+                        <div>B{{ $i }}</div>
+                    </div>
+                </div>
+            @else
+                <div class="seat-item">
+                    <div class="kursi reserved" style="background: #858796">
+                        <div>B{{ $i }}</div>
+                    </div>
+                </div>
+            @endif
+            @endfor
         </div>
+
 
          <!-- A Row -->
         <div class="seating-container seat-row">

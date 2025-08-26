@@ -13,7 +13,8 @@ class Transportasi extends Model
         'name',
         'kode',
         'jumlah',
-        'category_id'
+        'category_id',
+        'isForAdmin'
     ];
 
     public function category()

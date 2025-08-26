@@ -84,6 +84,13 @@
       <i class="fa-solid fa-ticket"></i>
       <span>Tiket Fisik</span></a>
   </li>
+  @if(auth()->user()->level == 'SuperAdmin' || auth()->user()->level == 'Admin')
+  <!-- Nav Item - Beli Tiket -->
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('order') }}">
+      <i class="fa-solid fa-cart-plus"></i>
+      <span>Beli Tiket</span></a>
+  @endif
   @endif
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">

@@ -23,7 +23,7 @@ class PemesananController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index_backup()
     {
         $ruteAwal = Rute::orderBy('start')->get()->groupBy('start');
         if (count($ruteAwal) > 0) {
@@ -44,6 +44,36 @@ class PemesananController extends Controller
         $category = Category::orderBy('name')->get();
         return view('client.index', compact('data', 'category'));
     }
+
+    public function index()
+    {
+        // Group all routes by 'start' location
+        $ruteAwal = Rute::orderBy('start')->get()->groupBy('start');
+        if (count($ruteAwal) > 0) {
+            foreach ($ruteAwal as $key => $value) {
+                $data['start'][] = $key;
+            }
+        } else {
+            $data['start'] = [];
+        }
+
+        // Group all routes by 'end' location
+        $ruteAkhir = Rute::orderBy('end')->get()->groupBy('end');
+        if (count($ruteAkhir) > 0) {
+            foreach ($ruteAkhir as $key => $value) {
+                $data['end'][] = $key;
+            }
+        } else {
+            $data['end'] = [];
+        }
+
+        // Get all categories
+        $category = Category::orderBy('name')->get();
+
+        // Return the Penumpang view
+        return view('client.index', compact('data', 'category'));
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -195,7 +225,8 @@ class PemesananController extends Controller
                     'waktu' => date("h:i A", strtotime($val->jam)),
                     'event_date' => date("h:i A", strtotime($val->jam)),
                     'id' => $val->id,
-                    'kategori' => $category->name
+                    'kategori' => $category->name,
+                    'isForAdmin' => $val->transportasi->isForAdmin
                 ];
             }
         }

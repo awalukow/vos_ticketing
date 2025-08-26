@@ -13,6 +13,9 @@
       <a href="{{ url('/') }}" class="text-white btn"><i class="fas fa-arrow-left mr-2"></i> Kembali</a>
       <div class="row mt-2">
         @foreach ($dataRute as $data)
+          @if ($data['isForAdmin'] == true && auth()->user()->level == 'Penumpang')
+              @continue
+          @endif
           <div class="col-lg-6 mb-4">
             @if ($data['kursi'] == 0)
               <div class="card o-hidden border-0 shadow h-100 py-2">
