@@ -18,6 +18,7 @@ Route::get('/signup', [RegisterController::class, 'showFastRegistrationForm'])->
 Route::post('/signup', [RegisterController::class, 'fastRegister'])->name('fast-register');
 Route::get('/adminRegister', [RegisterController::class, 'showAdminRegistrationForm'])->name('admin-register');
 Route::post('/adminRegister', [RegisterController::class, 'fastRegister'])->name('admin-register');
+Route::get('/view/pdf', [RegisterController::class, 'view_pdf']);
 
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {

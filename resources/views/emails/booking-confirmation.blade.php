@@ -1,122 +1,225 @@
-@component('mail::message')
-<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0;">
-    <div style="max-width: 650px; margin: 30px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: 1px solid #e9ecef;">
-        <div style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; padding: 30px 30px 20px; text-align: center;">
-            <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                <div style="font-size: 24px; font-weight: 700; color: #6a11cb;">VOS</div>
-            </div>
-            <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Ticket Order Confirmed</h1>
-            <p style="margin: 8px 0 0; opacity: 0.9; font-size: 16px;">Your booking has been successfully processed</p>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOS Ticket Order Confirmation</title>
+    <style>
+        /* This style will be stripped by Gmail, but kept for clients that support it */
+        @media (max-width: 600px) {
+            .container { width: 100% !important; margin: 0 !important; }
+            .content { padding: 15px !important; }
+            .button-container { display: block !important; }
+            .button { display: block !important; width: 100% !important; margin-bottom: 10px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8f9fa; font-family: Arial, sans-serif;">
 
-        <div style="padding: 30px;">
-            <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
-                <h2 style="color: #2c3e50; font-size: 20px; font-weight: 600; margin: 0 0 15px 0; display: flex; align-items: center;">
-                    <i style="margin-right: 10px; color: #6a11cb;">✓</i> Booking Details
-                </h2>
-                <div style="background: #f8f9ff; border-radius: 8px; padding: 15px 20px; border: 1px solid #e7eaff;">
-                    <div style="display: flex; margin-bottom: 10px; font-size: 15px;">
-                        <div style="width: 180px; font-weight: 600; color: #444;">Booking Code</div>
-                        <div style="flex: 1; color: #2c3e50;"><strong>{{ $bookingCode }}</strong></div>
-                    </div>
-                    <div style="display: flex; margin-bottom: 10px; font-size: 15px;">
-                        <div style="width: 180px; font-weight: 600; color: #444;">Event</div>
-                        <div style="flex: 1; color: #2c3e50;">VOS Interval | Pre Competition Concert</div>
-                    </div>
-                    <div style="display: flex; margin-bottom: 10px; font-size: 15px;">
-                        <div style="width: 180px; font-weight: 600; color: #444;">Date & Time</div>
-                        <div style="flex: 1; color: #2c3e50;">{{ $eventDate }}, {{ $eventTime }} WIB</div>
-                    </div>
-                    <div style="display: flex; margin-bottom: 10px; font-size: 15px;">
-                        <div style="width: 180px; font-weight: 600; color: #444;">Seat(s)</div>
-                        <div style="flex: 1; color: #2c3e50;">{{ $seats }}</div>
-                    </div>
-                    <div style="display: flex; margin-bottom: 10px; font-size: 15px;">
-                        <div style="width: 180px; font-weight: 600; color: #444;">Total Amount</div>
-                        <div style="flex: 1; color: #6a11cb; font-weight: 700; font-size: 18px;">{{ $totalAmount }}</div>
-                    </div>
-                </div>
-            </div>
+    <!-- Main wrapper for email clients -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                
+                <!-- Main container -->
+                <table class="container" width="650" cellpadding="0" cellspacing="0" border="0" style="max-width: 650px; background-color: #ffffff; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #6a11cb; padding: 25px 20px; text-align: center; border-bottom: 3px solid #2575fc;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center" style="padding-bottom: 15px;">
+                                        <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 50%; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                            <tr>
+                                                <td align="center" style="font-size: 20px; font-weight: bold; color: #6a11cb;">VOS</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="color: white; font-size: 22px; font-weight: bold; padding: 5px 0;">
+                                        Ticket Order Confirmed
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="color: rgba(255,255,255,0.9); font-size: 15px;">
+                                        Your booking has been successfully processed
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="content" style="padding: 25px 20px;">
+                            
+                            <!-- Booking Details -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+                                <tr>
+                                    <td style="color: #2c3e50; font-size: 18px; font-weight: bold; padding-bottom: 12px; border-bottom: 1px solid #eee;">
+                                        ✓ Booking Details
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9ff; border: 1px solid #e7eaff; border-radius: 6px; padding: 12px 15px; margin-bottom: 20px;">
+                                <tr>
+                                    <td width="130" style="font-weight: bold; color: #444; padding: 8px 0; font-size: 14px;">Booking Code</td>
+                                    <td style="color: #2c3e50; padding: 8px 0; font-size: 14px;"><strong>{{ $bookingCode }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; color: #444; padding: 8px 0; font-size: 14px;">Event</td>
+                                    <td style="color: #2c3e50; padding: 8px 0; font-size: 14px;">{{ $eventName }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; color: #444; padding: 8px 0; font-size: 14px;">Date & Time</td>
+                                    <td style="color: #2c3e50; padding: 8px 0; font-size: 14px;">{{ $eventDate }}, {{ $eventTime }} WIB</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; color: #444; padding: 8px 0; font-size: 14px;">Seat(s)</td>
+                                    <td style="color: #2c3e50; padding: 8px 0; font-size: 14px;">{{ $seats }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; color: #444; padding: 8px 0; font-size: 14px;">Total Amount</td>
+                                    <td style="color: #6a11cb; font-weight: bold; font-size: 16px;">Rp {{ number_format($totalAmount, 0, ',', '.') }}</td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Payment Instructions -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+                                <tr>
+                                    <td style="color: #2c3e50; font-size: 18px; font-weight: bold; padding-bottom: 12px; border-bottom: 1px solid #eee;">
+                                        💳 Payment Instructions
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fff8e6; border: 1px solid #ffe0a3; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="font-weight: bold; color: #d97706; padding-bottom: 10px; font-size: 14px;">
+                                        Bank Transfer - Bank JAGO
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-top: 8px; font-size: 14px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="130" style="font-weight: bold; color: #444; padding: 6px 0;">Account Number</td>
+                                                <td style="color: #2c3e50; padding: 6px 0;">XX</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: bold; color: #444; padding: 6px 0;">Account Name</td>
+                                                <td style="color: #2c3e50; padding: 6px 0;">Ratno Juniarto MS</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: bold; color: #444; padding: 6px 0;">Amount</td>
+                                                <td style="color: #6a11cb; font-weight: bold; font-size: 16px;">Rp {{ number_format($totalAmount, 0, ',', '.') }}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                                Please complete your payment within 1 hour to secure your booking. Upload your payment proof through your transaction page.
+                            </p>
+                            
+                            <!-- Action Buttons -->
+                            <table class="button-container" width="100%" cellpadding="0" cellspacing="0" border="0" style="text-align: center; margin: 20px 0;">
+                                <tr>
+                                    <td>
+                                        <table cellpadding="0" cellspacing="0" border="0" style="display: inline-block; margin: 0 5px;">
+                                            <tr>
+                                                <td align="center" bgcolor="#6a11cb" style="border-radius: 25px; padding: 12px 25px;">
+                                                    <a href="{{ $paymentUrl }}" target="_blank" style="font-size: 15px; font-weight: bold; color: #ffffff; text-decoration: none; display: inline-block;">
+                                                        Complete Payment Now
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table cellpadding="0" cellspacing="0" border="0" style="display: inline-block; margin: 0 5px;">
+                                            <tr>
+                                                <td align="center" style="border-radius: 25px; padding: 10px 23px; border: 2px solid #6a11cb;">
+                                                    <a href="{{ $transactionUrl }}" target="_blank" style="font-size: 15px; font-weight: bold; color: #6a11cb; text-decoration: none; display: inline-block;">
+                                                        View Transaction
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Next Steps -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 15px;">
+                                <tr>
+                                    <td style="color: #2c3e50; font-size: 18px; font-weight: bold; padding-bottom: 12px; border-bottom: 1px solid #eee;">
+                                        ℹ️ Next Steps
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <div style="text-align: center;">
+                                <ol style="color: #333; font-size: 14px; margin: 15px 0 0 20px; padding: 0; display: inline-block; text-align: left;">
+                                    <li style="margin-bottom: 8px;">Complete your payment using the bank details above</li>
+                                    <li style="margin-bottom: 8px;">Upload payment proof at your transaction page</li>
+                                    <li style="margin-bottom: 8px;">Receive e-ticket confirmation via email</li>
+                                    <li>Bring your e-ticket to the event venue</li>
+                                </ol>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee; color: #6c757d; font-size: 13px;">
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="https://wa.me/6285823536364" target="_blank" style="display: inline-block; width: 32px; height: 32px; background-color: #6a11cb; border-radius: 50%; color: #ffffff; text-decoration: none; margin: 0 5px; line-height: 32px;">
+                                            💬
+                                        </a>
+                                        <a href="#" target="_blank" style="display: inline-block; width: 32px; height: 32px; background-color: #6a11cb; border-radius: 50%; color: #ffffff; text-decoration: none; margin: 0 5px; line-height: 32px;">
+                                            📱
+                                        </a>
+                                        <a href="#" target="_blank" style="display: inline-block; width: 32px; height: 32px; background-color: #6a11cb; border-radius: 50%; color: #ffffff; text-decoration: none; margin: 0 5px; line-height: 32px;">
+                                            📷
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ $helpCenterUrl }}" target="_blank" style="color: #6a11cb; text-decoration: none; margin: 0 8px; font-size: 13px;">Help Center</a>
+                                        <a href="{{ $termsUrl }}" target="_blank" style="color: #6a11cb; text-decoration: none; margin: 0 8px; font-size: 13px;">Terms</a>
+                                        <a href="{{ $privacyUrl }}" target="_blank" style="color: #6a11cb; text-decoration: none; margin: 0 8px; font-size: 13px;">Privacy</a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 8px 0; color: #6c757d; font-size: 13px;">
+                                Need assistance? Contact our customer support:<br>
+                                <a href="https://wa.me/6285823536364" target="_blank" style="color: #6a11cb; text-decoration: none;">WhatsApp Support</a> or 
+                                <a href="mailto:cs@voiceofsoulchoir.id" style="color: #6a11cb; text-decoration: none;">cs@voiceofsoulchoir.id</a>
+                            </p>
+                            
+                            <p style="margin: 15px 0 0; color: #999; font-size: 11px; line-height: 1.5;">
+                                This is an automated message. Please do not reply directly to this email.<br>
+                                © 2024 Voice of Soul Choir. All rights reserved.
+                            </p>
+                            
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
 
-            <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
-                <h2 style="color: #2c3e50; font-size: 20px; font-weight: 600; margin: 0 0 15px 0; display: flex; align-items: center;">
-                    <i style="margin-right: 10px; color: #6a11cb;">💳</i> Payment Instructions
-                </h2>
-                <div style="background: #fff8e6; border-radius: 8px; padding: 18px 20px; border: 1px solid #ffe0a3;">
-                    <div style="font-weight: 600; color: #d97706; margin-bottom: 12px; display: flex; align-items: center;">
-                        💳 Bank Transfer - BCA
-                    </div>
-                    <div style="margin-top: 10px; font-size: 14px;">
-                        <div style="display: flex; margin-bottom: 10px; font-size: 15px;">
-                            <div style="width: 180px; font-weight: 600; color: #444;">Account Number</div>
-                            <div style="flex: 1; color: #2c3e50;">3420184785</div>
-                        </div>
-                        <div style="display: flex; margin-bottom: 10px; font-size: 15px;">
-                            <div style="width: 180px; font-weight: 600; color: #444;">Account Name</div>
-                            <div style="flex: 1; color: #2c3e50;">Ratno Juniarto MS</div>
-                        </div>
-                        <div style="display: flex; margin-bottom: 10px; font-size: 15px;">
-                            <div style="width: 180px; font-weight: 600; color: #444;">Amount</div>
-                            <div style="flex: 1; color: #6a11cb; font-weight: 700; font-size: 18px;">{{ $totalAmount }}</div>
-                        </div>
-                    </div>
-                </div>
-                <p style="margin-top: 15px; font-size: 14px;">
-                    Please complete your payment within 3 days to secure your booking. 
-                    Upload your payment proof through your transaction page.
-                </p>
-            </div>
-
-            <div style="text-align: center; margin: 30px 0;">
-                @component('mail::button', ['url' => $paymentUrl, 'color' => 'primary'])
-                Complete Payment Now
-                @endcomponent
-
-                @component('mail::button', ['url' => $transactionUrl, 'color' => 'secondary'])
-                View Transaction
-                @endcomponent
-            </div>
-
-            <div style="margin-bottom: 0; padding-bottom: 0;">
-                <h2 style="color: #2c3e50; font-size: 20px; font-weight: 600; margin: 0 0 15px 0; display: flex; align-items: center;">
-                    <i style="margin-right: 10px; color: #6a11cb;">ℹ️</i> Next Steps
-                </h2>
-                <ol style="padding-left: 20px; font-size: 15px;">
-                    <li style="margin-bottom: 8px;">Complete your payment using the bank details above</li>
-                    <li style="margin-bottom: 8px;">Upload payment proof at your transaction page</li>
-                    <li style="margin-bottom: 8px;">Receive e-ticket confirmation via email</li>
-                    <li>Bring your e-ticket to the event venue</li>
-                </ol>
-            </div>
-        </div>
-
-        <div style="background: #f8f9fa; padding: 25px 30px; text-align: center; color: #6c757d; font-size: 14px; border-top: 1px solid #eee;">
-            <div style="margin: 15px 0;">
-                <a href="https://wa.me/6285823536364" style="display: inline-block; width: 36px; height: 36px; background: #6a11cb; color: white; border-radius: 50%; line-height: 36px; text-align: center; margin: 0 6px; font-size: 16px; text-decoration: none;">💬</a>
-                <a href="#" style="display: inline-block; width: 36px; height: 36px; background: #6a11cb; color: white; border-radius: 50%; line-height: 36px; text-align: center; margin: 0 6px; font-size: 16px; text-decoration: none;">📱</a>
-                <a href="#" style="display: inline-block; width: 36px; height: 36px; background: #6a11cb; color: white; border-radius: 50%; line-height: 36px; text-align: center; margin: 0 6px; font-size: 16px; text-decoration: none;">📷</a>
-            </div>
-            
-            <div style="margin: 15px 0;">
-                <a href="{{ $helpCenterUrl }}" style="color: #6a11cb; text-decoration: none; margin: 0 10px; font-weight: 500;">Help Center</a>
-                <a href="{{ $termsUrl }}" style="color: #6a11cb; text-decoration: none; margin: 0 10px; font-weight: 500;">Terms & Conditions</a>
-                <a href="{{ $privacyUrl }}" style="color: #6a11cb; text-decoration: none; margin: 0 10px; font-weight: 500;">Privacy Policy</a>
-            </div>
-            
-            <p>
-                Need assistance? Contact our customer support:<br>
-                <a href="https://wa.me/6285823536364" style="color: #6a11cb; text-decoration: none;">WhatsApp Support</a> or 
-                <a href="mailto:cs@voiceofsoulchoir.id" style="color: #6a11cb; text-decoration: none;">cs@voiceofsoulchoir.id</a>
-            </p>
-            
-            <div style="font-size: 12px; color: #999; margin-top: 20px; line-height: 1.5; text-align: center;">
-                This is an automated message. Please do not reply directly to this email.<br>
-                © 2024 Voice of Soul Choir. All rights reserved.
-            </div>
-        </div>
-    </div>
-</div>
-
-Thanks,<br>
-{{ config('app.name') }}
-@endcomponent
+</body>
+</html>

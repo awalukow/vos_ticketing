@@ -12,8 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Mail;
 use Exception;
 use TCPDF;
+use PDF;
 use App\Mail\EmailNotification; // Assuming you have a Mailable class defined for the email notification
-
+use App\Mail\PaymentConfirmation;
 
 class LaporanController extends Controller
 {
@@ -162,30 +163,35 @@ class LaporanController extends Controller
         return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi.');
     }
 
-
-
     public function pembayaran($id)
-    {
-        $pemesanan = Pemesanan::find($id);
-        $penumpang = DB::table('users')
-                    ->join('pemesanan', 'users.id', '=', 'pemesanan.penumpang_id')
-                    ->select('users.username', 'users.email')
-                    ->where('pemesanan.kode', '=', $pemesanan->kode)
-                    ->first(); // Retrieve the first result
-        // Check if the booking exists
-        if (!$pemesanan) {
-            return redirect()->back()->with('error', 'Pemesanan tidak ditemukan!');
-        }
+{
+    $pemesanan = Pemesanan::find($id);
+    
+    // Check if the booking exists
+    if (!$pemesanan) {
+        return redirect()->back()->with('error', 'Pemesanan tidak ditemukan!');
+    }
 
-        // Verify the payment
-        $pemesanan->status = 'Sudah Bayar';
-        $pemesanan->petugas_id = Auth::user()->id;
-        $pemesanan->status_pembayaran = 'Sudah Verifikasi';
-        $pemesanan->save();
+    // Get passenger info
+    $penumpang = DB::table('users')
+                ->join('pemesanan', 'users.id', '=', 'pemesanan.penumpang_id')
+                ->select('users.username', 'users.email')
+                ->where('pemesanan.kode', '=', $pemesanan->kode)
+                ->first();
 
-        // Define $destination and $message for WA
-        $destination = $penumpang->username; // Replace with the destination number
-        $message = '*[NOTIFIKASI VOS] PEMBAYARAN BERHASIL*
+    if (!$penumpang) {
+        return redirect()->back()->with('error', 'Data penumpang tidak ditemukan!');
+    }
+
+    // Verify the payment
+    $pemesanan->status = 'Sudah Bayar';
+    $pemesanan->petugas_id = Auth::user()->id;
+    $pemesanan->status_pembayaran = 'Sudah Verifikasi';
+    $pemesanan->save();
+
+    // Define $destination and $message for WA
+    $destination = $penumpang->username;
+    $message = '*[NOTIFIKASI VOS] PEMBAYARAN BERHASIL*
 Tiket konser INTERVAL | VOS Pre Competition Concert, 20 Juli 2024.
 
 Kode booking: ' . $pemesanan->kode . ' 
@@ -193,36 +199,59 @@ Jumlah Tiket: ' . $pemesanan->kursi . '
 Total Biaya: ' . $pemesanan->total . '
 Status Pembayaran: *BERHASIL*
 
-untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)'; 
+untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)';
 
-        $messageEmail = 'Pembayaran sudah diterima dan diverifikasi. Tiket konser VOS Pre Competition Concert, 06 Juli 2024 dengan kode booking: ' . $pemesanan->kode . ' sudah sudah terkonfirmasi. 
-        berikut adalah ringkasan e-tiket anda: 
-        Kode Booking : '. $pemesanan->kode . '
-        Nama Event : Interval | Pre-Competition Concert 
-        Jumlah Kursi : '. $pemesanan->kursi . '
-        '; 
-
-        // Call sendSMS method
-        //$response = $this->sendWhatsAppMessage_2($destination, $message);
-
-          
-        //if ($response) {
-        //    echo "WA SUCCESS";
-        //} else {
-        //    echo "WA FAILED";
-        //}
-        
-
-        // Send email
-        $emailData = [
-            'subject' => '[VOS] Pesanan anda sudah dikonfirmasi! - Kode Booking : ' . $pemesanan->kode ,
-            'content' => $messageEmail
-        ];
-        Mail::to($penumpang->email)->send(new EmailNotification($emailData));
-
-
-        return redirect()->back()->with('success', 'Pembayaran Ticket Success!');
+    // Process seats - handle both string and array formats
+    $seats = $pemesanan->kursi;
+    $seatArray = [];
+    
+    // Check if kursi is a JSON string
+    if (is_string($seats) && substr($seats, 0, 1) === '[') {
+        $seatArray = json_decode($seats, true);
+        if (!is_array($seatArray)) {
+            $seatArray = [$seats];
+        }
+    } else {
+        // If it's a single seat or number
+        $seatArray = [$seats];
     }
+    
+    // Clean up seat names by removing brackets and quotes
+    $cleanedSeats = array_map(function($seat) {
+        return trim($seat, '[]"');
+    }, $seatArray);
+
+    // Prepare email data for payment confirmation
+    $emailData = [
+        'subject' => '[VOS] Pesanan anda sudah dikonfirmasi! - Kode Booking : ' . $pemesanan->kode,
+        'eventName' => 'VOS 20th Anniversary Concert @ Balai Resital Kartanegara',
+        'bookingCode' => $pemesanan->kode,
+        'eventDate' => '09 November 2024',
+        'eventTime' => '18:30',
+        'seats' => implode(', ', $cleanedSeats),
+        'seatCount' => count($cleanedSeats),
+        'totalAmount' => 'Rp ' . number_format($pemesanan->total, 0, ',', '.'),
+        'transactionUrl' => url('/transaksi/' . $pemesanan->kode),
+        'helpCenterUrl' => url('/help'),
+        'termsUrl' => url('/terms'),
+        'privacyUrl' => url('/privacy'),
+    ];
+
+    try {
+        // Send payment confirmation email
+        Mail::to($penumpang->email)->send(new PaymentConfirmation($emailData));
+        
+        // Send copy to CS
+        Mail::to("cs@voiceofsoulchoir.id")->send(new PaymentConfirmation($emailData));
+
+    } catch (\Exception $e) {
+        // Log the error but don't fail the payment verification
+        \Log::error('Error sending payment confirmation: ' . $e->getMessage());
+        \Log::error('Error trace: ' . $e->getTraceAsString());
+    }
+
+    return redirect()->back()->with('success', 'Pembayaran Ticket Success!');
+}
 
     public function history()
     {
@@ -391,6 +420,4 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
 
         return redirect()->back()->with('success', 'Berhasil Cancel.');
     }
-
-
 }

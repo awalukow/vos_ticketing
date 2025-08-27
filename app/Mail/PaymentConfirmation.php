@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class BookingConfirmation extends Mailable
+class PaymentConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -19,14 +19,23 @@ class BookingConfirmation extends Mailable
     public $bookingData;
 
     /**
+     * Path to the PDF attachment.
+     *
+     * @var string|null
+     */
+    private $pdfPath;
+
+    /**
      * Create a new message instance.
      *
      * @param array $bookingData
+     * @param string|null $pdfPath
      * @return void
      */
-    public function __construct($bookingData)
+    public function __construct($bookingData, $pdfPath = null)
     {
         $this->bookingData = $bookingData;
+        $this->pdfPath = $pdfPath;
     }
 
     /**
@@ -36,8 +45,8 @@ class BookingConfirmation extends Mailable
      */
     public function build()
     {
-        return $this->subject('[VOS] Pesanan Tiket Konser VOS anda telah berhasil - Kode Booking : ' . ($this->bookingData['bookingCode'] ?? ''))
-                    ->markdown('emails.booking-confirmation', [
+        $mail = $this->subject('[VOS] Pembayaran Berhasil! - Kode Booking : ' . ($this->bookingData['bookingCode'] ?? ''))
+                    ->markdown('emails.payment-confirmation', [
                         'bookingCode' => $this->bookingData['bookingCode'] ?? '',
                         'eventDate' => $this->bookingData['eventDate'] ?? '',
                         'eventTime' => $this->bookingData['eventTime'] ?? '',
@@ -51,5 +60,15 @@ class BookingConfirmation extends Mailable
                         'eventName' => $this->bookingData['eventName'] ?? '',
                         'paymentExpiry' => $this->bookingData['paymentExpiry'] ?? '',
                     ]);
+
+        // Add PDF attachment if path is provided and file exists
+        if ($this->pdfPath && file_exists($this->pdfPath)) {
+            $mail->attach($this->pdfPath, [
+                'as' => 'E-Ticket_VOS_' . ($this->bookingData['bookingCode'] ?? 'ticket') . '.pdf',
+                'mime' => 'application/pdf'
+            ]);
+        }
+
+        return $mail;
     }
 }

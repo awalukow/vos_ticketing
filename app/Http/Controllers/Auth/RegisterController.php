@@ -122,4 +122,10 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
     {
         return view('auth.fastRegister');
     }
+
+    //public function view_pdf (){
+        //$mpdf = new \Mpdf\Mpdf();
+        //$mpdf->WriteHTML('<h1>Hello world!</h1>');
+        //$mpdf->Output();
+    //}
 }
