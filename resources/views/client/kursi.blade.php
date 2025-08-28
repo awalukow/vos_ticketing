@@ -1335,7 +1335,8 @@
         </div>
         <div class="modal-body">
           <input type="text" id="referralInput" class="form-control" placeholder="Nama Referral">
-          <small class="text-muted d-block mt-2">Wajib diisi untuk total ≥ Rp150.000</small>
+          <!--<small class="text-muted d-block mt-2">Wajib diisi untuk total ≥ Rp150.000</small>-->
+          <small class="text-muted d-block mt-2">Isi referral penyanyi VOS</small>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal" id="cancelReferral">Batal</button>

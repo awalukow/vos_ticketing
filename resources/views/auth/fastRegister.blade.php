@@ -4,8 +4,8 @@
 @section('content')
 <style>
   .bg-gradient-primary {
-            background-color: #970b0b;
-            background-image: linear-gradient(180deg, #b71e1e 10%, #601d2f 100%);
+            background-color: #970b72ff;
+            background-image: linear-gradient(180deg, #b71ea8ff 10%, #4d1d60ff 100%);
             background-size: cover;
         }
 </style>
@@ -57,8 +57,8 @@
                   </div>
 
                   <div class="d-flex flex-row align-items-center mb-4">
-                  <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
-                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                  <i class="fa-solid fa-lock fa-lg me-3 fa-fw" hidden></i>
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0" hidden>
                         <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password" value="" placeholder="Password">
                         @error('password')
                         <span class="invalid-feedback" role="alert">
@@ -68,8 +68,8 @@
                     </div>
                   </div>
                 <div class="d-flex flex-row align-items-center mb-4">
-                <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
-                <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                <i class="fa-solid fa-lock fa-lg me-3 fa-fw" hidden></i>
+                <div data-mdb-input-init class="form-outline flex-fill mb-0" hidden>
                     <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password_confirmation" value="" placeholder="Confirm Password">
                     @error('password')
                         <span class="invalid-feedback" role="alert">
@@ -131,6 +131,7 @@
       </div>
       <div class="modal-body">
         <p>Apakah data yang anda masukkan sudah benar?</p>
+        <p><strong>Password akan dikirimkan via Email</strong></p>
         <ul id="confirmationDetails">
           <!-- Confirmation details will be inserted here -->
           <li><strong>Password Default: password12345678</strong></li>

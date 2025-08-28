@@ -535,6 +535,7 @@ class PemesananController extends Controller
                 'penumpang_id' => Auth::user()->id,
                 'petugas_id' => Auth::user()->id,
                 'status' => 'Sudah Bayar',
+                'status_pembayaran' => 'Sudah Verifikasi',
                 'referral' => $referral, // Insert referral value into the database
                 'expired_date' => Carbon::now(), // Set expired_date to today + 3 days
                 'rowstatus' => 0,

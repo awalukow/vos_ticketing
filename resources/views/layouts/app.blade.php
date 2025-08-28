@@ -48,8 +48,8 @@
     @endif
     <style>
       .bg-gradient-primary {
-            background-color: #970b0b;
-            background-image: linear-gradient(180deg, #b71e1e 10%, #601d2f 100%);
+            background-color: #970b72ff;
+            background-image: linear-gradient(180deg, #b71ea8ff 10%, #4d1d60ff 100%);
             background-size: cover;
         }
 
