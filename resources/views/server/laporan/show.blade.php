@@ -634,15 +634,14 @@
                 Nominal: <strong>Rp {{ number_format($data->total, 0, ',', '.') }}</strong><br>
                 Batas Waktu Pembayaran: <strong>{{ $paymentExpiry->locale('id')->isoFormat('LLLL') }}</strong>
             </div>
-
+            <!-- Right side: QR Code -->
+            <div class="ms-3 d-flex align-items-center" align="center">
+                <img src="{{ asset('img/qris-vos-gopay.png') }}" alt="QR Code" style="max-width: 150px; height: auto;">
+            </div>
             <!-- Countdown Timer -->
             <div class="alert alert-warning mb-3 p-3">
                 <strong>Hitung Mundur Pembayaran:</strong><br>
                 <span id="countdown" style="font-weight: bold; font-size: 1.2rem;"></span>
-            </div>
-            <!-- Right side: QR Code -->
-            <div class="ms-3 d-flex align-items-center">
-                <img src="{{ asset('img/qris-vos-gopay.png') }}" alt="QR Code" style="max-width: 150px; height: auto;">
             </div>
         </div>
     </div>
