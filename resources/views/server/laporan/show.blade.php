@@ -462,7 +462,7 @@
               <td class="value">{{ $data->penumpang->name }}</td>
             </tr>
             <tr>
-              <td class="label">Jumlah Kursi</td>
+              <td class="label">Nomor Kursi</td>
               <td class="value">{{ $data->kursi }}</td>
             </tr>
             <tr>
