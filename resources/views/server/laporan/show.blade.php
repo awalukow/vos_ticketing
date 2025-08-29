@@ -630,7 +630,7 @@
             <div class="alert alert-info mb-3 p-3">
                 <strong>Instruksi Pembayaran:</strong><br>
                 Bank Jago XXX a.n Ratno Juniarto MS<br>
-                Atau <strong>scan QR dibawah untuk pembayaran via Gopay/OVO/Dana/LinkAja</strong><br>
+                Atau <strong>scan QR dibawah untuk pembayaran via Gopay/OVO/Dana/LinkAja/m-Banking</strong><br>
                 Nominal: <strong>Rp {{ number_format($data->total, 0, ',', '.') }}</strong><br>
                 Batas Waktu Pembayaran: <strong>{{ $paymentExpiry->locale('id')->isoFormat('LLLL') }}</strong>
             </div>
