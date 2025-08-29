@@ -16,8 +16,7 @@
             <td align="center" style="background: #27ae60; color: #ffffff; padding: 30px 20px;">
               <div style="margin-bottom: 15px;">
                 <div style="width:50px; height:50px; background:#ffffff; border-radius:50%; display:inline-block; line-height:50px; font-weight:bold; font-size:20px; color:#27ae60;">
-                  <!--VOS-->
-                  <img src="{{ asset('img/favicon.png') }}" alt="Logo" class="custom-logo">
+                  VOS
                 </div>
               </div>
               <h1 style="margin:0; font-size:22px; font-weight:700; text-align:center;">Payment Confirmed</h1>

@@ -16,8 +16,7 @@
             <td align="center" style="background: #27ae60; color: #ffffff; padding: 30px 20px;">
               <div style="margin-bottom: 15px;">
                 <div style="width:50px; height:50px; background:#ffffff; border-radius:50%; display:inline-block; line-height:50px; font-weight:bold; font-size:20px; color:#27ae60;">
-                  <!--VOS-->
-                  <img src="{{ asset('img/favicon.png') }}" alt="Logo" class="custom-logo">
+                  VOS
                 </div>
               </div>
               <h1 style="margin:0; font-size:22px; font-weight:700; text-align:center;">Payment Confirmed</h1>
@@ -69,8 +68,8 @@
   @foreach(explode(', ', $seats) as $index => $seat)
     <div style="text-align: center; margin: 10px;">
       <div style="background: white; padding: 8px; border-radius: 8px; display: inline-block;">
-        <!-- Embed the QR code as base64 -->
-        <img src="data:image/png;base64,{{ $base64QrCodes[$index] }}" alt="QR Code" width="150" height="150" />
+        <!-- Embed the QR code using CID -->
+        <img src="cid:qr_{{ $index }}@{{ config('app.url') }}" alt="QR Code" width="150" height="150" />
       </div>
       <div style="margin-top: 8px; font-size: 14px; font-weight: 600;">
         {{ $seat }}

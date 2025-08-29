@@ -446,7 +446,7 @@
         
         <div class="card-body">
           <div class="event-info">
-            <div class="event-date">Sabtu, 20 Juli 2024</div>
+            <div class="event-date">Minggu, 09 November 2024</div>
             <div class="event-time">{{ date('H:i', strtotime($data->rute->jam)) }} WIB</div>
           </div>
         </div>
@@ -617,37 +617,49 @@
 
             @php
                 // Use expired_date from the database for countdown and display
-                $paymentExpiry = \Carbon\Carbon::parse($data->expired_date);
+                $paymentExpiry = \Carbon\Carbon::parse($data->expired_date)->tz('Asia/Jakarta');
             @endphp
 
             <div class="card-body">
 
-                <!-- Payment Instructions -->
-                <div class="alert alert-info mb-3 p-3">
-                    <strong>Instruksi Pembayaran:</strong><br>
-                    Bank Jago XXX a.n Ratno Juniarto MS<br>
-                    Nominal: <strong>Rp {{ number_format($data->total, 0, ',', '.') }}</strong><br>
-                    Batas Waktu Pembayaran: <strong>{{ $paymentExpiry->locale('id')->isoFormat('LLLL') }}</strong>
-                </div>
-
-                <!-- Countdown Timer -->
-                <div class="alert alert-warning mb-3 p-3">
-                    <strong>Hitung Mundur Pembayaran:</strong><br>
-                    <span id="countdown" style="font-weight: bold; font-size: 1.2rem;"></span>
-                </div>
-
-                <!-- Upload Form -->
-                <form action="{{ route('upload.bukti.pembayaran', $data->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="form-group mb-2">
-                        <label for="bukti_pembayaran" class="form-label" style="font-size: 0.8rem;">Upload Bukti Pembayaran</label>
-                        <input type="file" class="form-control" name="bukti_pembayaran" required style="padding: 0.375rem 0.75rem; height: auto;">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-custom btn-block">
-                        <i class="fas fa-upload mr-1"></i> Upload
-                    </button>
-                </form>
+    <!-- Wrapper with flexbox -->
+    <div class="d-flex flex-wrap">
+        <!-- Left side: Payment instructions and countdown -->
+        <div class="flex-grow-1" style="min-width: 0;">
+            <!-- Payment Instructions -->
+            <div class="alert alert-info mb-3 p-3">
+                <strong>Instruksi Pembayaran:</strong><br>
+                Bank Jago XXX a.n Ratno Juniarto MS<br>
+                Atau <strong>scan QR dibawah untuk pembayaran via Gopay/OVO/Dana/LinkAja</strong><br>
+                Nominal: <strong>Rp {{ number_format($data->total, 0, ',', '.') }}</strong><br>
+                Batas Waktu Pembayaran: <strong>{{ $paymentExpiry->locale('id')->isoFormat('LLLL') }}</strong>
             </div>
+
+            <!-- Countdown Timer -->
+            <div class="alert alert-warning mb-3 p-3">
+                <strong>Hitung Mundur Pembayaran:</strong><br>
+                <span id="countdown" style="font-weight: bold; font-size: 1.2rem;"></span>
+            </div>
+            <!-- Right side: QR Code -->
+            <div class="ms-3 d-flex align-items-center">
+                <img src="{{ asset('img/qris-vos-gopay.png') }}" alt="QR Code" style="max-width: 150px; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Form -->
+    <form action="{{ route('upload.bukti.pembayaran', $data->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="form-group mb-2">
+            <label for="bukti_pembayaran" class="form-label" style="font-size: 0.8rem;">Upload Bukti Pembayaran</label>
+            <input type="file" class="form-control" name="bukti_pembayaran" required style="padding: 0.375rem 0.75rem; height: auto;">
+        </div>
+        <button type="submit" class="btn btn-primary btn-custom btn-block">
+            <i class="fas fa-upload mr-1"></i> Upload
+        </button>
+    </form>
+</div>
+
 
             <!-- Countdown Timer Script -->
             <script>
@@ -692,7 +704,7 @@
               </small>
             </div>
             
-            <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block mb-1">
+            <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block mb-1">
               <i class="fas fa-file-image mr-1"></i> Lihat Bukti
             </a>
             <a href="https://api.whatsapp.com/send?phone=6285823536364" target="_blank" class="btn btn-success btn-custom btn-block">

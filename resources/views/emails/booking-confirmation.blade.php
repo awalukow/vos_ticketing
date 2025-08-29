@@ -32,7 +32,8 @@
                                     <td align="center" style="padding-bottom: 15px;">
                                         <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 50%; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                                             <tr>
-                                                <td align="center" style="font-size: 20px; font-weight: bold; color: #6a11cb;">VOS</td>
+                                                <!--<td align="center" style="font-size: 20px; font-weight: bold; color: #6a11cb;">VOS</td>-->
+                                                <img src="{{ asset('img/favicon.png') }}" alt="Logo" class="custom-logo">
                                             </tr>
                                         </table>
                                     </td>
@@ -120,12 +121,32 @@
                                         </table>
                                     </td>
                                 </tr>
+                                <br>
+                                <tr>
+                                    <td style="font-weight: bold; color: #d97706; padding-bottom: 10px; font-size: 14px;">
+                                        QRIS
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-top: 8px; font-size: 14px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center">
+                                                    <img src="{{ asset('img/qris-vos-gopay.png') }}" alt="QR Code" style="max-width: 150px; height: auto;">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="color: #2c3e50; padding: 6px 0;" align="center">
+                                                    Apabila QRIS tidak muncul, silahkan klik tombol "View Transaction"
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
                             </table>
-                            
-                            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
-                                Please complete your payment within 1 hour to secure your booking. Upload your payment proof through your transaction page.
-                            </p>
-                            
+
+                            <div class="ms-3 d-flex align-items-center">
+                            </div>
                             <!-- Action Buttons -->
                             <table class="button-container" width="100%" cellpadding="0" cellspacing="0" border="0" style="text-align: center; margin: 20px 0;">
                                 <tr>

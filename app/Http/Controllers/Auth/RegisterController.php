@@ -14,6 +14,7 @@ use Mail;
 use Exception;
 use TCPDF;
 use App\Mail\EmailNotification;
+use App\Mail\WelcomeEmail;
 
 
 class RegisterController extends Controller
@@ -71,47 +72,67 @@ class RegisterController extends Controller
      * @return \App\Models\User
      */
     protected function create(array $data)
-    {
-        $password = $data['password'] ? $data['password'] : 'password12345678';
-    
-        $user = User::create([
-            'name' => $data['name'],
-            'username' => $data['username'],
-            'password' => Hash::make($password),
-            'level' => 'Penumpang',
-            'email' => $data['email']
-        ]);
-    
-        // Check if user creation was successful
-        if ($user) {
-            // Define $destination and $message for WA
-            $laporanController = new LaporanController();
-            $destination = $data['username']; // Replace with the destination number
-            $message = '*[NOTIFIKASI VOS] REGISTRASI BERHASIL*
+{
+    $password = $data['password'] ? $data['password'] : 'password12345678';
+
+    $user = User::create([
+        'name' => $data['name'],
+        'username' => $data['username'],
+        'password' => Hash::make($password),
+        'level' => 'Penumpang',
+        'email' => $data['email']
+    ]);
+
+    // Check if user creation was successful
+    if ($user) {
+        // Define $destination and $message for WA
+        $laporanController = new LaporanController();
+        $destination = $data['username'];
+        $message = '*[NOTIFIKASI VOS] REGISTRASI BERHASIL*
 Anda telah berhasil melakukan pendaftaran akun sistem e-Ticket VOS
-    
+
 username: ' . $data['username'] . ' 
 Password: ' . $data['password'] . ' 
-Anda dapat melakukan perubahan password pada menu pengaturan '.url('/pengaturan').'
-    
-untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)'; 
-    
-            // Send email
-            $emailData = [
-                'subject' => '[VOS] Pendaftaran Berhasil!',
-                'content' => $message
-            ];
-    
-            //send command
+Anda dapat melakukan perubahan password pada menu pengaturan ' . url('/pengaturan') . '
+
+untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau https://wa.me/6287780553668 (Tiara)';
+
+        // Prepare email data for welcome email
+        $emailData = [
+            'subject' => '[VOS] Pendaftaran Berhasil!',
+            'name' => $data['name'],
+            'username' => $data['username'],
+            'password' => $password,
+            'settingsUrl' => url('/pengaturan'),
+            'helpCenterUrl' => url('/help'),
+            'termsUrl' => url('/terms'),
+            'privacyUrl' => url('/privacy'),
+        ];
+
+        try {
+            // Send WhatsApp notification
             $response = $laporanController->sendWhatsAppMessage_2($destination, $message);
-            Mail::to($data['email'])->send(new EmailNotification($emailData));
             
-            return $user;
-        } else {
-            // Return an error if user creation fails
-            return response()->json(['error' => 'User creation failed'], 500);
+            // Send welcome email with proper template
+            Mail::to($data['email'])->send(new WelcomeEmail($emailData));
+
+        } catch (\Exception $e) {
+            // Log the error but don't fail user creation
+            \Log::error('Error sending welcome notification: ' . $e->getMessage());
+            \Log::error('Error trace: ' . $e->getTraceAsString());
+            
+            // In development environment, show detailed error
+            if (app()->environment('local', 'development')) {
+                throw $e;
+            }
         }
+
+        return $user;
+    } else {
+        // Return an error if user creation fails
+        return response()->json(['error' => 'User creation failed'], 500);
     }
+}
     
     public function showAdminRegistrationForm()
     {
