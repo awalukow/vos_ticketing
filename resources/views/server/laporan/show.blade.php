@@ -521,7 +521,7 @@
           @if (Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
             <!-- Bukti Pembayaran Button -->
           <div class="card-body">
-            <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block">
+            <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block">
               <i class="fas fa-file-image mr-1"></i> Lihat Bukti
             </a>
           @elseif ((($data->expired_date >= now()) && Auth::user()->level != "Penumpang" && $data->status_pembayaran == null) || ($data->status == "Belum Bayar" && $data->isChurch == 1))
@@ -722,7 +722,7 @@
               </small>
             </div>
             
-            <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block mb-1">
+            <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block mb-1">
               <i class="fas fa-file-image mr-1"></i> Lihat Bukti
             </a>
             <a href="https://api.whatsapp.com/send?phone=6285823536364" target="_blank" class="btn btn-success btn-custom btn-block">
