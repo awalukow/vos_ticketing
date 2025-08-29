@@ -51,7 +51,8 @@ return [
         'public' => [
             'driver' => 'local',
             //'root' => storage_path('app/public'),
-            'root' => storage_path('../public/storage'),
+            //--Local    'root' => storage_path('../public/storage'),
+            'root' => storage_path('../../public_html/ticket.voiceofsoulchoir.id/storage'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],
