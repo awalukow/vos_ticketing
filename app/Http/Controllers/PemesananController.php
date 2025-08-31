@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Pemesanan;
 use App\Models\Transportasi;
 use App\Models\Pemesanan_Detail;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -496,7 +497,7 @@ class PemesananController extends Controller
             $seatCount = (int)$kursi;
         }
         
-        if ($seatCount > 5 && $auth()->user()->level == 'Penumpang') {
+        if ($seatCount > 5 && Auth::user()->level == 'Penumpang') {
             Log::info('Pemesanan Melebihi Batas');
             return redirect()->route('store')->with('error', 'Pemesanan melebihi batas maksimal 5 tiket');
         }
@@ -648,14 +649,21 @@ class PemesananController extends Controller
             'content' => $messageAdmin // You can customize the email content as per your requirements
         ];
         if (env('APP_ENV') == 'production') {
-            //Mail::to("jeansengkey10@gmail.com")->send(new EmailNotification($emailDataAdmin)); // jean
-            //Mail::to("jen.tenmury@gmail.com")->send(new EmailNotification($emailDataAdmin)); // tiara
+            // Get all users who are not Penumpang level
+            $nonPenumpangUsers = User::where('level', '!=', 'Penumpang')
+                                ->where('level', '!=', 'Petugas')
+                                ->get();
+            
+            // Send email to each non-Penumpang user
+            foreach ($nonPenumpangUsers as $user) {
+                Mail::to($user->email)->send(new EmailNotification($emailDataAdmin));
+            }
         }
         else{
             Mail::to("axcellentwalukow@gmail.com")->send(new EmailNotification($emailDataAdmin));
         }
         //Mail::to("cs@voiceofsoulchoir.id")->send(new EmailNotification($emailData)); // cs
-        Mail::to("ticketing@voiceofsoulchoir.id")->send(new BookingConfirmation($emailData)); // cs
+        //Mail::to("ticketing@voiceofsoulchoir.id")->send(new BookingConfirmation($emailData)); // cs
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -1357,6 +1357,7 @@
     var seatPrice   = {{ (int) $data['harga'] }};
     var dataString  = @json($dataString);
     var selectedSeats = [];
+    var userRole = "{{ Auth::user()->level }}";
 
     function toggleSeat(seat) {
       if (!seat.classList.contains('reserved')) {
@@ -1369,7 +1370,7 @@
 
     document.getElementById('submitBtn').addEventListener('click', function () {
       if (selectedSeats.length === 0) { alert('Silakan pilih minimal satu kursi.'); return; }
-      if (selectedSeats.length > 5) { alert('Maksimal 5 kursi per transaksi.'); return; }
+      if (selectedSeats.length > 5 && userRole === "Penumpang") { alert('Maksimal 5 kursi per transaksi.'); return; }
 
       var seatList = selectedSeats.join(', ');
       document.getElementById('modalBodyContent').innerHTML =

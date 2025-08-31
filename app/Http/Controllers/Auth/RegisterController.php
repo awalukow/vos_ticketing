@@ -144,6 +144,10 @@ untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau ht
         return view('auth.fastRegister');
     }
 
+    public function showMaintenance()
+    {
+        return view('auth.maintenance');
+    }
     //public function view_pdf (){
         //$mpdf = new \Mpdf\Mpdf();
         //$mpdf->WriteHTML('<h1>Hello world!</h1>');

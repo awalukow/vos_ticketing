@@ -20,6 +20,7 @@ class Pemesanan extends Model
         'penumpang_id',
         'petugas_id',
         'bukti_pembayaran',
+        'status_pembayaran',
         'referral',
         'expired_date',
         'rowstatus',
