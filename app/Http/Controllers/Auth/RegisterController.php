@@ -111,7 +111,7 @@ untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau ht
 
         try {
             // Send WhatsApp notification
-            $response = $laporanController->sendWhatsAppMessage_2($destination, $message);
+            //$response = $laporanController->sendWhatsAppMessage_2($destination, $message);
             
             // Send welcome email with proper template
             Mail::to($data['email'])->send(new WelcomeEmail($emailData));
