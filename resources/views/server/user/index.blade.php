@@ -186,13 +186,18 @@
                         <input type="text" class="form-control" id="username" name="username" placeholder="Username" required />
                     </div>
                     <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Email" required />
+                    </div>
+                    <div class="form-group">
                         <label for="level">Level User</label>
                         <select class="select2 form-control" id="level" name="level" required style="width: 100%; color: #6e707e;">
                             <option value="" disabled selected>-- Pilih Level User --</option>
-                            <option value="Admin">Admin</option>
+                            <option value="SuperAdmin">System Admin (ADM1)</option>
+                            <option value="Admin">Admin VOS (ADM2)</option>
                             <option value="Petugas">Petugas</option>
                             <option value="Penumpang">Customer</option>
-                            <option value="AdminChurch">Admin Gereja</option>
+                            <option value="AdminChurch">Admin Gereja (ADM3)</option>
                         </select>
                     </div>
                     <div class="form-group">
