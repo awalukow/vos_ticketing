@@ -185,6 +185,10 @@
         <form action="{{ route('user.store') }}" method="POST">
           @csrf
           <div class="modal-body">
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="defaultPasswordCheck-{{ $data->id }}" onchange="togglePasswordFields({{ $data->id }})">
+                <label class="form-check-label" for="defaultPasswordCheck-{{ $data->id }}">Set Default Password</label>
+            </div>
             <div class="form-group">
               <label for="name">Nama User</label>
               <input
