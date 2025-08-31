@@ -21,7 +21,7 @@
   </a>
   <!-- Divider -->
   <hr class="sidebar-divider my-0">
-  @if(auth()->user()->level != 'Penumpang' && auth()->user()->level != 'Petugas')
+  @if(auth()->user()->level != 'Penumpang' && auth()->user()->level != 'Petugas' && auth()->user()->level != 'AdminChurch')
   <!-- Nav Item - Dashboard -->
   <li class="nav-item">
     <a class="nav-link" href="{{ route('home') }}">
@@ -84,7 +84,7 @@
       <i class="fa-solid fa-ticket"></i>
       <span>Tiket Fisik</span></a>
   </li>
-  @if(auth()->user()->level == 'SuperAdmin' || auth()->user()->level == 'Admin')
+  @if(auth()->user()->level == 'SuperAdmin' || auth()->user()->level == 'Admin' || auth()->user()->level == 'AdminChurch')
   <!-- Nav Item - Beli Tiket -->
   <li class="nav-item">
     <a class="nav-link" href="{{ route('order') }}">
