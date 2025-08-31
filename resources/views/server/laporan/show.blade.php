@@ -519,17 +519,18 @@
           </table>
         </div>
       
-          @if (Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
-            <!-- Bukti Pembayaran Button -->
-          <div class="card-body">
-            <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block">
-              <i class="fas fa-file-image mr-1"></i> Lihat Bukti
-            </a>
-          @elseif ((($data->expired_date >= now()) && Auth::user()->level != "Penumpang" && $data->status_pembayaran == null) || ($data->status == "Belum Bayar" && $data->isChurch == 1))
-            <button class="btn btn-secondary btn-custom btn-block" disabled>
-              <i class="fas fa-ban mr-1"></i> Lihat Bukti
-            </button>
-          </div>
+          @if (Auth::user()->level != "Penumpang")
+            <div class="card-body">
+              @if ($data->status_pembayaran != null)
+                <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block">
+                  <i class="fas fa-file-image mr-1"></i> Lihat Bukti
+                </a>
+              @elseif ((($data->expired_date >= now()) && $data->status_pembayaran == null) || ($data->status == "Belum Bayar" && $data->isChurch == 1))
+                <button class="btn btn-secondary btn-custom btn-block" disabled>
+                  <i class="fas fa-ban mr-1"></i> Lihat Bukti
+                </button>
+              @endif
+            </div>
           @endif
 
         <!-- Check-in Form -->
