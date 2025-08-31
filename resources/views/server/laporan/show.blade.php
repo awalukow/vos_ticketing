@@ -411,7 +411,8 @@
   <div class="row justify-content-center">
     <div class="col-12">
       @if (Auth::user()->level != "Admin")
-        <a href="javascript:window.history.back();" class="btn btn-link mb-2" style="color: #4e73df; padding: 0; font-size: 0.9rem;">
+        <!--<a href="javascript:window.history.back();" class="btn btn-link mb-2" style="color: #4e73df; padding: 0; font-size: 0.9rem;">-->
+        <a href="{{ url('/') }}" class="btn btn-link mb-2" style="color: #4e73df; padding: 0; font-size: 0.9rem;">
           <i class="fas fa-arrow-left mr-1"></i> Kembali
         </a>
       @endif
