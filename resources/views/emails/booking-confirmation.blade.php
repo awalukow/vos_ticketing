@@ -108,7 +108,7 @@
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                             <tr>
                                                 <td width="130" style="font-weight: bold; color: #444; padding: 6px 0;">Account Number</td>
-                                                <td style="color: #2c3e50; padding: 6px 0;">XX</td>
+                                                <td style="color: #2c3e50; padding: 6px 0;">1058 7839 6486</td>
                                             </tr>
                                             <tr>
                                                 <td style="font-weight: bold; color: #444; padding: 6px 0;">Account Name</td>
