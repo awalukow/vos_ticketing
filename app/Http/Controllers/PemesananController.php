@@ -526,7 +526,7 @@ class PemesananController extends Controller
             DB::beginTransaction();
 
             // GENERATE PURCHASE
-            if(auth()->user()->level != 'Penumpang'){
+            if(auth()->user()->level != 'Penumpang' && auth()->user()->level != 'AdminChurch'){
                 Pemesanan::create([
                 'kode' => $kodePemesanan,
                 'kursi' => $kursi,
