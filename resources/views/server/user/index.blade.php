@@ -161,105 +161,57 @@
     </div>
   </div>
   <!-- Add Modal -->
-  <div
-  class="modal fade"
-  id="add-modal"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="exampleModalLabel"
-  aria-hidden="true"
-  >
+<div class="modal fade" id="add-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Tambah User</h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tambah User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('user.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="defaultPasswordCheck" onchange="toggleAddPasswordFields()">
+                        <label class="form-check-label" for="defaultPasswordCheck">Set Default Password</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Nama User</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Nama User" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="level">Level User</label>
+                        <select class="select2 form-control" id="level" name="level" required style="width: 100%; color: #6e707e;">
+                            <option value="" disabled selected>-- Pilih Level User --</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Petugas">Petugas</option>
+                            <option value="Penumpang">Customer</option>
+                            <option value="AdminChurch">Admin Gereja</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="password_confirmation">Confirm Password</label>
+                        <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Confirm Password" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kembali</button>
+                    <button type="submit" class="btn btn-primary">Tambah</button>
+                </div>
+            </form>
         </div>
-        <form action="{{ route('user.store') }}" method="POST">
-          @csrf
-          <div class="modal-body">
-            <div class="form-group form-check">
-                <input type="checkbox" class="form-check-input" id="defaultPasswordCheck-{{ $data->id }}" onchange="togglePasswordFields({{ $data->id }})">
-                <label class="form-check-label" for="defaultPasswordCheck-{{ $data->id }}">Set Default Password</label>
-            </div>
-            <div class="form-group">
-              <label for="name">Nama User</label>
-              <input
-                type="text"
-                class="form-control"
-                id="name"
-                name="name"
-                placeholder="Nama User"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="username">Username</label>
-              <input
-                type="text"
-                class="form-control"
-                id="username"
-                name="username"
-                placeholder="Username"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="level">Level User</label>
-              <select
-                class="select2 form-control"
-                id="level"
-                name="level"
-                required
-                style="width: 100%; color: #6e707e;"
-              >
-                <option value="" disabled selected>-- Pilih Level User --</option>
-                <option value="Admin">Admin</option>
-                <option value="Petugas">Petugas</option>
-                <option value="Penumpang">Customer</option>
-                <option value="AdminChurch">Admin Gereja</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input
-                type="password"
-                class="form-control"
-                id="password"
-                name="password"
-                placeholder="Password"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="password_confirmation">Confirm Password</label>
-              <input
-                type="password"
-                class="form-control"
-                id="password_confirmation"
-                name="password_confirmation"
-                placeholder="Confirm Password"
-                required
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-              Kembali
-            </button>
-            <button type="submit" class="btn btn-primary">Tambah</button>
-          </div>
-        </form>
-      </div>
     </div>
-  </div>
+</div>
 @endsection
 @section('script')
 <script src="{{ asset('vendor/datatables/jquery.dataTables.min.js') }}"></script>
@@ -288,6 +240,24 @@
             newPasswordField.value = '';
             confirmPasswordField.value = '';
             newPasswordField.disabled = false;
+            confirmPasswordField.disabled = false;
+        }
+    }
+    
+    function toggleAddPasswordFields() {
+        var checkBox = document.getElementById('defaultPasswordCheck');
+        var passwordField = document.getElementById('password');
+        var confirmPasswordField = document.getElementById('password_confirmation');
+
+        if (checkBox.checked) {
+            passwordField.value = 'password12345678';
+            confirmPasswordField.value = 'password12345678';
+            passwordField.disabled = true;
+            confirmPasswordField.disabled = true;
+        } else {
+            passwordField.value = '';
+            confirmPasswordField.value = '';
+            passwordField.disabled = false;
             confirmPasswordField.disabled = false;
         }
     }
