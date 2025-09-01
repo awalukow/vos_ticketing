@@ -574,9 +574,9 @@
             $array = array('kursi' => 'L' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'SILVER')
             <div class="seat-item">
-              <div class="kursi platinum" onclick="toggleSeat(this)">
+              <div class="kursi silver" onclick="toggleSeat(this)">
                 <div>L{{ $i }}</div>
               </div>
             </div>
@@ -1425,6 +1425,27 @@
       </div>
     </div>
   </div>
+  <!-- Email Modal -->
+  <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="emailModalLabel">Masukkan Email Pemesan</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closeEmail">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                  <input type="email" id="emailInput" class="form-control" placeholder="Email Pemesan">
+                  <small class="text-muted d-block mt-2">QR Code akan dikirimkan melalui email</small>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal" id="cancelEmail">Batal</button>
+                  <button type="button" class="btn btn-primary" id="confirmEmailBtn">Lanjutkan</button>
+              </div>
+          </div>
+      </div>
+  </div>
 
   <div class="loading-overlay">
     <div class="loading-spinner"></div>
@@ -1471,25 +1492,49 @@
     });
 
     document.getElementById('confirmReferralBtn').addEventListener('click', function () {
-      var referral = (document.getElementById('referralInput').value || '').trim();
-      $('#referralModal').modal('hide');
-      proceedToBooking(referral);
+    var referral = (document.getElementById('referralInput').value || '').trim();
+        $('#referralModal').modal('hide');
+        
+        if (userRole !== "Penumpang") {
+            $('#emailModal').modal('show');
+        } else {
+            proceedToBooking(referral, '');
+        }
     });
 
-    function proceedToBooking(referral) {
-      document.querySelector('.loading-overlay').style.display = 'block';
+    document.getElementById('confirmEmailBtn').addEventListener('click', function () {
+        var referral = (document.getElementById('referralInput').value || '').trim();
+        var email = (document.getElementById('emailInput').value || '').trim();
+        
+        if (email === '') {
+            alert('Silakan masukkan email pemesan');
+            return;
+        }
+        
+        $('#emailModal').modal('hide');
+        proceedToBooking(referral, email);
+    });
 
-      var seatsParam = encodeURIComponent(JSON.stringify(selectedSeats));
-      var dataParam  = encodeURIComponent(dataString);
+    function proceedToBooking(referral, email) {
+        document.querySelector('.loading-overlay').style.display = 'block';
 
-      var url2 = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE']) }}";
-      var url3 = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE', 'referral' => 'R_PLACE']) }}";
+        var seatsParam = encodeURIComponent(JSON.stringify(selectedSeats));
+        var dataParam  = encodeURIComponent(dataString);
 
-      var url = referral
-        ? url3.replace('K_PLACE', seatsParam).replace('D_PLACE', dataParam).replace('R_PLACE', encodeURIComponent(referral))
-        : url2.replace('K_PLACE', seatsParam).replace('D_PLACE', dataParam);
+        var url2 = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE']) }}";
+        var url3 = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE', 'referral' => 'R_PLACE']) }}";
+        var url4 = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE', 'referral' => 'R_PLACE', 'email' => 'E_PLACE']) }}";
 
-      window.location.href = url;
+        var url;
+        if (email && referral) {
+            url = url4.replace('K_PLACE', seatsParam).replace('D_PLACE', dataParam).replace('R_PLACE', encodeURIComponent(referral)).replace('E_PLACE', encodeURIComponent(email));
+        } else if (referral) {
+            url = url3.replace('K_PLACE', seatsParam).replace('D_PLACE', dataParam).replace('R_PLACE', encodeURIComponent(referral));
+        } else {
+            url = url2.replace('K_PLACE', seatsParam).replace('D_PLACE', dataParam);
+        }
+
+        window.location.href = url;
     }
 
     function formatRupiah(angka) {
