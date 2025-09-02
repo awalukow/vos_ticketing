@@ -52,10 +52,10 @@
       <div class="card card-login">
         <!-- Header with Logo -->
         <div class="text-center py-4 bg-white border-bottom">
-          <h2 class="h3 text-gray-900 font-weight-bold mb-0">Sistem Login</h2>
-          <small class="text-muted">Masuk ke akun Anda</small>
+          <img src="{{ asset('img/vos-logo.png') }}" alt="Logo" style="max-height: 60px;">
+          <small class="text-muted d-block mt-2">Masuk ke akun Anda</small>
         </div>
-
+        
         <!-- Body -->
         <div class="card-body p-5">
           <form id="loginForm" method="POST" action="{{ route('login') }}" class="user">
