@@ -298,7 +298,7 @@
                 @unless(request()->is('ticket-fisik'))
                 <td data-label="Tanggal Expired">
                   <div class="date-info">{{ date('d F Y', strtotime($data->expired_date)) }}</div>
-                  <div class="time-info">{{ date('H:i', strtotime($data->created_at) + 7*3600) }} WIB</div>
+                  <div class="time-info">{{ date('H:i', strtotime($data->expired_date) + 7*3600) }} WIB</div>
                 </td>
                 @endunless
                 @unless((request()->is('ticket-gereja') || request()->is('ticket-fisik')))
