@@ -10,6 +10,8 @@ use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransportasiController;
 use App\Http\Controllers\RuteController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 if (env('APP_ENV') === 'maintenance') {
     // Route only to maintenance view
@@ -24,6 +26,12 @@ if (env('APP_ENV') === 'maintenance') {
     Route::get('/adminRegister', [RegisterController::class, 'showAdminRegistrationForm'])->name('admin-register');
     Route::post('/adminRegister', [RegisterController::class, 'fastRegister'])->name('admin-register');
     Route::get('/view/pdf', [RegisterController::class, 'view_pdf']);
+
+    // Password Reset Routes...
+    Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
     // Authenticated Routes
     Route::middleware(['auth'])->group(function () {

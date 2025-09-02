@@ -3,52 +3,134 @@
 @section('content')
   <style>
     .bg-gradient-primary {
-            background-color: #970b72ff;
-            background-image: linear-gradient(180deg, #b71ea8ff 10%, #4d1d60ff 100%);
-            background-size: cover;
-        }
+      background-color: #970b72ff;
+      background-image: linear-gradient(135deg, #b71ea8ff 0%, #4d1d60ff 100%);
+      min-height: 100vh;
+    }
+
+    .card-login {
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .form-control-user {
+      border-radius: 1.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    .btn-user {
+      border-radius: 1.5rem;
+      padding: 0.75rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-user:hover {
+      transform: translateY(-2px);
+    }
+
+    .text-primary {
+      color: #b71ea8ff !important;
+    }
+
+    .link-primary {
+      color: #b71ea8ff;
+      transition: color 0.2s;
+    }
+
+    .link-primary:hover {
+      color: #8a1078;
+      text-decoration: underline;
+    }
   </style>
-  <div class="col-xl-5 col-lg-6 col-md-9">
-    <div class="card o-hidden border-0 shadow-lg my-5">
-      <div class="card-body p-0">
-        <!-- Nested Row within Card Body -->
-        <div class="row">
-          <div class="col-12">
-            <div class="p-5">
-              <div class="text-center">
-                <h1 class="h4 text-gray-900 mb-4">Selamat Datang!</h1>
-              </div>
-              <form id="loginForm" method="POST" action="{{ route('login') }}" class="user">
-              @csrf
-                <div class="form-group">
-                  <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Username" id="username">
-                  @error('username')
-                    <span class="invalid-feedback" role="alert">
-                      <strong>{{ $message }}</strong>
-                    </span>
-                  @enderror
+
+  <div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="col-xl-4 col-lg-5 col-md-7">
+      <div class="card card-login">
+        <!-- Header with Logo -->
+        <div class="text-center py-4 bg-white border-bottom">
+          <h2 class="h3 text-gray-900 font-weight-bold mb-0">Sistem Login</h2>
+          <small class="text-muted">Masuk ke akun Anda</small>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body p-5">
+          <form id="loginForm" method="POST" action="{{ route('login') }}" class="user">
+            @csrf
+
+            <!-- Username -->
+            <div class="form-group mb-3">
+              <input
+                type="text"
+                class="form-control form-control-user @error('username') is-invalid @enderror"
+                name="username"
+                id="username"
+                value="{{ old('username') }}"
+                required
+                autocomplete="off"
+                placeholder="Username atau Nomor HP"
+                autofocus
+              >
+              @error('username')
+                <div class="invalid-feedback d-block">
+                  <small>{{ $message }}</small>
                 </div>
-                <div class="form-group">
-                  <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password" required placeholder="Password">
-                  @error('password')
-                    <span class="invalid-feedback" role="alert">
-                      <strong>{{ $message }}</strong>
-                    </span>
-                  @enderror
-                </div>
-                <div class="form-group">
-                  <div class="custom-control custom-checkbox small">
-                    <input type="checkbox" class="custom-control-input" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <label class="custom-control-label" for="remember">{{ __('Remember Me') }}</label>
-                  </div>
-                </div>
-                <button type="button" id="loginButton" class="btn btn-primary btn-user btn-block">
-                  {{ __('Login') }}
-                </button>
-               
-              </form>
-              <hr>
+              @enderror
             </div>
+
+            <!-- Password -->
+            <div class="form-group mb-3">
+              <input
+                type="password"
+                class="form-control form-control-user @error('password') is-invalid @enderror"
+                name="password"
+                required
+                placeholder="Kata Sandi"
+              >
+              @error('password')
+                <div class="invalid-feedback d-block">
+                  <small>{{ $message }}</small>
+                </div>
+              @enderror
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="d-flex justify-content-between mb-4">
+              <div class="custom-control custom-checkbox small">
+                <input
+                  type="checkbox"
+                  class="custom-control-input"
+                  name="remember"
+                  id="remember"
+                  {{ old('remember') ? 'checked' : '' }}
+                >
+                <label class="custom-control-label" for="remember">{{ __('Ingat Saya') }}</label>
+              </div>
+              @if (Route::has('password.request'))
+                  <a class="link-primary small" href="{{ route('password.request') }}">Lupa kata sandi?</a>
+              @endif
+            </div>
+
+            <!-- Login Button -->
+            <button
+              type="button"
+              id="loginButton"
+              class="btn btn-primary btn-user btn-block btn-lg"
+            >
+              <span id="buttonText">{{ __('Masuk') }}</span>
+              <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <hr class="my-4">
+          <div class="text-center">
+            <small class="text-muted">Belum punya akun? 
+              <a href="{{ route('fast-register') }}" class="link-primary">Daftar di sini</a>
+            </small>
           </div>
         </div>
       </div>
@@ -58,16 +140,33 @@
 
 @section('script')
   <script>
-    $("body").addClass("bg-gradient-primary");
+    // Add gradient background
+    document.body.classList.add("bg-gradient-primary");
 
-    // JavaScript function to adjust input value
-    document.getElementById("loginButton").addEventListener("click", function() {
-      var usernameInput = document.getElementById("username");
-      var inputValue = usernameInput.value;
-      if (inputValue.startsWith("0")) {
+    // Handle login button click
+    document.getElementById("loginButton").addEventListener("click", function () {
+      const button = document.getElementById("loginButton");
+      const text = document.getElementById("buttonText");
+      const spinner = document.getElementById("loadingSpinner");
+
+      // Prevent multiple submissions
+      if (button.disabled) return;
+
+      // Get username input
+      const usernameInput = document.getElementById("username");
+      let inputValue = usernameInput.value.trim();
+
+      // Auto-format: replace leading '0' with '62'
+      if (inputValue && inputValue.startsWith("0")) {
         usernameInput.value = "62" + inputValue.slice(1);
       }
-      // Submit the form after modification
+
+      // Show loading state
+      button.disabled = true;
+      text.textContent = "Memuat...";
+      spinner.classList.remove("d-none");
+
+      // Submit form
       document.getElementById("loginForm").submit();
     });
   </script>

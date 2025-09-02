@@ -1,74 +1,69 @@
 @extends('layouts.app')
-@section('title', 'Reset Password')
+@section('title', 'Lupa Kata Sandi')
 @section('content')
-  <style>
+<style>
     .bg-gradient-primary {
-        background-color: #df4e6f;
-        background-image: linear-gradient(180deg, #df4e55 10%, #200b38 100%);
+        background-color: #970b72ff;
+        background-image: linear-gradient(135deg, #b71ea8ff 0%, #4d1d60ff 100%);
+        min-height: 100vh;
+        margin: 0;
         background-size: cover;
+        background-position: center;
     }
-  </style>
-  <div class="col-xl-5 col-lg-6 col-md-9">
-    <div class="card o-hidden border-0 shadow-lg my-5">
-      <div class="card-body p-0">
-        <!-- Nested Row within Card Body -->
-        <div class="row">
-          <div class="col-12">
-            <div class="p-5">
-              <div class="text-center">
-                <h1 class="h4 text-gray-900 mb-4">Reset Password</h1>
-              </div>
-              <form id="loginForm" method="POST" action="{{ route('login') }}" class="user">
-              @csrf
-                <div class="form-group">
-                  <input type="text" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Username" id="username">
-                  @error('username')
-                    <span class="invalid-feedback" role="alert">
-                      <strong>{{ $message }}</strong>
-                    </span>
-                  @enderror
+</style>
+
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="col-xl-4 col-lg-5 col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-5">
+                <h2 class="h4 text-center text-gray-900 mb-4">Lupa Kata Sandi?</h2>
+                <p class="text-muted text-center mb-4">
+                    Masukkan email Anda, kami akan kirimkan tautan untuk mengatur ulang kata sandi.
+                </p>
+
+                @if (session('status'))
+                    <div class="alert alert-success">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('password.email') }}">
+                    @csrf
+
+                    <div class="form-group mb-3">
+                        <input
+                            type="email"
+                            name="email"
+                            class="form-control form-control-user @error('email') is-invalid @enderror"
+                            placeholder="Alamat Email"
+                            value="{{ old('email') }}"
+                            required
+                        >
+                        @error('email')
+                            <div class="invalid-feedback d-block">
+                                <small>{{ $message }}</small>
+                            </div>
+                        @enderror
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-user btn-block">
+                        Kirim Tautan Reset
+                    </button>
+                </form>
+
+                <hr class="my-4">
+                <div class="text-center">
+                    <a class="small link-primary" href="{{ route('login') }}">Kembali ke Login</a>
                 </div>
-                <div class="form-group">
-                  <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password" required placeholder="Password">
-                  @error('password')
-                    <span class="invalid-feedback" role="alert">
-                      <strong>{{ $message }}</strong>
-                    </span>
-                  @enderror
-                </div>
-                <div class="form-group">
-                  <div class="custom-control custom-checkbox small">
-                    <input type="checkbox" class="custom-control-input" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <label class="custom-control-label" for="remember">{{ __('Remember Me') }}</label>
-                  </div>
-                </div>
-                <button type="button" id="loginButton" class="btn btn-primary btn-user btn-block">
-                  {{ __('Login') }}
-                </button>
-               
-              </form>
-              <hr>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 @endsection
 
 @section('script')
-  <script>
-    $("body").addClass("bg-gradient-primary");
-
-    // JavaScript function to adjust input value
-    document.getElementById("loginButton").addEventListener("click", function() {
-      var usernameInput = document.getElementById("username");
-      var inputValue = usernameInput.value;
-      if (inputValue.startsWith("0")) {
-        usernameInput.value = "62" + inputValue.slice(1);
-      }
-      // Submit the form after modification
-      document.getElementById("loginForm").submit();
-    });
-  </script>
+<script>
+    // Apply gradient background to body
+    document.body.classList.add('bg-gradient-primary');
+</script>
 @endsection
