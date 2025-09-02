@@ -1,234 +1,250 @@
 @extends('layouts.app')
-@section('title', 'Sign up')
+@section('title', 'Daftar Akun')
 
 @section('content')
 <style>
   .bg-gradient-primary {
-            background-color: #970b72ff;
-            background-image: linear-gradient(180deg, #b71ea8ff 10%, #4d1d60ff 100%);
-            background-size: cover;
-        }
+    background: linear-gradient(135deg, #b71ea8ff 0%, #4d1d60ff 100%);
+    min-height: 100vh;
+    margin: 0;
+    background-attachment: fixed;
+  }
+
+  .card-register {
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 1000px;
+    min-height: 600px; /* make it taller */
+    margin: 2rem auto;
+    background-color: #fff;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .form-control-user {
+    border-radius: 1.5rem;
+    padding: 0.75rem 1.25rem 0.75rem 2.5rem; /* left padding to avoid overlap */
+    font-size: 0.95rem;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    z-index: 2;
+    font-size: 14px;
+    width: 20px;
+    text-align: center;
+  }
+
+  .g-recaptcha {
+    display: flex;
+    justify-content: center;
+    margin: 15px 0;
+  }
+
+  /* make both sides equal height */
+  .row.g-0 {
+    height: 100%;
+  }
+  .col-lg-6 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .col-lg-6 img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
 </style>
-<section class="vh-100" >
-  <div class="container h-100">
-    <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="col-lg-12 col-xl-11">
-        <div class="card text-black" style="border-radius: 25px;">
-          <div class="card-body p-md-5">
-            <div class="row justify-content-center">
-              <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
-                <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
-                <form method="POST" action="{{ route('register') }}" class="mx-1 mx-md-4" id="registerForm">
-                  @csrf
-                  <div class="d-flex flex-row align-items-center mb-4">
-                    <i class="fas fa-user fa-lg me-3 fa-fw"></i>
-                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                      <input type="text" id="name" class="form-control form-control-user @error('name') is-invalid @enderror" name="name" required autocomplete="off" autofocus placeholder="Nama User">
-                      @error('name')
-                        <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                    </div>
-                  </div>
 
-                  <div class="d-flex flex-row align-items-center mb-4">
-                    <i class="fas fa-phone fa-lg me-3 fa-fw"></i>
-                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                      <input type="text" id="username" class="form-control form-control-user @error('username') is-invalid @enderror" name="username" required autocomplete="off" placeholder="Nomor Telepon">
-                      @error('username')
-                        <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                    </div>
-                  </div>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+  <div class="col-xl-10 col-lg-12 col-md-12">
+    <div class="card card-register">
+      <div class="row g-0">
 
-                  <div class="d-flex flex-row align-items-center mb-4">
-                    <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
-                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                      <input type="email" id="email" class="form-control form-control-user @error('email') is-invalid @enderror" name="email" required autocomplete="off" placeholder="Email">
-                      @error('email')
-                        <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                    </div>
-                  </div>
+        <!-- Left Form Side -->
+        <div class="col-lg-6 p-5 bg-white">
+          <h2 class="h4 text-center text-gray-900 mb-4 fw-bold">Daftar Akun Baru</h2>
+          <p class="text-muted text-center mb-4">Isi data di bawah untuk mendaftar</p>
 
-                  <div class="d-flex flex-row align-items-center mb-4">
-                  <i class="fa-solid fa-lock fa-lg me-3 fa-fw" hidden></i>
-                    <div data-mdb-input-init class="form-outline flex-fill mb-0" hidden>
-                        <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password" value="" placeholder="Password">
-                        @error('password')
-                        <span class="invalid-feedback" role="alert">
-                           <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                    </div>
-                  </div>
-                <div class="d-flex flex-row align-items-center mb-4">
-                <i class="fa-solid fa-lock fa-lg me-3 fa-fw" hidden></i>
-                <div data-mdb-input-init class="form-outline flex-fill mb-0" hidden>
-                    <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password_confirmation" value="" placeholder="Confirm Password">
-                    @error('password')
-                        <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                </div>
-                </div>
+          <form method="POST" action="{{ route('register') }}" id="registerForm">
+            @csrf
 
-                  <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                    <button type="button" class="btn btn-primary btn-lg" id="submitButton">Continue</button>
-                  </div>
-                  <div class="text-center">
-                    <a class="medium" href="{{ route('login') }}">Login!</a>
-                  </div>
-                </form>
-              </div>
-              <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
-                <img src="{{ asset('img/vos-logo.png') }}"
-                  class="img-fluid" alt="Sample image">
-              </div>
+            <!-- Name -->
+            <div class="form-group mb-3 position-relative">
+              <i class="fas fa-user input-icon"></i>
+              <input type="text" name="name" class="form-control form-control-user @error('name') is-invalid @enderror"
+                     placeholder="Nama Lengkap" value="{{ old('name') }}" required autofocus>
+              @error('name')
+                <div class="invalid-feedback d-block"><small>{{ $message }}</small></div>
+              @enderror
             </div>
-          </div>
+
+            <!-- Phone -->
+            <div class="form-group mb-3 position-relative">
+              <i class="fas fa-phone input-icon"></i>
+              <input type="text" name="username" id="username"
+                     class="form-control form-control-user @error('username') is-invalid @enderror"
+                     placeholder="Nomor Telepon (0812...)" value="{{ old('username') }}" required>
+              @error('username')
+                <div class="invalid-feedback d-block"><small>{{ $message }}</small></div>
+              @enderror
+            </div>
+
+            <!-- Email -->
+            <div class="form-group mb-3 position-relative">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" name="email"
+                     class="form-control form-control-user @error('email') is-invalid @enderror"
+                     placeholder="Alamat Email" value="{{ old('email') }}" required>
+              @error('email')
+                <div class="invalid-feedback d-block"><small>{{ $message }}</small></div>
+              @enderror
+            </div>
+
+            <!-- reCAPTCHA -->
+            <div class="form-group mb-3">
+              <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+              @error('g-recaptcha-response')
+                <div class="text-danger text-center"><small>{{ $message }}</small></div>
+              @enderror
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid mb-3">
+              <button type="button" class="btn btn-primary btn-user btn-block" id="submitButton">
+                Lanjutkan Pendaftaran
+              </button>
+            </div>
+
+            <!-- Login & WhatsApp -->
+            <div class="text-center">
+              <p class="mb-1">
+                Sudah punya akun? <a href="{{ route('login') }}" class="text-primary fw-bold">Masuk di sini</a>
+              </p>
+              <p class="mb-0">
+                <a href="https://wa.me/6285823536364" target="_blank" class="text-decoration-none">
+                  <i class="fab fa-whatsapp text-success"></i>
+                  <small class="text-success fw-bold">Butuh bantuan? Chat WhatsApp</small>
+                </a>
+              </p>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right Image Side -->
+        <div class="col-lg-6 d-none d-lg-block p-0">
+          <img src="{{ asset('img/vos-logo.png') }}" alt="VOS" 
+              class="img-fluid w-100 h-100" 
+              style="object-fit: cover;">
         </div>
       </div>
     </div>
   </div>
-</section>
+</div>
 
 <!-- Error Modal -->
-<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="errorModalLabel">Error</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title text-danger">Kesalahan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body" id="errorModalBody">
-        <!-- Error messages will be inserted here -->
-      </div>
+      <div class="modal-body" id="errorModalBody"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Confirmation Modal -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="confirmationModalLabel">Konfirmasi</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title">Konfirmasi Pendaftaran</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p>Apakah data yang anda masukkan sudah benar?</p>
-        <p><strong>Password akan dikirimkan via Email</strong></p>
-        <ul id="confirmationDetails">
-          <!-- Confirmation details will be inserted here -->
-          <li><strong>Password Default: password12345678</strong></li>
-        </ul>
+        <p>Apakah data berikut sudah benar?</p>
+        <ul id="confirmationDetails"></ul>
+        <p><strong>Password akan dikirim via email.</strong></p>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kembali</button>
-        <button type="button" class="btn btn-primary" id="confirmButton">Lanjutkan</button>
-
-        <div class="loading-overlay" style="display: none;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Loading...</span>
-            </div>
-            <span class="ml-2">Loading...</span>
+      <div class="modal-footer position-relative">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kembali</button>
+        <button type="button" class="btn btn-primary" id="confirmButton">Daftar Sekarang</button>
+        <div class="loading-overlay">
+          <div class="spinner-border text-light" role="status"></div>
+          <span class="ms-2">Mendaftar...</span>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-
-
 @endsection
 
 @section('script')
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
-  $("body").addClass("bg-gradient-primary");
+  // Apply gradient background
+  document.body.classList.add('bg-gradient-primary');
 
-  // JavaScript to gather input values and display confirmation modal
-  document.getElementById('submitButton').addEventListener('click', function(event) {
-      event.preventDefault(); // Prevent default form submission
+  // Show confirmation modal
+  document.getElementById('submitButton').addEventListener('click', function () {
+    const name = document.querySelector('input[name="name"]').value.trim();
+    const username = document.querySelector('input[name="username"]').value.trim();
+    const email = document.querySelector('input[name="email"]').value.trim();
+    const recaptcha = grecaptcha.getResponse();
 
-      // Gather input values
-      var name = document.getElementsByName('name')[0].value;
-      var username = document.getElementsByName('username')[0].value;
-      var email = document.getElementsByName('email')[0].value;
+    // Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^0\d{9,}$/;
 
-      // Email validation regex
-      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!name) return showError('Nama wajib diisi.');
+    if (!email || !emailRegex.test(email)) return showError('Email tidak valid.');
+    if (!username || !phoneRegex.test(username)) return showError('Nomor telepon harus dimulai dengan 0.');
+    if (!recaptcha) return showError('Silakan selesaikan reCAPTCHA.');
 
-      // Phone number validation regex (starts with '0' and only contains numbers)
-      var phoneRegex = /^0\d{9,}$/;
+    // Format phone for display
+    const formattedPhone = username.startsWith('0') ? '62' + username.slice(1) : username;
 
-      // Validation flags
-      var isValidEmail = emailRegex.test(email);
-      var isValidPhone = phoneRegex.test(username);
+    // Populate confirmation
+    document.getElementById('confirmationDetails').innerHTML = `
+      <li><strong>Nama:</strong> ${name}</li>
+      <li><strong>Telepon:</strong> ${formattedPhone}</li>
+      <li><strong>Email:</strong> ${email}</li>
+    `;
 
-      // If email or phone number is invalid, show error and return
-      if (!isValidEmail) {
-          $('#errorModalBody').html('<p>Email tidak valid!</p>');
-          $('#errorModal').modal('show');
-          return;
-      }
-      if (!isValidPhone) {
-          $('#errorModalBody').html('<p>Nomor Telepon tidak valid!</p>');
-          $('#errorModal').modal('show');
-          return;
-      }
-
-      // If phone number starts with '0', replace '0' with '62'
-      if (username.startsWith('0')) {
-          username = '62' + username.substring(1);
-      }
-
-      // Build confirmation message
-      var confirmationMessage = "<li><strong>Nama Lengkap:</strong> " + name + "</li>";
-      confirmationMessage += "<li><strong>Nomor Telepon:</strong> " + username + "</li>";
-      confirmationMessage += "<li><strong>Email:</strong> " + email + "</li>";
-
-      // Set confirmation details in modal
-      document.getElementById('confirmationDetails').innerHTML = confirmationMessage;
-
-      // Show confirmation modal
-      $('#confirmationModal').modal('show');
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+    modal.show();
   });
 
-  // Handle confirm button click event
-  document.getElementById('confirmButton').addEventListener('click', function(event) {
-      // Replace '0' with '62' in the phone number if it starts with '0'
-      var username = document.getElementsByName('username')[0].value;
-      if (username.startsWith('0')) {
-          username = '62' + username.substring(1);
-          document.getElementsByName('username')[0].value = username; // Update the input field value
-      }
+  // Confirm and submit
+  document.getElementById('confirmButton').addEventListener('click', function () {
+    const usernameInput = document.querySelector('input[name="username"]');
+    if (usernameInput.value.startsWith('0')) {
+      usernameInput.value = '62' + usernameInput.value.slice(1);
+    }
 
-      // Disable the Confirm button
-      $('#confirmButton, .btn-secondary').prop('disabled', true);
-      // Show loading overlay
-      document.querySelector('.loading-overlay').style.display = 'flex';
+    document.querySelector('.loading-overlay').style.display = 'flex';
+    document.getElementById('confirmButton').disabled = true;
 
-      // Attach an event listener to keep the loading animation displayed until page navigation begins
-      window.addEventListener('beforeunload', function() {
-          document.querySelector('.loading-overlay').style.display = 'block';
-      });
-
-      // Submit the form
-      document.getElementById('registerForm').submit();
+    document.getElementById('registerForm').submit();
   });
+
+  function showError(message) {
+    document.getElementById('errorModalBody').textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+    modal.show();
+  }
 </script>
 @endsection

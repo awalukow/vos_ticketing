@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Penumpang;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -73,6 +74,14 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
 {
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'username' => 'required|unique:users',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:8',
+        'g-recaptcha-response' => 'required|captcha',
+    ]);
+
     $password = $data['password'] ? $data['password'] : 'password12345678';
 
     $user = User::create([
