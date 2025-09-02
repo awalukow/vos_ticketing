@@ -9,6 +9,7 @@ class Pemesanan extends Model
 {
     use HasFactory;
 
+    protected $table = 'pemesanan';
     protected $fillable = [
         'kode',
         'kursi',
@@ -29,20 +30,35 @@ class Pemesanan extends Model
         'seatCheckin'
     ];
 
+    /**
+     * A Pemesanan belongs to a Rute
+     */
     public function rute()
     {
-        return $this->belongsTo('App\Models\Rute', 'rute_id');
+        return $this->belongsTo(Rute::class, 'rute_id');
     }
 
+    /**
+     * A Pemesanan belongs to a Penumpang (User)
+     */
     public function penumpang()
     {
-        return $this->belongsTo('App\Models\User', 'penumpang_id');
+        return $this->belongsTo(User::class, 'penumpang_id');
     }
 
+    /**
+     * A Pemesanan may belong to a Petugas (User)
+     */
     public function petugas()
     {
-        return $this->belongsTo('App\Models\User', 'petugas_id');
+        return $this->belongsTo(User::class, 'petugas_id');
     }
 
-    protected $table = 'pemesanan';
+    /**
+     * A Pemesanan has many Pemesanan_Detail (seat details)
+     */
+    public function pemesananDetails()
+    {
+        return $this->hasMany(Pemesanan_Detail::class, 'pemesananCode', 'kode');
+    }
 }

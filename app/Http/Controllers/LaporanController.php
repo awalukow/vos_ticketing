@@ -227,7 +227,7 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
         'subject' => '[VOS] Pesanan anda sudah dikonfirmasi! - Kode Booking : ' . $pemesanan->kode,
         'eventName' => 'VOS 20th Anniversary Concert @ Balai Resital Kartanegara',
         'bookingCode' => $pemesanan->kode,
-        'eventDate' => '09 November 2024',
+        'eventDate' => '09 November 2025',
         'eventTime' => '18:30',
         'seats' => implode(', ', $cleanedSeats),
         'seatCount' => count($cleanedSeats),
