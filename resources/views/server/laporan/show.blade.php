@@ -518,6 +518,45 @@
             @endif
           </table>
         </div>
+
+        @if($data->status == "Sudah Bayar")
+        <div class="card-body">
+          <div class="event-info">
+            <div class="event-date">Seat QR</div>
+            <!-- Center the QR codes -->
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 16px; flex-wrap: wrap;">
+                @php
+                  $seats = $data->kursi;
+                  $seatArray = [];
+                  
+                  // Handle both string and array formats
+                  if (is_string($seats) && substr($seats, 0, 1) === '[') {
+                      $seatArray = json_decode($seats, true);
+                      if (!is_array($seatArray)) {
+                          $seatArray = [$seats];
+                      }
+                  } else {
+                      $seatArray = [$seats];
+                  }
+                  
+                  // Clean up seat names
+                  $cleanedSeats = array_map(function($seat) {
+                      return trim($seat, '[]"');
+                  }, $seatArray);
+                @endphp
+                
+                @foreach($cleanedSeats as $seat)
+                  <div style="text-align: center; margin: 4px;">
+                    <div style="background: white; padding: 4px; border-radius: 4px; display: inline-block;">
+                      {!! DNS2D::getBarcodeHTML($data->kode . '_' . $seat, 'QRCODE', 6, 6) !!}
+                    </div>
+                    <div style="font-size: 0.7rem; margin-top: 2px;">{{ $seat }}</div>
+                  </div>
+                @endforeach
+              </div>
+          </div>
+        </div>
+        @endif
       
           @if (Auth::user()->level != "Penumpang")
             <div class="card-body">
