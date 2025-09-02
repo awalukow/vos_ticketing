@@ -48,15 +48,36 @@ class Transportasi extends Model
         $count = Pemesanan_Detail::where('seatNumber', $data['kursi'])
             ->whereHas('pemesanan', function ($query) use ($data) {
                 $query->where('rute_id', $data['rute'])
-                      ->where('waktu', 'like', $data['waktu'] . '%')
-                      ->where('rowstatus', '>=', 0)
-                      ->where('expired_date', '>', now());
+                    //->where('waktu', 'like', $data['waktu'] . '%')
+                    ->where('rowstatus', '>=', 0)
+                    ->where(function ($q) {
+                        $q->where(function ($sub) {
+                            $sub->where('expired_date', '>', now())
+                                ->where('status', 'Belum Bayar');
+                        })->orWhere(function ($sub) {
+                            $sub->whereNotNull('bukti_pembayaran')
+                                ->where('status_pembayaran', 'Menunggu Verifikasi');
+                        })->orWhere('status', 'Sudah Bayar');
+                    });
             })
             ->count();
 
         return $count > 0 ? null : $data['kursi'];
     }
 
+    public function kursi____($id)
+    {
+        $data = json_decode($id, true);
+
+        $kursi = Pemesanan_Detail:://where('rute_id', $data['rute'])
+                            //->where('waktu', $data['waktu'])
+                            where('seatNumber', $data['kursi'])->count();
+        if ($kursi > 0) {
+            return null;
+        } else {
+            return $id;
+        }
+    }
     /**
      * Legacy method - may be removed if unused
      */
