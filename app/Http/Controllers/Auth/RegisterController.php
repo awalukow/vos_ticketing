@@ -72,9 +72,12 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\Models\User
      */
-    protected function create(array $data)
+    use Illuminate\Support\Facades\Validator;
+
+protected function create(array $data)
 {
-    $data->validate([
+    // Manually validate the input
+    $validator = Validator::make($data, [
         'name' => 'required|string|max:255',
         'username' => 'required|unique:users',
         'email' => 'required|email|unique:users',
@@ -82,7 +85,13 @@ class RegisterController extends Controller
         'g-recaptcha-response' => 'required|captcha',
     ]);
 
-    $password = $data['password'] ? $data['password'] : 'password12345678';
+    // Throw if validation fails
+    if ($validator->fails()) {
+        throw new \Illuminate\Validation\ValidationException($validator);
+    }
+
+    // Use default password if not set (though validation already requires it)
+    $password = $data['password'] ?? 'password12345678';
 
     $user = User::create([
         'name' => $data['name'],
@@ -92,9 +101,7 @@ class RegisterController extends Controller
         'email' => $data['email']
     ]);
 
-    // Check if user creation was successful
     if ($user) {
-        // Define $destination and $message for WA
         $laporanController = new LaporanController();
         $destination = $data['username'];
         $message = '*[NOTIFIKASI VOS] REGISTRASI BERHASIL*
@@ -106,7 +113,6 @@ Anda dapat melakukan perubahan password pada menu pengaturan ' . url('/pengatura
 
 untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau https://wa.me/6287780553668 (Tiara)';
 
-        // Prepare email data for welcome email
         $emailData = [
             'subject' => '[VOS] Pendaftaran Berhasil!',
             'name' => $data['name'],
@@ -119,18 +125,12 @@ untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau ht
         ];
 
         try {
-            // Send WhatsApp notification
-            //$response = $laporanController->sendWhatsAppMessage_2($destination, $message);
-            
-            // Send welcome email with proper template
+            // $laporanController->sendWhatsAppMessage_2($destination, $message);
             Mail::to($data['email'])->send(new WelcomeEmail($emailData));
-
         } catch (\Exception $e) {
-            // Log the error but don't fail user creation
             \Log::error('Error sending welcome notification: ' . $e->getMessage());
             \Log::error('Error trace: ' . $e->getTraceAsString());
-            
-            // In development environment, show detailed error
+
             if (app()->environment('local', 'development')) {
                 throw $e;
             }
@@ -138,7 +138,6 @@ untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau ht
 
         return $user;
     } else {
-        // Return an error if user creation fails
         return response()->json(['error' => 'User creation failed'], 500);
     }
 }
