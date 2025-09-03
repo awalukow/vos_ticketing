@@ -107,7 +107,27 @@
                 <td>{{ $data->name }}</td>
                 <td>{{ $data->username }}</td>
                 <td>{{ $data->email }}</td>
-                <td>{{ $data->level == 'Penumpang' ? 'Customer' : $data->level }}</td>
+                <td>
+                    @switch($data->level)
+                        @case('SuperAdmin')
+                            System Admin (ADM1)
+                            @break
+                        @case('Admin')
+                            Admin VOS (ADM2)
+                            @break
+                        @case('Petugas')
+                            Petugas
+                            @break
+                        @case('Penumpang')
+                            Customer
+                            @break
+                        @case('AdminChurch')
+                            Admin Gereja (ADM3)
+                            @break
+                        @default
+                            {{ $data->level }}
+                    @endswitch
+                </td>
                 <td>
                     <form action="{{ route('user.destroy', $data->id) }}" method="POST" style="display:inline-block;">
                         @csrf
