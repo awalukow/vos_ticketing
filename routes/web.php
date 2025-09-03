@@ -13,11 +13,16 @@ use App\Http\Controllers\RuteController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
-if (env('APP_ENV') === 'maintenance') {
+
+$allowedIps = [
+    '36.88.182.218'
+];
+
+if (env('APP_ENV') === 'maintenance' && in_array(Request::ip(), $allowedIps)) {
     // Route only to maintenance view
     Route::get('/', [RegisterController::class, 'showMaintenance'])->name('maintenance');
-    Route::get('/{any}', [RegisterController::class, 'showMaintenance'])->where('any', '.*'); // Optional: catch-all
-} else {
+    Route::get('/{any}', [RegisterController::class, 'showMaintenance'])->where('any', '.*'); // Catch-all
+}else {
     Auth::routes();
 
     // Public Routes
