@@ -74,7 +74,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
 {
-    $request->validate([
+    $data->validate([
         'name' => 'required|string|max:255',
         'username' => 'required|unique:users',
         'email' => 'required|email|unique:users',
