@@ -107,6 +107,29 @@
               @enderror
             </div>
 
+             <div class="d-flex flex-row align-items-center mb-4">
+                  <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                        <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password" value="" placeholder="Password">
+                        @error('password')
+                        <span class="invalid-feedback" role="alert">
+                           <strong>{{ $message }}</strong>
+                        </span>
+                      @enderror
+                    </div>
+                  </div>
+                <div class="d-flex flex-row align-items-center mb-4">
+                <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
+                <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                    <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password_confirmation" value="" placeholder="Confirm Password">
+                    @error('password')
+                        <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                        </span>
+                      @enderror
+                </div>
+                </div>
+
             <!-- reCAPTCHA -->
             <div class="form-group mb-3">
               <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
