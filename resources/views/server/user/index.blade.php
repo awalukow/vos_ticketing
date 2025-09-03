@@ -94,7 +94,8 @@
             <tr>
               <td>No</td>
               <td>Name</td>
-              <td>Username</td>
+              <td>Username/NoHP</td>
+              <td>Email</td>
               <td>Level</td>
               <th>Action</th>
             </tr>
@@ -105,6 +106,7 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $data->name }}</td>
                 <td>{{ $data->username }}</td>
+                <td>{{ $data->email }}</td>
                 <td>{{ $data->level == 'Penumpang' ? 'Customer' : $data->level }}</td>
                 <td>
                     <form action="{{ route('user.destroy', $data->id) }}" method="POST" style="display:inline-block;">
