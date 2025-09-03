@@ -83,7 +83,7 @@
         </p>
         
         <div class="maintenance-time">
-            Perkiraan waktu pemulihan: 2 September 2025, Pukul 17:00 WIB
+            Perkiraan waktu pemulihan: N/A
         </div>
         
         <p class="maintenance-message">
