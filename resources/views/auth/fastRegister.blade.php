@@ -107,28 +107,28 @@
               @enderror
             </div>
 
-             <div class="d-flex flex-row align-items-center mb-4">
-                  <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
-                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                        <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password" value="" placeholder="Password">
-                        @error('password')
-                        <span class="invalid-feedback" role="alert">
-                           <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                    </div>
-                  </div>
-                <div class="d-flex flex-row align-items-center mb-4">
-                <i class="fa-solid fa-lock fa-lg me-3 fa-fw"></i>
-                <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                    <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" name="password_confirmation" value="" placeholder="Confirm Password">
-                    @error('password')
-                        <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                </div>
-                </div>
+            <!-- Password -->
+            <div class="form-group mb-3 position-relative">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" name="password"
+                    class="form-control form-control-user @error('password') is-invalid @enderror"
+                    placeholder="Password" autocomplete="new-password">
+              @error('password')
+                <div class="invalid-feedback d-block"><small>{{ $message }}</small></div>
+              @enderror
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group mb-3 position-relative">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" name="password_confirmation"
+                    class="form-control form-control-user @error('password_confirmation') is-invalid @enderror"
+                    placeholder="Konfirmasi Password" autocomplete="new-password">
+              @error('password_confirmation')
+                <div class="invalid-feedback d-block"><small>{{ $message }}</small></div>
+              @enderror
+            </div>
+
 
             <!-- reCAPTCHA -->
             <div class="form-group mb-3">
