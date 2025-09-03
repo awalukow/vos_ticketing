@@ -353,7 +353,7 @@
             $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
             <div class="seat-item">
               <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>O{{ $i }}</div>
@@ -376,7 +376,7 @@
             $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
             <div class="seat-item">
               <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>O{{ $i }}</div>
@@ -485,7 +485,7 @@
             $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
             <div class="seat-item">
               <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>M{{ $i }}</div>
@@ -508,7 +508,7 @@
             $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
             <div class="seat-item">
               <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>M{{ $i }}</div>
