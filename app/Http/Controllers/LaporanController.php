@@ -243,7 +243,7 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
         Mail::to($penumpang->email)->send(new PaymentConfirmation($emailData));
         
         // Send copy to CS
-        Mail::to("cs@voiceofsoulchoir.id")->send(new PaymentConfirmation($emailData));
+        Mail::to("ticketing@voiceofsoulchoir.id")->send(new PaymentConfirmation($emailData));
 
     } catch (\Exception $e) {
         // Log the error but don't fail the payment verification
