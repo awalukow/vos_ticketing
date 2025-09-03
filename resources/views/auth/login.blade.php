@@ -65,16 +65,16 @@
             <div class="form-group mb-3">
               <input
                 type="text"
-                class="form-control form-control-user @error('username') is-invalid @enderror"
-                name="username"
-                id="username"
-                value="{{ old('username') }}"
+                class="form-control form-control-user @error('login') is-invalid @enderror"
+                name="login"
+                id="login"
+                value="{{ old('login') }}"
                 required
                 autocomplete="off"
-                placeholder="Username atau Nomor HP"
+                placeholder="Nomor HP / Email / Username"
                 autofocus
               >
-              @error('username')
+              @error('login')
                 <div class="invalid-feedback d-block">
                   <small>{{ $message }}</small>
                 </div>
@@ -153,7 +153,7 @@
       if (button.disabled) return;
 
       // Get username input
-      const usernameInput = document.getElementById("username");
+      const usernameInput = document.getElementById("login");
       let inputValue = usernameInput.value.trim();
 
       // Auto-format: replace leading '0' with '62'
