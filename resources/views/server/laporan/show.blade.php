@@ -602,7 +602,7 @@
         @endif
 
         <!-- Verification Button -->
-        @if ((($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level != "Penumpang" && $data->status_pembayaran == "Menunggu Verifikasi") || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isChurch == 1) || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isFisik == 1))
+        @if ((($data->status == "Belum Bayar" && Auth::user()->level != "Penumpang" && $data->status_pembayaran == "Menunggu Verifikasi") || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isChurch == 1) || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isFisik == 1))
           <div class="card-body">
             <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-custom btn-block">
               <i class="fas fa-clipboard-check mr-1"></i> Verifikasi
