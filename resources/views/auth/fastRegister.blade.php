@@ -108,7 +108,7 @@
             </div>
 
             <!-- Password -->
-            <div class="form-group mb-3 position-relative">
+            <div class="form-group mb-3 position-relative" hidden>
               <i class="fas fa-lock input-icon"></i>
               <input type="password" name="password"
                     class="form-control form-control-user @error('password') is-invalid @enderror"
@@ -119,7 +119,7 @@
             </div>
 
             <!-- Confirm Password -->
-            <div class="form-group mb-3 position-relative">
+            <div class="form-group mb-3 position-relative" hidden>
               <i class="fas fa-lock input-icon"></i>
               <input type="password" name="password_confirmation"
                     class="form-control form-control-user @error('password_confirmation') is-invalid @enderror"
