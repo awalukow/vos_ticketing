@@ -774,7 +774,7 @@
 <!-- Expired Ticket Actions -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-@if(Auth::user()->level != "Penumpang" && Auth::user()->level != "Petugas" && $data->isChurch == 0 && $data->isFisik == 0)
+@if(Auth::user()->level != "Penumpang" && $data->isChurch == 0 && $data->isFisik == 0)
   <div class="card-body">
     <div style="display: flex; gap: 6px; width: 100%;">
       <a href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}" target="_blank" 
@@ -787,11 +787,18 @@
         <i class="far fa-envelope contact-icon"></i>
         Email
       </a>
-      <button type="button" id="resendTicketBtn" 
-              class="contact-btn btn-danger" style="flex: 1; min-width: 0; white-space: nowrap;">
-        <i class="fas fa-paper-plane contact-icon"> <div class="far fa-envelope contact-icon"> </div></i>
-        <span id="resendText">Resend Ticket</span>
-      </button>
+      @if ($data->status == "Sudah Bayar")
+          <button type="button" id="resendTicketBtn" class="contact-btn btn-danger" style="flex: 1; min-width: 0; white-space: nowrap;">
+              <i class="fas fa-paper-plane contact-icon"></i>
+              <span id="resendText">Resend Ticket</span>
+          </button>
+      @else
+          <button type="button" class="contact-btn btn-secondary" style="flex: 1; min-width: 0; white-space: nowrap;" disabled>
+              <i class="far fa-envelope contact-icon"></i>
+              <span>Resend Ticket</span>
+          </button>
+      @endif
+
       <a href="tel:+62{{$data->penumpang->username}}" 
          class="contact-btn btn-success" style="flex: 1; min-width: 0; white-space: nowrap;">
         <i class="fas fa-phone contact-icon"></i>
