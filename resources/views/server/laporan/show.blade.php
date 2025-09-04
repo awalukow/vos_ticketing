@@ -747,7 +747,7 @@
             <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block mb-1">
               <i class="fas fa-file-image mr-1"></i> Lihat Bukti
             </a>
-            <a href="https://api.whatsapp.com/send?phone=6285823536364" target="_blank" class="btn btn-success btn-custom btn-block">
+            <a href="https://api.whatsapp.com/send?phone=62818290913" target="_blank" class="btn btn-success btn-custom btn-block">
               <i class="fab fa-whatsapp mr-1"></i> Hubungi Admin
             </a>
           </div>
@@ -766,7 +766,7 @@
             <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block mb-1">
               <i class="fas fa-file-image mr-1"></i> Lihat Bukti
             </a>
-            <a href="https://api.whatsapp.com/send?phone=6285823536364" target="_blank" class="btn btn-success btn-custom btn-block">
+            <a href="https://api.whatsapp.com/send?phone=62818290913" target="_blank" class="btn btn-success btn-custom btn-block">
               <i class="fab fa-whatsapp mr-1"></i> Hubungi Admin
             </a>
           </div>

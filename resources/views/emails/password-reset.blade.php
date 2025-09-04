@@ -79,7 +79,7 @@
               </div>
 
               <div style="margin:12px 0;">
-                <a href="https://wa.me/6285823536364" style="color:#b71ea8; text-decoration:none; margin:0 8px;">WhatsApp Support</a> |
+                <a href="https://wa.me/62818290913" style="color:#b71ea8; text-decoration:none; margin:0 8px;">WhatsApp Support</a> |
                 <a href="mailto:cs@voiceofsoulchoir.id" style="color:#b71ea8; text-decoration:none; margin:0 8px;">cs@voiceofsoulchoir.id</a>
               </div>
 
