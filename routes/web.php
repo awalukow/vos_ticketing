@@ -132,4 +132,12 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
     // 🔻 IMPORTANT: PLACE THIS ROUTE AT THE VERY END 🔻
     // It must come last to avoid conflicts with more specific routes
     Route::get('/{id}/{data}', [PemesananController::class, 'show'])->name('show');
+    Route::get('/clear-cache', function() {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:cache');
+    return 'Cache cleared!';
+});
 }
