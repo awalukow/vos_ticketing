@@ -771,38 +771,83 @@
             </a>
           </div>
         @endif
+<!-- Expired Ticket Actions -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <!-- Expired Ticket Actions -->
-        @if($data->expired_date < now() && Auth::user()->level == "Penumpang")
-          <div class="card-body text-center">
-            <a href="https://api.whatsapp.com/send?phone=6285823536364" target="_blank" class="btn btn-success btn-custom btn-block">
-              <i class="fab fa-whatsapp mr-1"></i> Hubungi Admin
-            </a>
-          </div>
-        @elseif(Auth::user()->level != "Penumpang" && Auth::user()->level != "Petugas" && $data->isChurch == 0 && $data->isFisik == 0)
-          <div class="card-body">
-            <div class="contact-grid">
-              <a href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}" target="_blank" class="contact-btn btn-success">
-                <i class="fab fa-whatsapp contact-icon"></i>
-                WA
-              </a>
-              <a href="mailto:{{$data->penumpang->email}}" target="_blank" class="contact-btn btn-success">
-                <i class="far fa-envelope contact-icon"></i>
-                Email
-              </a>
-              <a href="tel:+{{$data->penumpang->username}}" class="contact-btn btn-success">
-                <i class="fas fa-phone contact-icon"></i>
-                Telp
-              </a>
-            </div>
-          </div>
-        @endif
-      </div>
+@if(Auth::user()->level != "Penumpang" && Auth::user()->level != "Petugas" && $data->isChurch == 0 && $data->isFisik == 0)
+  <div class="card-body">
+    <div style="display: flex; gap: 6px; width: 100%;">
+      <a href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}" target="_blank" 
+         class="contact-btn btn-success" style="flex: 1; min-width: 0; white-space: nowrap;">
+        <i class="fab fa-whatsapp contact-icon"></i>
+        WA
+      </a>
+      <a href="mailto:{{$data->penumpang->email}}" target="_blank" 
+         class="contact-btn btn-success" style="flex: 1; min-width: 0; white-space: nowrap;">
+        <i class="far fa-envelope contact-icon"></i>
+        Email
+      </a>
+      <button type="button" id="resendTicketBtn" 
+              class="contact-btn btn-danger" style="flex: 1; min-width: 0; white-space: nowrap;">
+        <i class="fas fa-paper-plane contact-icon"> <div class="far fa-envelope contact-icon"> </div></i>
+        <span id="resendText">Resend Ticket</span>
+      </button>
+      <a href="tel:+62{{$data->penumpang->username}}" 
+         class="contact-btn btn-success" style="flex: 1; min-width: 0; white-space: nowrap;">
+        <i class="fas fa-phone contact-icon"></i>
+        Telp
+      </a>
     </div>
   </div>
+@endif
+</div>
+</div>
+</div>
 
-  <script>
+<script>
   document.addEventListener('DOMContentLoaded', function () {
+    const resendButton = document.getElementById('resendTicketBtn');
+    const resendText = document.getElementById('resendText');
+    
+    if (resendButton) {
+        resendButton.addEventListener('click', function() {
+            if (confirm('Apakah Anda yakin ingin mengirim ulang tiket ke email?')) {
+                const originalText = resendText.innerHTML;
+                resendText.innerHTML = 'Mengirim...';
+                resendButton.disabled = true;
+                
+                fetch('{{ route("resend.ticket.email", $data->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => {
+                    resendText.innerHTML = originalText;
+                    resendButton.disabled = false;
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengirim email. Silakan coba lagi.');
+                    resendText.innerHTML = originalText;
+                    resendButton.disabled = false;
+                });
+            }
+        });
+    }
+});
+</script>
+<script>
+// Keep your existing scripts
+document.addEventListener('DOMContentLoaded', function () {
     const minusBtn = document.getElementById('minus-btn');
     const plusBtn = document.getElementById('plus-btn');
     const checkinCount = document.getElementById('checkin-count');
@@ -810,24 +855,24 @@
     const loadingDiv = document.getElementById('loading');
     const checkinForm = document.getElementById('checkin-form');
 
-    minusBtn.addEventListener('click', function () {
-      let currentValue = parseInt(checkinCount.value);
-      if (currentValue > 0) {
-        checkinCount.value = currentValue - 1;
-      }
+    minusBtn?.addEventListener('click', function () {
+        let currentValue = parseInt(checkinCount.value);
+        if (currentValue > 0) {
+            checkinCount.value = currentValue - 1;
+        }
     });
 
-    plusBtn.addEventListener('click', function () {
-      let currentValue = parseInt(checkinCount.value);
-      if (currentValue < {{ $data->kursi }} - {{$data->seatCheckin}}) {
-        checkinCount.value = currentValue + 1;
-      }
+    plusBtn?.addEventListener('click', function () {
+        let currentValue = parseInt(checkinCount.value);
+        if (currentValue < {{ $data->kursi }} - {{$data->seatCheckin}}) {
+            checkinCount.value = currentValue + 1;
+        }
     });
 
-    checkinForm.addEventListener('submit', function () {
-      submitBtn.disabled = true;
-      loadingDiv.style.display = 'block';
+    checkinForm?.addEventListener('submit', function () {
+        submitBtn.disabled = true;
+        loadingDiv.style.display = 'block';
     });
-  });
-  </script>
+});
+</script>
 @endsection

@@ -421,4 +421,56 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
 
         return redirect()->back()->with('success', 'Berhasil Cancel.');
     }
+
+    public function resendTicketEmail($id)
+    {
+        $pemesanan = Pemesanan::find($id);
+        
+        if (!$pemesanan) {
+            return response()->json(['message' => 'Pemesanan tidak ditemukan'], 404);
+        }
+        
+        try {
+            // Process seats
+            $seats = $pemesanan->kursi;
+            $seatArray = [];
+            
+            if (is_string($seats) && substr($seats, 0, 1) === '[') {
+                $seatArray = json_decode($seats, true);
+                if (!is_array($seatArray)) {
+                    $seatArray = [$seats];
+                }
+            } else {
+                $seatArray = [$seats];
+            }
+            
+            $cleanedSeats = array_map(function($seat) {
+                return trim($seat, '[]"');
+            }, $seatArray);
+
+            // Prepare email data
+            $emailData = [
+                'subject' => '[VOS] Pesanan anda sudah dikonfirmasi! - Kode Booking : ' . $pemesanan->kode,
+                'bookingCode' => $pemesanan->kode,
+                'eventName' => 'VOS 20th Anniversary Concert @ Balai Resital Kartanegara',
+                'eventDate' => '09 November 2025',
+                'eventTime' => '18:30',
+                'seats' => implode(', ', $cleanedSeats),
+                'totalAmount' => 'Rp ' . number_format($pemesanan->total, 0, ',', '.'),
+                'transactionUrl' => url('/transaksi/' . $pemesanan->kode),
+                'helpCenterUrl' => url('/help'),
+                'termsUrl' => url('/terms'),
+                'privacyUrl' => url('/privacy'),
+            ];
+
+            // Send email
+            Mail::to($pemesanan->penumpang->email)->send(new PaymentConfirmation($emailData));
+            
+            return response()->json(['message' => 'Tiket berhasil dikirim ulang ke email']);
+            
+        } catch (\Exception $e) {
+            \Log::error('Resend ticket email failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal mengirim ulang tiket'], 500);
+        }
+    }
 }

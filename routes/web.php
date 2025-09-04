@@ -73,6 +73,7 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
                 Route::get('/order', [PemesananController::class, 'index'])->name('order');
                 Route::get('/pesan/{kursi}/{data}/{referral?}', [PemesananController::class, 'pesan'])->name('pesan');
                 Route::get('/cari/kursi/{data}', [PemesananController::class, 'edit'])->name('cari.kursi');
+                Route::post('/resend-ticket/{id}', [PemesananController::class, 'resendTicketEmail'])->name('resend.ticket.email');
             });
 
             // AdminChurch Routes
@@ -97,6 +98,7 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
                 Route::get('/ticket-fisik', [LaporanController::class, 'ticket_fisik'])->name('ticket_fisik');
                 Route::patch('/user/{id}/change-password', [UserController::class, 'changePassword'])->name('user.changePassword');
                 Route::post('/cancelOrder/{id}', [LaporanController::class, 'cancelOrder'])->name('cancelOrder');
+                Route::post('/resend-ticket/{id}', [LaporanController::class, 'resendTicketEmail'])->name('resend.ticket.email');
             });
         });
 
