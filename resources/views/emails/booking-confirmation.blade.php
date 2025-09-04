@@ -200,7 +200,7 @@
                             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
                                 <tr>
                                     <td align="center">
-                                        <a href="https://wa.me/62818290913" target="_blank" style="display: inline-block; width: 32px; height: 32px; background-color: #6a11cb; border-radius: 50%; color: #ffffff; text-decoration: none; margin: 0 5px; line-height: 32px;">
+                                        <a href="https://wa.me/{{ $cs }}" target="_blank" style="display: inline-block; width: 32px; height: 32px; background-color: #6a11cb; border-radius: 50%; color: #ffffff; text-decoration: none; margin: 0 5px; line-height: 32px;">
                                             💬
                                         </a>
                                         <a href="#" target="_blank" style="display: inline-block; width: 32px; height: 32px; background-color: #6a11cb; border-radius: 50%; color: #ffffff; text-decoration: none; margin: 0 5px; line-height: 32px;">
@@ -225,7 +225,11 @@
                             
                             <p style="margin: 8px 0; color: #6c757d; font-size: 13px;">
                                 Need assistance? Contact our customer support:<br>
-                                <a href="https://wa.me/62818290913" target="_blank" style="color: #6a11cb; text-decoration: none;">WhatsApp Support</a> or 
+                                @if ($customerService && $customerService->Value)
+                                    <a href="https://api.whatsapp.com/send?phone={{ $cs }}" target="_blank" class="btn btn-success btn-custom btn-block">
+                                        WhatsApp Support
+                                    </a>
+                                @endif or 
                                 <a href="mailto:cs@voiceofsoulchoir.id" style="color: #6a11cb; text-decoration: none;">cs@voiceofsoulchoir.id</a>
                             </p>
                             

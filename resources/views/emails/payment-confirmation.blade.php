@@ -89,7 +89,7 @@
                 <li style="margin-bottom:6px;">Your e-ticket is now confirmed and ready to use</li>
                 <li style="margin-bottom:6px;">Keep this email as your proof of payment</li>
                 <li style="margin-bottom:6px;">Bring your e-ticket to the event venue</li>
-                <li>Present your booking code at the entrance</li>
+                <li>Present your booking code at the entrance <strong>Check this email attachment</strong></li>
                 <li>Use the QR codes above for seat verification</li>
               </ol>
 
@@ -105,7 +105,7 @@
           <tr>
             <td style="padding:20px; background-color:#f8f9fa; text-align:center; font-size:13px; color:#6c757d;">
               <div style="margin:10px 0;">
-                <a href="https://wa.me/62818290913" style="display:inline-block; background:#27ae60; color:white; text-decoration:none; border-radius:50%; width:32px; height:32px; line-height:32px; text-align:center; font-size:14px; margin:0 5px;">💬</a>
+                <a href="https://wa.me/{{ $cs }}" style="display:inline-block; background:#27ae60; color:white; text-decoration:none; border-radius:50%; width:32px; height:32px; line-height:32px; text-align:center; font-size:14px; margin:0 5px;">💬</a>
                 <a href="#" style="display:inline-block; background:#27ae60; color:white; text-decoration:none; border-radius:50%; width:32px; height:32px; line-height:32px; text-align:center; font-size:14px; margin:0 5px;">📱</a>
                 <a href="#" style="display:inline-block; background:#27ae60; color:white; text-decoration:none; border-radius:50%; width:32px; height:32px; line-height:32px; text-align:center; font-size:14px; margin:0 5px;">📷</a>
               </div>
@@ -118,7 +118,9 @@
 
               <p style="margin:0 0 10px;">
                 Need assistance? Contact our customer support:<br>
-                <a href="https://wa.me/62818290913" style="color:#27ae60; text-decoration:none;">WhatsApp Support</a> or 
+                <a href="https://api.whatsapp.com/send?phone={{ $cs }}" target="_blank" class="btn btn-success btn-custom btn-block">
+                    WhatsApp Support
+                </a>
                 <a href="mailto:cs@voiceofsoulchoir.id" style="color:#27ae60; text-decoration:none;">cs@voiceofsoulchoir.id</a>
               </p>
 

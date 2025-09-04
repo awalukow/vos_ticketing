@@ -747,9 +747,11 @@
             <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block mb-1">
               <i class="fas fa-file-image mr-1"></i> Lihat Bukti
             </a>
-            <a href="https://api.whatsapp.com/send?phone=62818290913" target="_blank" class="btn btn-success btn-custom btn-block">
-              <i class="fab fa-whatsapp mr-1"></i> Hubungi Admin
-            </a>
+            @if ($customerService && $customerService->Value)
+                <a href="https://api.whatsapp.com/send?phone={{ $customerService->Value }}" target="_blank" class="btn btn-success btn-custom btn-block">
+                    <i class="fab fa-whatsapp mr-1"></i> Hubungi Admin
+                </a>
+            @endif
           </div>
         @endif
 
@@ -766,9 +768,11 @@
             <a href="{{ asset('../storage/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-custom btn-block mb-1">
               <i class="fas fa-file-image mr-1"></i> Lihat Bukti
             </a>
-            <a href="https://api.whatsapp.com/send?phone=62818290913" target="_blank" class="btn btn-success btn-custom btn-block">
-              <i class="fab fa-whatsapp mr-1"></i> Hubungi Admin
-            </a>
+            @if ($customerService && $customerService->Value)
+                <a href="https://api.whatsapp.com/send?phone={{ $customerService->Value }}" target="_blank" class="btn btn-success btn-custom btn-block">
+                   <i class="fab fa-whatsapp mr-1"></i> Hubungi Admin
+                </a>
+            @endif
           </div>
         @endif
 <!-- Expired Ticket Actions -->

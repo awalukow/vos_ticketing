@@ -15,6 +15,7 @@ use TCPDF;
 use PDF;
 use App\Mail\EmailNotification; // Assuming you have a Mailable class defined for the email notification
 use App\Mail\PaymentConfirmation;
+use App\Models\AppSetting; 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class LaporanController extends Controller
@@ -86,16 +87,19 @@ class LaporanController extends Controller
 
     public function show($id)
     {
-        $data = Pemesanan::with('rute.transportasi.category', 'penumpang')->where('kode', $id)->where('rowstatus','>=',0)->first();
-        //dd(Carbon::now());
-        //dd(env('APP_ENV'));
+        $data = Pemesanan::with('rute.transportasi.category', 'penumpang')
+                    ->where('kode', $id)
+                    ->where('rowstatus', '>=', 0)
+                    ->first();
+
+        $customerService = AppSetting::getCustomerService();
+
         if ($data) {
-            return view('server.laporan.show', compact('data'));
+            return view('server.laporan.show', compact('data', 'customerService'));
         } else {
             return redirect()->back()->with('error', 'Kode Transaksi Tidak Ditemukan!');
         }
     }
-
     public function pembayaran_old($id)
     {
         Pemesanan::find($id)->update([
@@ -167,6 +171,7 @@ class LaporanController extends Controller
     public function pembayaran($id)
 {
     $pemesanan = Pemesanan::find($id);
+    $customerService = AppSetting::getCustomerService();
     
     // Check if the booking exists
     if (!$pemesanan) {
@@ -236,6 +241,7 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
         'helpCenterUrl' => url('/help'),
         'termsUrl' => url('/terms'),
         'privacyUrl' => url('/privacy'),
+        'cs' => $customerService ?? '',
     ];
 
     try {
@@ -461,6 +467,7 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
                 'helpCenterUrl' => url('/help'),
                 'termsUrl' => url('/terms'),
                 'privacyUrl' => url('/privacy'),
+                'cs' => AppSetting::getCustomerService()->Value ?? '',  
             ];
 
             // Send email

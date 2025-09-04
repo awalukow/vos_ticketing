@@ -88,6 +88,7 @@ class PaymentConfirmation extends Mailable
                         'paymentExpiry' => $this->bookingData['paymentExpiry'] ?? '',
                         'attachments' => $attachments, // Pass the attachments (CID)
                         'base64QrCodes' => $base64QrCodes, // Pass base64 QR codes to view
+                        'cs' => $this->bookingData['cs'] ?? '',
                     ]);
     }
 }

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailNotification; // Assuming you have a Mailable class defined for the email notification
 use App\Mail\BookingConfirmation;
 use App\Mail\PaymentConfirmation;
+use App\Mail\AppSetting;
 use Illuminate\Support\Facades\DB;
 
 class PemesananController extends Controller
@@ -491,6 +492,8 @@ class PemesananController extends Controller
 
     public function pesan ($kursi, $encodedData, $referral = null, $email = null)
     {
+        
+        $customerService = AppSetting::getCustomerService();
         if (is_string($kursi) && substr($kursi, 0, 1) === '[') {
             $kursiArray = json_decode($kursi, true);
             $seatCount = is_array($kursiArray) ? count($kursiArray) : 0;
@@ -545,6 +548,7 @@ class PemesananController extends Controller
                 'rowstatus' => 0,
                 'isChurch' => false,
                 'isFisik' => false,
+                'cs' => $customerService ?? '',
             ]);   
             }
             else{
@@ -561,6 +565,7 @@ class PemesananController extends Controller
                 'rowstatus' => 0,
                 'isChurch' => false,
                 'isFisik' => false,
+                'cs' => $customerService ?? '',
             ]);   
             } 
 

@@ -104,7 +104,7 @@
           <tr>
             <td style="padding:20px; background-color:#f8f9fa; text-align:center; font-size:13px; color:#6c757d;">
               <div style="margin:10px 0;">
-                <a href="https://wa.me/6285823536364" style="display:inline-block; background:#27ae60; color:white; text-decoration:none; border-radius:50%; width:32px; height:32px; line-height:32px; text-align:center; font-size:14px; margin:0 5px;">💬</a>
+                <a href="https://wa.me/{{ $paymentUrl }}" style="display:inline-block; background:#27ae60; color:white; text-decoration:none; border-radius:50%; width:32px; height:32px; line-height:32px; text-align:center; font-size:14px; margin:0 5px;">💬</a>
                 <a href="#" style="display:inline-block; background:#27ae60; color:white; text-decoration:none; border-radius:50%; width:32px; height:32px; line-height:32px; text-align:center; font-size:14px; margin:0 5px;">📱</a>
                 <a href="#" style="display:inline-block; background:#27ae60; color:white; text-decoration:none; border-radius:50%; width:32px; height:32px; line-height:32px; text-align:center; font-size:14px; margin:0 5px;">📷</a>
               </div>
@@ -116,8 +116,9 @@
               </div>
 
               <p style="margin:0 0 10px;">
-                Need assistance? Contact our customer support:<br>
-                <a href="https://wa.me/6285823536364" style="color:#27ae60; text-decoration:none;">WhatsApp Support</a> or 
+                <a href="https://api.whatsapp.com/send?phone={{ $cs }}" target="_blank" class="btn btn-success btn-custom btn-block">
+                    WhatsApp Support
+                </a>
                 <a href="mailto:cs@voiceofsoulchoir.id" style="color:#27ae60; text-decoration:none;">cs@voiceofsoulchoir.id</a>
               </p>
 
@@ -135,3 +136,4 @@
 
 </body>
 </html>
+

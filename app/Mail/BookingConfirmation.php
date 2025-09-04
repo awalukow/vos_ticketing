@@ -50,6 +50,7 @@ class BookingConfirmation extends Mailable
                         'privacyUrl' => $this->bookingData['privacyUrl'] ?? '',
                         'eventName' => $this->bookingData['eventName'] ?? '',
                         'paymentExpiry' => $this->bookingData['paymentExpiry'] ?? '',
+                        'cs' => $this->bookingData['cs'] ?? '',
                     ]);
     }
 }
