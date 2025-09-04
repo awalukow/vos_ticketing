@@ -83,7 +83,7 @@
         </p>
         
         <div class="maintenance-time">
-            Perkiraan waktu pemulihan: {{ $maintenanceMode->ValueStart }} - {{ $maintenanceMode->ValueEnd }} <br>
+            Perkiraan waktu pemulihan: {{ $maintenanceMode->ValueStart ?? '' }} - {{ $maintenanceMode->ValueEnd ?? '' }} <br>
             {{ $maintenanceMode->isRunning ? 'Sedang Berlangsung' : 'Finishing' }}
         </div>
         
