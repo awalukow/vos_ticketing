@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Category')
-@section('heading', 'Category')
+@section('title', 'Event')
+@section('heading', 'Event')
 @section('styles')
   <link href="{{ asset('vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet"/>
 @endsection
@@ -77,7 +77,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Tambah Category</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Tambah Event / Concert</h5>
           <button
             type="button"
             class="close"
