@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\Pemesanan;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PemesananExport implements FromCollection, WithHeadings
 {
