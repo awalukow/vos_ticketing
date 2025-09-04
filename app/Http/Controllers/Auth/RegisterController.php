@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use App\Models\Penumpang;
+use App\Models\AppSetting; 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
@@ -147,7 +148,8 @@ untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau ht
 
     public function showMaintenance()
     {
-        return view('auth.maintenance');
+        $customerService = AppSetting::getCustomerService();
+        return view('auth.maintenance', compact('customerService'));
     }
     //public function view_pdf (){
         //$mpdf = new \Mpdf\Mpdf();

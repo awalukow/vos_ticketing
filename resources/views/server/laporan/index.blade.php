@@ -234,8 +234,10 @@
   <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
       <h6 class="font-weight-bold text-primary mb-0">Daftar Transaksi</h6>
-      <button type="button" class="btn btn-primary btn-sm btn-add">
-        <i class="fas fa-plus"></i> Tambah
+      <button onclick="window.location.href='{{ route('pemesanan.export') }}'" 
+              type="button" 
+              class="btn btn-success btn-sm">
+          <i class="fas fa-file-excel"></i> Export Excel
       </button>
     </div>
     <div class="card-body">

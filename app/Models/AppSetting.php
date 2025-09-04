@@ -19,6 +19,13 @@ class AppSetting extends Model
                 ->first();
     }
 
+    public static function getMaintenanceMode()
+    {
+        return self::where('Category', 'MaintenanceMode')
+                ->where('RowStatus', '>=', 0)
+                ->first();
+    }
+
     // Define fillable fields (optional but good practice)
     protected $fillable = [
         'Category',

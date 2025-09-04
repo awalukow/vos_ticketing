@@ -13,6 +13,9 @@ use App\Http\Controllers\RuteController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
+use App\Exports\PemesananExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 $allowedIps = [
     '36.88.182.218'
@@ -74,6 +77,9 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
                 Route::get('/pesan/{kursi}/{data}/{referral?}', [PemesananController::class, 'pesan'])->name('pesan');
                 Route::get('/cari/kursi/{data}', [PemesananController::class, 'edit'])->name('cari.kursi');
                 Route::post('/resend-ticket/{id}', [PemesananController::class, 'resendTicketEmail'])->name('resend.ticket.email');
+                Route::get('/pemesanan/export', function () {
+                                return Excel::download(new PemesananExport, 'pemesanan.xlsx');
+                            })->name('pemesanan.export');
             });
 
             // AdminChurch Routes
@@ -99,6 +105,9 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
                 Route::patch('/user/{id}/change-password', [UserController::class, 'changePassword'])->name('user.changePassword');
                 Route::post('/cancelOrder/{id}', [LaporanController::class, 'cancelOrder'])->name('cancelOrder');
                 Route::post('/resend-ticket/{id}', [LaporanController::class, 'resendTicketEmail'])->name('resend.ticket.email');
+                Route::get('/pemesanan/export', function () {
+                                return Excel::download(new PemesananExport, 'pemesanan.xlsx');
+                            })->name('pemesanan.export');
             });
         });
 
