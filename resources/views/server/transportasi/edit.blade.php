@@ -103,6 +103,18 @@
             @endforeach
           </select>
         </div>
+        <div class="form-group form-check">
+          <input type="hidden" name="isForAdmin" value="0">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="isForAdmin"
+            name="isForAdmin"
+            value="1"
+            {{ $transportasi->isForAdmin ? 'checked' : '' }}
+          >
+          <label class="form-check-label" for="isForAdmin">Only for admin</label>
+        </div>
       </div>
       <div class="card-footer">
         <a href="{{ route('transportasi.index') }}" class="btn btn-warning mr-2">Kembali</a>
