@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Rute')
-@section('heading', 'Rute')
+@section('title', 'Seating Detail / Pricing')
+@section('heading', 'Seating Detail / Pricing')
 @section('styles')
   <link href="{{ asset('vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet"/>
   <link href="{{ asset('vendor/select2/dist/css/select2.min.css') }}" rel="stylesheet"/>

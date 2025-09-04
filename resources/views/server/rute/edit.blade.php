@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Edit Rute')
-@section('heading', 'Edit Rute')
+@section('title', 'Edit Pricing')
+@section('heading', 'Edit Pricing')
 @section('styles')
   <link href="{{ asset('vendor/select2/dist/css/select2.min.css') }}" rel="stylesheet"/>
   <style>
