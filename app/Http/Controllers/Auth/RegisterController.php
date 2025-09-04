@@ -149,7 +149,7 @@ untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau ht
     public function showMaintenance()
     {
         $maintenanceMode = AppSetting::getCustomerService();
-        return view('auth.maintenance', compact('customerService'));
+        return view('auth.maintenance', compact('maintenanceMode'));
     }
     //public function view_pdf (){
         //$mpdf = new \Mpdf\Mpdf();
