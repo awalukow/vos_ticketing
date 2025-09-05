@@ -220,7 +220,7 @@
 
       <!-- Right Image Side -->
       <div class="col-lg-6 d-none d-lg-block p-0">
-        <img src="{{ asset('img/img-signup.png') }}" alt="VOS" 
+        <img src="{{ asset('img/img-signup.jpg') }}" alt="VOS" 
              class="img-fluid w-100 h-100" 
              style="object-fit: cover; height: 600px;">
       </div>
