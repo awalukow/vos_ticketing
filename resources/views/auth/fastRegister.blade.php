@@ -151,7 +151,7 @@
                 Sudah punya akun? <a href="{{ route('login') }}" class="text-primary fw-bold">Masuk di sini</a>
               </p>
               <p class="mb-0">
-                <a href="https://wa.me/6285823536364" target="_blank" class="text-decoration-none">
+                <a href="https://wa.me/{{ $customerService->Value }}" target="_blank" class="text-decoration-none">
                   <i class="fab fa-whatsapp text-success"></i>
                   <small class="text-success fw-bold">Butuh bantuan? Chat WhatsApp</small>
                 </a>

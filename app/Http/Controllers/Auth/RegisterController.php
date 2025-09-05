@@ -76,6 +76,7 @@ class RegisterController extends Controller
     protected function create(array $data)
 {
     $password = $data['password'] ? $data['password'] : 'password12345678';
+    $customerService = AppSetting::getCustomerService();
 
     $user = User::create([
         'name' => $data['name'],
@@ -109,6 +110,7 @@ untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau ht
             'helpCenterUrl' => url('/help'),
             'termsUrl' => url('/terms'),
             'privacyUrl' => url('/privacy'),
+            'cs' => $customerService,
         ];
 
         try {
@@ -143,7 +145,8 @@ untuk informasi lebih lanjut hubungi: https://wa.me/6285823536364 (Jean) atau ht
     
     public function showFastRegistrationForm()
     {
-        return view('auth.fastRegister');
+        $customerService = AppSetting::getCustomerService();
+        return view('auth.fastRegister', compact('customerService'));
     }
 
     public function showMaintenance()

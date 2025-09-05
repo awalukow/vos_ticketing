@@ -45,6 +45,7 @@ class WelcomeEmail extends Mailable
                         'helpCenterUrl' => $this->userData['helpCenterUrl'],
                         'termsUrl' => $this->userData['termsUrl'],
                         'privacyUrl' => $this->userData['privacyUrl'],
+                        'cs' => $this->userData['cs'] ?? '',
                     ]);
     }
 }
