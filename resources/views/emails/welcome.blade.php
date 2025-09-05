@@ -139,7 +139,7 @@
                             
                             <p style="margin: 8px 0; color: #6c757d; font-size: 13px;">
                                 Need assistance? Contact our customer support:<br>
-                                <a href="https://wa.me/6285823536364" target="_blank" style="color: #6a11cb; text-decoration: none;">WhatsApp Support</a> or 
+                                <a href="https://wa.me/{{ $cs }}" target="_blank" style="color: #6a11cb; text-decoration: none;">WhatsApp Support</a> or 
                                 <a href="mailto:cs@voiceofsoulchoir.id" style="color: #6a11cb; text-decoration: none;">cs@voiceofsoulchoir.id</a>
                             </p>
                             
