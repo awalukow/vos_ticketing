@@ -241,7 +241,7 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
         'helpCenterUrl' => url('/help'),
         'termsUrl' => url('/terms'),
         'privacyUrl' => url('/privacy'),
-        'cs' => $customerService ?? '',
+        'cs' => $customerService->value ?? '',
     ];
 
     try {

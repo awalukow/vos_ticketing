@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailNotification; // Assuming you have a Mailable class defined for the email notification
 use App\Mail\BookingConfirmation;
 use App\Mail\PaymentConfirmation;
-use App\Mail\AppSetting;
+use App\Models\AppSetting;
 use Illuminate\Support\Facades\DB;
 
 class PemesananController extends Controller
@@ -548,7 +548,6 @@ class PemesananController extends Controller
                 'rowstatus' => 0,
                 'isChurch' => false,
                 'isFisik' => false,
-                'cs' => $customerService ?? '',
             ]);   
             }
             else{
@@ -565,7 +564,6 @@ class PemesananController extends Controller
                 'rowstatus' => 0,
                 'isChurch' => false,
                 'isFisik' => false,
-                'cs' => $customerService ?? '',
             ]);   
             } 
 
@@ -595,6 +593,7 @@ class PemesananController extends Controller
                 'helpCenterUrl' => url('/help'),
                 'termsUrl'      => url('/terms'),
                 'privacyUrl'    => url('/privacy'),
+                'cs' => $customerService->value ?? '',
                 //'paymentExpiry' => Carbon::parse($pemesanan->expired_date)->format('d F Y H:i') . ' WIB',
             ];
             Mail::to(Auth::user()->email)->send(new BookingConfirmation($emailData));
@@ -614,6 +613,7 @@ class PemesananController extends Controller
                 'helpCenterUrl' => url('/help'),
                 'termsUrl'      => url('/terms'),
                 'privacyUrl'    => url('/privacy'),
+                'cs' => $customerService->value ?? '',
                 //'paymentExpiry' => Carbon::parse($pemesanan->expired_date)->format('d F Y H:i') . ' WIB',
             ];
             try {
