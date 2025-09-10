@@ -447,7 +447,7 @@
         
         <div class="card-body">
           <div class="event-info">
-            <div class="event-date">{{ $eventDate->value }}</div>
+            <div class="event-date">{{ $eventDate }}</div>
             <div class="event-time">{{ date('H:i', strtotime($data->rute->jam)) }} WIB</div>
           </div>
         </div>
