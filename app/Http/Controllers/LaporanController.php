@@ -96,7 +96,7 @@ class LaporanController extends Controller
         $eventDate = '09 November 2025';
 
         if ($data) {
-            return view('server.laporan.show', compact('data', 'customerService'));
+            return view('server.laporan.show', compact('data', 'customerService', 'eventDate'));
         } else {
             return redirect()->back()->with('error', 'Kode Transaksi Tidak Ditemukan!');
         }
