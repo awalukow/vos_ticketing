@@ -10,7 +10,7 @@
 @php
     $currentDateTime = Carbon::now();
     if (env('APP_ENV') == 'production') {
-        $targetDateTime = Carbon::create(2024, 7, 20, 8, 0, 0);
+        $targetDateTime = Carbon::create(2025, 11, 9, 5, 0, 0);
     } else {
         $targetDateTime = $currentDateTime;
     }
@@ -447,7 +447,7 @@
         
         <div class="card-body">
           <div class="event-info">
-            <div class="event-date">Minggu, 09 November 2024</div>
+            <div class="event-date">{{ $eventDate->value }}</div>
             <div class="event-time">{{ date('H:i', strtotime($data->rute->jam)) }} WIB</div>
           </div>
         </div>

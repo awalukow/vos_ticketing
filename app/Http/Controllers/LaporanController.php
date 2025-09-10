@@ -93,6 +93,7 @@ class LaporanController extends Controller
                     ->first();
 
         $customerService = AppSetting::getCustomerService();
+        $eventDate = '09 November 2025';
 
         if ($data) {
             return view('server.laporan.show', compact('data', 'customerService'));
