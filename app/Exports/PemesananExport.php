@@ -13,6 +13,7 @@ class PemesananExport implements FromCollection, WithHeadings
     {
         return Pemesanan::with(['penumpang', 'rute.transportasi', 'petugas'])
             ->where('status', 'Sudah Bayar')
+            ->where('RowStatus', '>=', 0)
             ->get()
             ->map(function ($p) {
                 return [

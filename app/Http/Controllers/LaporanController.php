@@ -17,9 +17,15 @@ use App\Mail\EmailNotification; // Assuming you have a Mailable class defined fo
 use App\Mail\PaymentConfirmation;
 use App\Models\AppSetting; 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Services\WhatsAppService;
+
 
 class LaporanController extends Controller
 {
+    public function __construct(WhatsAppService $whatsAppService)
+    {
+        $this->whatsAppService = $whatsAppService;
+    }
     public function index()
     {
         $pemesanan = Pemesanan::with('rute', 'penumpang', 'petugas')
@@ -166,6 +172,37 @@ class LaporanController extends Controller
         }
         $transaksi->save();
 
+        // Send email admin
+        $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pembayaran dengan kode pesanan ' . $transaksi->kode . ' sudah diterima. Mohon segera dikonfirmasi!
+    Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . ', ' . url('/transaksi/' . $transaksi->kode);
+        $emailDataAdmin = [
+            'subject' => '[VOS] Pesanan Masuk - Kode Booking : ' . $transaksi->kode,
+            'content' => $messageAdmin // You can customize the email content as per your requirements
+        ];
+        if (env('APP_ENV') == 'production') {
+            // Get all users who are not Penumpang level
+            $admins = User::where('level', '!=', 'Penumpang')
+                        ->where('level', '!=', 'Petugas')
+                        ->get();
+            
+            // Send email to each non-Penumpang user
+            foreach ($admins as $user) {
+                Mail::to($user->email)->send(new EmailNotification($emailDataAdmin));
+                $responseAdmin = $this->whatsAppService->sendWA($user->contactPerson, 'HX7f3af4dfbf1e8eb58d382246dd8cb87e', [
+                    "code" => "" . $transaksi->kode . "",
+                ]);
+            }
+        }
+        else{
+            //Mail::to("axcellentwalukow@gmail.com")->send(new EmailNotification($emailDataAdmin));
+            //Mail::to("cs@voiceofsoulchoir.id")->send(new EmailNotification($emailData)); // cs
+            //Mail::to("ticketing@voiceofsoulchoir.id")->send(new BookingConfirmation($emailData)); // cs
+            //$responseAdmin = $this->whatsAppService->sendMessage('+6285156651097', $messageAdmin);
+            $responseAdmin = $this->whatsAppService->sendWA('6285156651097', 'HX7f3af4dfbf1e8eb58d382246dd8cb87e', [
+                    "code" => "" . $transaksi->kode . "",
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi.');
     }
 
@@ -195,19 +232,6 @@ class LaporanController extends Controller
     $pemesanan->petugas_id = Auth::user()->id;
     $pemesanan->status_pembayaran = 'Sudah Verifikasi';
     $pemesanan->save();
-
-    // Define $destination and $message for WA
-    $destination = $penumpang->username;
-    $message = '*[NOTIFIKASI VOS] PEMBAYARAN BERHASIL*
-Tiket konser INTERVAL | VOS Pre Competition Concert, 20 Juli 2024.
-
-Kode booking: ' . $pemesanan->kode . ' 
-Jumlah Tiket: ' . $pemesanan->kursi . '
-Total Biaya: ' . $pemesanan->total . '
-Status Pembayaran: *BERHASIL*
-
-untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau http://wa.me/6287780553668 (Tiara)';
-
     // Process seats - handle both string and array formats
     $seats = $pemesanan->kursi;
     $seatArray = [];
@@ -248,6 +272,30 @@ untuk informasi lebih lanjut hubungi: http://wa.me/6285823536364 (Jean) atau htt
     try {
         // Send payment confirmation email
         Mail::to($penumpang->email)->send(new PaymentConfirmation($emailData));
+        if (env('APP_ENV') == 'production') {
+             if(auth()->user()->level != 'Penumpang'){
+                $WAtoCustomer = $this->whatsAppService->sendWA($penumpang->contactPerson, 'HX8059954450eebff37d0c37774d561809', [
+                    "code" => "" . $pemesanan->kode . "",
+                ]);
+            }
+            else{
+                $WAtoCustomer = $this->whatsAppService->sendWA($penumpang->username, 'HX8059954450eebff37d0c37774d561809', [
+                    "code" => "" . $pemesanan->kode . "",
+                ]);
+            }
+        }
+        else{
+            if(auth()->user()->level != 'Penumpang'){
+                $WAtoCustomer = $this->whatsAppService->sendWA('+6285156651097', 'HX8059954450eebff37d0c37774d561809', [
+                    "code" => "" . $pemesanan->kode . "",
+                ]);
+            }
+            else{
+                $WAtoCustomer = $this->whatsAppService->sendWA('+6285156651097', 'HX8059954450eebff37d0c37774d561809', [
+                    "code" => "" . $pemesanan->kode . "",
+                ]);
+            }
+        }
         
         // Send copy to CS
         Mail::to("ticketing@voiceofsoulchoir.id")->send(new PaymentConfirmation($emailData));

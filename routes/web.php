@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
 use App\Exports\PemesananExport;
+use App\Services\WhatsAppService;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -35,6 +36,21 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
     Route::get('/adminRegister', [RegisterController::class, 'showAdminRegistrationForm'])->name('admin-register');
     Route::post('/adminRegister', [RegisterController::class, 'fastRegister'])->name('admin-register');
     Route::get('/view/pdf', [RegisterController::class, 'view_pdf']);
+
+    Route::get('/test-whatsapp', function (WhatsAppService $whatsAppService) {
+        //$whatsAppService->sendMessage('+6285156651097', 'Test message from Laravel!');
+        $whatsAppService->sendWA('6285156651097', 'HX67e0f598e604b2044fc7cdac0162ca56', [
+                "event_name" => "VOS 20th Anniversary Concert @ Balai Resital Kartanegara",
+                "event_date" => "09 November 2025",
+                "code" => "123456",
+            ]);
+        return 'Message sent!';
+    });
+
+    Route::get('/send-sms', function (WhatsAppService $smsService) {
+        $smsService->sendSms('6285156651097', 'SMS Test Done!');
+        return 'SMS sent!';
+    });
 
     // Password Reset Routes...
     Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');

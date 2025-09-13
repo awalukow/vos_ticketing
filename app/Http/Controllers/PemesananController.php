@@ -19,6 +19,7 @@ use App\Mail\BookingConfirmation;
 use App\Mail\PaymentConfirmation;
 use App\Models\AppSetting;
 use Illuminate\Support\Facades\DB;
+use App\Services\WhatsAppService;
 
 class PemesananController extends Controller
 {
@@ -27,6 +28,10 @@ class PemesananController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct(WhatsAppService $whatsAppService)
+    {
+        $this->whatsAppService = $whatsAppService;
+    }
     public function index_backup()
     {
         $ruteAwal = Rute::orderBy('start')->get()->groupBy('start');
@@ -621,35 +626,14 @@ class PemesananController extends Controller
                 if($email != null && filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     Mail::to($email)->send(new PaymentConfirmation($emailData));
                 }
+                $WAtoCustomer = $this->whatsAppService->sendWA(Auth::user()->contactPerson, 'HX8059954450eebff37d0c37774d561809', [
+                    "code" => "" . $kodePemesanan . "",
+                ]);
             } catch (\Exception $e) {
                 \Log::error('Email sending failed: ' . $e->getMessage());
                 // Don't fail the entire transaction if email fails
             }
         }
-        
-        // Send email admin
-        $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan ' . $kodePemesanan . ' sudah diterima. Mohon segera dikonfirmasi!
-    Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
-        $emailDataAdmin = [
-            'subject' => '[VOS] Pesanan Masuk - Kode Booking : ' . $kodePemesanan,
-            'content' => $messageAdmin // You can customize the email content as per your requirements
-        ];
-        if (env('APP_ENV') == 'production') {
-            // Get all users who are not Penumpang level
-            $admins = User::where('level', '!=', 'Penumpang')
-                        ->where('level', '!=', 'Petugas')
-                        ->get();
-            
-            // Send email to each non-Penumpang user
-            foreach ($admins as $user) {
-                Mail::to($user->email)->send(new EmailNotification($emailDataAdmin));
-            }
-        }
-        else{
-            Mail::to("axcellentwalukow@gmail.com")->send(new EmailNotification($emailDataAdmin));
-        }
-        //Mail::to("cs@voiceofsoulchoir.id")->send(new EmailNotification($emailData)); // cs
-        //Mail::to("ticketing@voiceofsoulchoir.id")->send(new BookingConfirmation($emailData)); // cs
 
         } catch (\Exception $e) {
             DB::rollBack();

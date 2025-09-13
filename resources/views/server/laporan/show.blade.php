@@ -446,8 +446,9 @@
         </div>
         
         <div class="card-body">
-          <div class="event-info">
-            <div class="event-date">{{ $eventDate }}</div>
+          <div class="event-info"><div class="event-date">
+              {{ \Carbon\Carbon::parse($data->rute->transportasi->category->EventDate)->translatedFormat('l, d F Y') }}
+          </div>
             <div class="event-time">{{ date('H:i', strtotime($data->rute->jam)) }} WIB</div>
           </div>
         </div>
