@@ -222,7 +222,7 @@ class LaporanController extends Controller
     // Get passenger info
     $penumpang = DB::table('users')
                 ->join('pemesanan', 'users.id', '=', 'pemesanan.penumpang_id')
-                ->select('users.username', 'users.email')
+                ->select('users.username', 'users.email', 'users.username', 'users.contactPerson')
                 ->where('pemesanan.kode', '=', $pemesanan->kode)
                 ->first();
 
