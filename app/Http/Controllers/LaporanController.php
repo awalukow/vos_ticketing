@@ -188,9 +188,11 @@ class LaporanController extends Controller
             // Send email to each non-Penumpang user
             foreach ($admins as $user) {
                 Mail::to($user->email)->send(new EmailNotification($emailDataAdmin));
-                $responseAdmin = $this->whatsAppService->sendWA($user->contactPerson, 'HX7f3af4dfbf1e8eb58d382246dd8cb87e', [
-                    "code" => "" . $transaksi->kode . "",
-                ]);
+                if($user->contactPerson){
+                    $responseAdmin = $this->whatsAppService->sendWA($user->contactPerson, 'HX7f3af4dfbf1e8eb58d382246dd8cb87e', [
+                        "code" => "" . $transaksi->kode . "",
+                    ]);
+                }
             }
         }
         else{

@@ -626,9 +626,11 @@ class PemesananController extends Controller
                 if($email != null && filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     Mail::to($email)->send(new PaymentConfirmation($emailData));
                 }
-                $WAtoCustomer = $this->whatsAppService->sendWA(Auth::user()->contactPerson, 'HX8059954450eebff37d0c37774d561809', [
-                    "code" => "" . $kodePemesanan . "",
-                ]);
+                if(Auth::user()->contactPerson){
+                    $WAtoCustomer = $this->whatsAppService->sendWA(Auth::user()->contactPerson, 'HX8059954450eebff37d0c37774d561809', [
+                        "code" => "" . $kodePemesanan . "",
+                    ]);
+                }
             } catch (\Exception $e) {
                 \Log::error('Email sending failed: ' . $e->getMessage());
                 // Don't fail the entire transaction if email fails
