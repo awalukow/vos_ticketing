@@ -286,12 +286,12 @@ class LaporanController extends Controller
         }
         else{
             if(auth()->user()->level != 'Penumpang'){
-                $WAtoCustomer = $this->whatsAppService->sendWA('+6285156651097', 'HX8059954450eebff37d0c37774d561809', [
+                $WAtoCustomer = $this->whatsAppService->sendWA('6285156651097', 'HX8059954450eebff37d0c37774d561809', [
                     "code" => "" . $pemesanan->kode . "",
                 ]);
             }
             else{
-                $WAtoCustomer = $this->whatsAppService->sendWA('+6285156651097', 'HX8059954450eebff37d0c37774d561809', [
+                $WAtoCustomer = $this->whatsAppService->sendWA('6285156651097', 'HX8059954450eebff37d0c37774d561809', [
                     "code" => "" . $pemesanan->kode . "",
                 ]);
             }
