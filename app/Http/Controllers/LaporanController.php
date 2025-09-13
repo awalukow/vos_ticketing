@@ -222,7 +222,7 @@ class LaporanController extends Controller
     // Get passenger info
     $penumpang = DB::table('users')
                 ->join('pemesanan', 'users.id', '=', 'pemesanan.penumpang_id')
-                ->select('users.username', 'users.email', 'users.username', 'users.contactPerson')
+                ->select('users.username', 'users.email', 'users.contactPerson')
                 ->where('pemesanan.kode', '=', $pemesanan->kode)
                 ->first();
 
@@ -276,6 +276,9 @@ class LaporanController extends Controller
         // Send payment confirmation email
         Mail::to($penumpang->email)->send(new PaymentConfirmation($emailData));
         if (env('APP_ENV') == 'production') {
+            $WAtoCustomer = $this->whatsAppService->sendWA($penumpang->username, 'HX8059954450eebff37d0c37774d561809', [
+                    "code" => "" . $pemesanan->kode . "",
+                ]);
              if(auth()->user()->level != 'Penumpang'){
                 $WAtoCustomer = $this->whatsAppService->sendWA($penumpang->contactPerson, 'HX8059954450eebff37d0c37774d561809', [
                     "code" => "" . $pemesanan->kode . "",
