@@ -195,6 +195,23 @@ class HomeController extends Controller
                                     ->where('rowstatus', '>=', 0)
                                     ->selectRaw('SUM(JSON_LENGTH(kursi)) as total_seats')
                                     ->value('total_seats') ?? 0;
+        // ============= REFERRAL RANKING =============
+        $referralRankings = Pemesanan::select('referral')
+            ->whereNotNull('referral')
+            ->where('referral', '!=', '')
+            ->selectRaw('COUNT(*) as total_orders')
+            ->selectRaw('SUM(total) as total_revenue')
+            ->groupBy('referral')
+            ->orderByDesc('total_orders')
+            ->orderByDesc('total_revenue') // secondary sort
+            ->limit(10)
+            ->get();
+
+        // Add rank number (1st, 2nd, 3rd...)
+        $rankedReferrals = $referralRankings->map(function ($item, $index) {
+            $item->rank = $index + 1;
+            return $item;
+        });
     
         // Add calculations for each route
         foreach ($rute_table as $rute) {
@@ -332,7 +349,7 @@ class HomeController extends Controller
 
         return view('server.home', compact(
             'ruteCount', 'pendapatan', 'rute_table', 'transportasiCount', 'userCount', 
-            'pendingTicketCount', 'paidTicketCount', 'sortedChurches'
+            'pendingTicketCount', 'paidTicketCount', 'sortedChurches', 'rankedReferrals'
         ));
     }
 }
