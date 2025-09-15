@@ -10,7 +10,7 @@
   <!-- === SALES SUMMARY SECTION === -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="text-primary fw-bold">📊 Ringkasan Penjualan</h4>
-    <small class="text-muted">Data terbaru per {{ now()->format('d M Y H:i') }}</small>
+    <small class="text-muted">Data terbaru per {{ now()->setTimezone('Asia/Jakarta')->format('d M Y H:i') }}</small>
   </div>
 
   <div class="row g-4 mb-5">
