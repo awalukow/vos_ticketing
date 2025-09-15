@@ -207,7 +207,7 @@ class HomeController extends Controller
             ->groupBy('referral')
             ->orderByDesc('total_orders')
             ->orderByDesc('total_revenue') // secondary sort
-            ->limit(10)
+            //->limit(10)
             ->get();
 
         // Add rank number (1st, 2nd, 3rd...)
