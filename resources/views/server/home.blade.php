@@ -76,7 +76,7 @@
   </div>
 
   <!-- === SALES DETAIL SECTION === -->
-  <h4 class="text-primary fw-bold mb-4">🧾 Detail Penjualan per Rute</h4>
+  <h4 class="text-primary fw-bold mb-4">🧾 Detail Penjualan</h4>
   <div class="row g-4 mb-5">
     @foreach($rute_table as $rute)
       <div class="col-xl-3 col-md-6">
