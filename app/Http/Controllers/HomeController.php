@@ -200,6 +200,8 @@ class HomeController extends Controller
             ->whereNotNull('referral')
             ->where('referral', '!=', '')
             ->where('rowstatus', '>=', 0)
+            ->where('status', 'Sudah Bayar')
+            ->where('status_pembayaran', 'Sudah Verifikasi')
             ->selectRaw('COUNT(*) as total_orders')
             ->selectRaw('SUM(total) as total_revenue')
             ->groupBy('referral')
