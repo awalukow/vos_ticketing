@@ -96,7 +96,6 @@
           </div>
         </div>
       </div>
-      <br>
     @endforeach
 
     <!-- TOTAL KESULURUHAN CARD - Only if 4 or fewer rutes -->
