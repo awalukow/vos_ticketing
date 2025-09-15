@@ -188,11 +188,11 @@
                   @else {{ $referral->rank }}
                   @endif
                 </div>
-                <h6 class="fw-bold text-purple mb-0">{{ Str::limit($referral->referral, 25) }}</h6>
+                <h6 class="fw-bold text-purple mb-0 text-uppercase">{{ Str::limit($referral->referral, 25) }}</h6>
               </div>
               <ul class="list-unstyled small">
-                <li class="mb-1"><strong>📦 Total Orders:</strong> {{ $referral->total_orders }}</li>
-                <li class="mb-1"><strong>💰 Total Revenue:</strong> Rp {{ number_format($referral->total_revenue, 0, ',', '.') }}</li>
+                <li class="mb-1"><strong>📦 Total Pesanan:</strong> {{ $referral->total_orders }}</li>
+                <li class="mb-1"><strong>💰 Total Pendapatan:</strong> Rp {{ number_format($referral->total_revenue, 0, ',', '.') }}</li>
               </ul>
             </div>
           </div>
