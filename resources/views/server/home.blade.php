@@ -90,8 +90,8 @@
               <li class="mb-1"><strong>Belum Lunas:</strong> {{ $rute->unpaid_seat }} kursi</li>
               <li class="mb-1"><strong>Sisa Kursi:</strong> {{ $rute->sisa_kursi }} kursi</li>
               <li class="mb-1"><strong>Nominal Terjual:</strong> Rp {{ number_format($rute->nominal_terjual, 0, ',', '.') }}</li>
-              <li class="mb-1"><strong>Sisa Alokasi Gereja:</strong> {{ $rute->unpaid_seat_church }} kursi</li>
-              <li class="mb-1"><strong>Sisa Tiket Fisik:</strong> {{ $rute->unpaid_seat_fisik }} kursi</li>
+              <!--<li class="mb-1"><strong>Sisa Alokasi Gereja:</strong> {{ $rute->unpaid_seat_church }} kursi</li>
+              <li class="mb-1"><strong>Sisa Tiket Fisik:</strong> {{ $rute->unpaid_seat_fisik }} kursi</li>-->
             </ul>
           </div>
         </div>
