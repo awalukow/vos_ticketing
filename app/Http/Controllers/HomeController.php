@@ -199,6 +199,7 @@ class HomeController extends Controller
         $referralRankings = Pemesanan::select('referral')
             ->whereNotNull('referral')
             ->where('referral', '!=', '')
+            ->wherwe('rowstatus', '>=', 0)
             ->selectRaw('COUNT(*) as total_orders')
             ->selectRaw('SUM(total) as total_revenue')
             ->groupBy('referral')
