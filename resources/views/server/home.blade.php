@@ -173,6 +173,7 @@
   </div>
 
   <!-- === REFERRAL RANKING SECTION === -->
+   <!--
   @if($rankedReferrals->isNotEmpty())
     <h4 class="text-primary fw-bold mb-4 mt-5">🏆 Top Referral Rankings</h4>
     <div class="row g-4">
@@ -200,6 +201,7 @@
       @endforeach
     </div>
   @endif
+-->
 
 </div>
 
