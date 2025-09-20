@@ -58,10 +58,10 @@
     </div>
   </div>
 
-  <!-- ✅ JSQR Library -->
+  <!-- ✅ QR Code Library -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
-  <!-- ✅ Inline JavaScript (No push, guaranteed to run) -->
+  <!-- ✅ Inline JavaScript — Guaranteed to Run -->
   <script>
     console.log("✅ QR Scanner script loaded.");
 
@@ -95,12 +95,26 @@
             video: { facingMode: "environment" }
           });
 
-          console.log("✅ Camera stream received.");
+          console.log("✅ Camera stream received:", stream);
+
+          // Assign stream to video
           video.srcObject = stream;
+
+          // Wait for video metadata to load, then play
+          video.onloadedmetadata = () => {
+            console.log("🎥 Video metadata loaded. Attempting to play...");
+            video.play().catch(err => {
+              console.error("❌ Failed to play video:", err);
+              statusDiv.innerHTML = "<span class='text-danger'>❌ Camera feed failed to start. Try refreshing.</span>";
+            });
+          };
+
+          // Show scanner UI
           scannerContainer.style.display = 'block';
           scanning = true;
           statusDiv.innerHTML = "<span class='text-info'>Scanning... point camera at QR code</span>";
 
+          // Start scanning loop
           const tick = () => {
             if (!scanning) return;
 
@@ -109,9 +123,18 @@
               canvas.width = video.videoWidth;
               canvas.height = video.videoHeight;
               const ctx = canvas.getContext('2d');
+
+              // Draw current video frame to canvas
               ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
               const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
+              // Debug: Check if we got pixel data
+              if (imageData.data.length === 0) {
+                console.warn("⚠️ No pixel data — camera may be inactive or blocked.");
+                return;
+              }
+
+              // Try to decode QR
               const code = jsQR(imageData.data, imageData.width, imageData.height, {
                 inversionAttempts: "dontInvert",
               });
@@ -119,9 +142,9 @@
               if (code) {
                 console.log("✅ QR Code detected:", code.data);
                 kodeInput.value = code.data;
-                statusDiv.innerHTML = "<span class='text-success'>✅ QR Code detected! Scanner closing...</span>";
+                statusDiv.innerHTML = "<span class='text-success'>✅ QR Code read! Scanner closing...</span>";
                 stopScanner();
-                // Uncomment to auto-submit:
+                // Optional: Auto-submit form
                 // document.querySelector('form').submit();
               }
             }
@@ -132,7 +155,7 @@
           requestAnimationFrame(tick);
 
         } catch (err) {
-          console.error("🚨 Camera error:", err);
+          console.error("🚨 Camera access error:", err);
           let message = `<span class='text-danger'>❌ Camera Error</span><br>
                          • Use HTTPS or localhost<br>
                          • Allow camera permission<br>
@@ -162,7 +185,7 @@
         scannerContainer.style.display = 'none';
       }
 
-      console.log("✅ QR Scanner initialized.");
+      console.log("✅ QR Scanner initialized and ready.");
     });
   </script>
 @endsection
