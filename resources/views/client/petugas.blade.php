@@ -32,103 +32,137 @@
                   Cari
                 </button>
               </div>
-              <div class="col-auto">
-                <button type="button" class="btn btn-success px-4" style="font-size: 16px" id="scan-qr-btn">
-                  Scan QR
-                </button>
-              </div>
             </div>
           </form>
 
-          <!-- Hidden Video Element for QR Scanner -->
-          <div id="scanner-container" style="display: none; margin-top: 20px; text-align: center;">
-            <video id="qr-video" width="300" height="225" style="border: 2px solid #000; background: #000;"></video>
-            <p><button id="close-scanner" class="btn btn-secondary btn-sm mt-2">Close Scanner</button></p>
+          <!-- 🆕 QR Scanner Section -->
+          <div id="qr-scanner-section" class="mt-4 p-3 border rounded" style="background: #f8f9fa;">
+            <h5><i class="fas fa-qrcode"></i> QR Code Scanner</h5>
+            <button type="button" class="btn btn-success" id="scan-qr-btn">
+              <i class="fas fa-camera"></i> Scan QR Code
+            </button>
+            <div id="scanner-status" class="mt-2" style="min-height: 1.5em; font-weight: 500;">
+              <span class="text-muted">Click “Scan QR Code” to start.</span>
+            </div>
+
+            <!-- Scanner Video (Hidden by default) -->
+            <div id="scanner-container" style="display: none; margin-top: 20px; text-align: center;">
+              <video id="qr-video" width="300" height="225" style="border: 2px solid #000; background: #000;"></video>
+              <p class="mt-2">
+                <button id="close-scanner" class="btn btn-secondary btn-sm">❌ Close</button>
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-@endsection
 
-@push('scripts')
-  <!-- Include jsQR library -->
+  <!-- ✅ JSQR Library -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
+  <!-- ✅ Inline JavaScript (No push, guaranteed to run) -->
   <script>
+    console.log("✅ QR Scanner script loaded.");
+
     document.addEventListener('DOMContentLoaded', function () {
+      console.log("✅ DOM fully loaded.");
+
       const scanButton = document.getElementById('scan-qr-btn');
       const closeScannerButton = document.getElementById('close-scanner');
       const video = document.getElementById('qr-video');
       const scannerContainer = document.getElementById('scanner-container');
+      const statusDiv = document.getElementById('scanner-status');
       const kodeInput = document.getElementById('kode');
-      const form = document.querySelector('form');
+
+      if (!scanButton) {
+        console.error("🚨 Scan button not found! Check HTML ID.");
+        statusDiv.innerHTML = "<span class='text-danger'>Error: Scan button not found.</span>";
+        return;
+      }
+
+      console.log("✅ Scan button found. Adding click listener...");
 
       let scanning = false;
 
       scanButton.addEventListener('click', async () => {
+        console.log("🖱️ Scan button clicked.");
+        statusDiv.innerHTML = "<span class='text-warning'>Requesting camera access...</span>";
+
         try {
-          // Request camera stream
+          console.log("📹 Requesting camera stream...");
           const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "environment" }
           });
 
+          console.log("✅ Camera stream received.");
           video.srcObject = stream;
           scannerContainer.style.display = 'block';
           scanning = true;
+          statusDiv.innerHTML = "<span class='text-info'>Scanning... point camera at QR code</span>";
 
-          // Start scanning frames
+          const tick = () => {
+            if (!scanning) return;
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+              const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+              });
+
+              if (code) {
+                console.log("✅ QR Code detected:", code.data);
+                kodeInput.value = code.data;
+                statusDiv.innerHTML = "<span class='text-success'>✅ QR Code detected! Scanner closing...</span>";
+                stopScanner();
+                // Uncomment to auto-submit:
+                // document.querySelector('form').submit();
+              }
+            }
+
+            requestAnimationFrame(tick);
+          };
+
           requestAnimationFrame(tick);
 
         } catch (err) {
-          let message = 'Unable to access camera. Please ensure:\n' +
-                        '• You are on HTTPS or localhost\n' +
-                        '• A camera is connected and working\n' +
-                        '• You allowed camera permissions in your browser\n\n' +
-                        'Technical Details: ' + err.message;
-
-          alert(message);
-          console.error("Camera Error:", err);
+          console.error("🚨 Camera error:", err);
+          let message = `<span class='text-danger'>❌ Camera Error</span><br>
+                         • Use HTTPS or localhost<br>
+                         • Allow camera permission<br>
+                         • Check camera is connected<br>
+                         <small>Error: ${err.name || 'Unknown'}</small>`;
+          statusDiv.innerHTML = message;
+          alert(`Camera Access Failed:\n${err.message || 'Unknown error'}`);
         }
       });
 
-      closeScannerButton.addEventListener('click', () => {
-        stopScanner();
-      });
+      if (closeScannerButton) {
+        closeScannerButton.addEventListener('click', () => {
+          console.log("CloseOperation clicked.");
+          stopScanner();
+          statusDiv.innerHTML = "<span class='text-muted'>Scanner closed.</span>";
+        });
+      }
 
       function stopScanner() {
         scanning = false;
         if (video.srcObject) {
-          video.srcObject.getTracks().forEach(track => track.stop());
+          video.srcObject.getTracks().forEach(track => {
+            track.stop();
+            console.log("⏹️ Stopped track:", track.label);
+          });
         }
         scannerContainer.style.display = 'none';
       }
 
-      function tick() {
-        if (!scanning) return;
-
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "dontInvert",
-          });
-
-          if (code) {
-            kodeInput.value = code.data;
-            stopScanner();
-            // Optional: Auto-submit form after scan
-            // form.submit();
-          }
-        }
-
-        requestAnimationFrame(tick);
-      }
+      console.log("✅ QR Scanner initialized.");
     });
   </script>
-@endpush
+@endsection
