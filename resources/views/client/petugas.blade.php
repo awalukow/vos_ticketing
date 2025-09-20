@@ -74,11 +74,16 @@
       const scannerContainer = document.getElementById('scanner-container');
       const statusDiv = document.getElementById('scanner-status');
       const kodeInput = document.getElementById('kode');
+      const cariButton = document.querySelector('form button[type="submit"]'); // 👈 Get "Cari" button
 
       if (!scanButton) {
         console.error("🚨 Scan button not found! Check HTML ID.");
         statusDiv.innerHTML = "<span class='text-danger'>Error: Scan button not found.</span>";
         return;
+      }
+
+      if (!cariButton) {
+        console.warn("⚠️ 'Cari' button not found — auto-submit will not work.");
       }
 
       console.log("✅ Scan button found. Adding click listener...");
@@ -97,10 +102,8 @@
 
           console.log("✅ Camera stream received:", stream);
 
-          // Assign stream to video
           video.srcObject = stream;
 
-          // Wait for video metadata to load, then play
           video.onloadedmetadata = () => {
             console.log("🎥 Video metadata loaded. Attempting to play...");
             video.play().catch(err => {
@@ -109,12 +112,10 @@
             });
           };
 
-          // Show scanner UI
           scannerContainer.style.display = 'block';
           scanning = true;
           statusDiv.innerHTML = "<span class='text-info'>Scanning... point camera at QR code</span>";
 
-          // Start scanning loop
           const tick = () => {
             if (!scanning) return;
 
@@ -123,18 +124,14 @@
               canvas.width = video.videoWidth;
               canvas.height = video.videoHeight;
               const ctx = canvas.getContext('2d');
-
-              // Draw current video frame to canvas
               ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
               const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-              // Debug: Check if we got pixel data
               if (imageData.data.length === 0) {
                 console.warn("⚠️ No pixel data — camera may be inactive or blocked.");
                 return;
               }
 
-              // Try to decode QR
               const code = jsQR(imageData.data, imageData.width, imageData.height, {
                 inversionAttempts: "dontInvert",
               });
@@ -142,10 +139,16 @@
               if (code) {
                 console.log("✅ QR Code detected:", code.data);
                 kodeInput.value = code.data;
-                statusDiv.innerHTML = "<span class='text-success'>✅ QR Code read! Scanner closing...</span>";
+                statusDiv.innerHTML = "<span class='text-success'>✅ QR Code read! Submitting...</span>";
                 stopScanner();
-                // Optional: Auto-submit form
-                // document.querySelector('form').submit();
+
+                // ✅ AUTO CLICK "CARI" BUTTON AFTER SCAN
+                if (cariButton) {
+                  console.log("🖱️ Auto-clicking 'Cari' button...");
+                  cariButton.click();
+                } else {
+                  console.warn("⚠️ 'Cari' button not found — cannot auto-submit.");
+                }
               }
             }
 
@@ -157,10 +160,10 @@
         } catch (err) {
           console.error("🚨 Camera access error:", err);
           let message = `<span class='text-danger'>❌ Camera Error</span><br>
-                         • Use HTTPS or localhost<br>
-                         • Allow camera permission<br>
-                         • Check camera is connected<br>
-                         <small>Error: ${err.name || 'Unknown'}</small>`;
+                        • Use HTTPS or localhost<br>
+                        • Allow camera permission<br>
+                        • Check camera is connected<br>
+                        <small>Error: ${err.name || 'Unknown'}</small>`;
           statusDiv.innerHTML = message;
           alert(`Camera Access Failed:\n${err.message || 'Unknown error'}`);
         }
