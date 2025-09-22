@@ -8,187 +8,204 @@
 @endif
 
 @section('content')
+<div class="container py-4">
   <div class="row justify-content-center">
-    <div class="col-12">
-      <div class="card shadow">
-        <div class="card-body">
-          <form method="POST" action="{{ route('petugas.kode') }}">
+    <div class="col-lg-8 col-md-10">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0 fw-bold text-primary">
+            <i class="fas fa-search me-2"></i> Cari Pemesanan
+          </h5>
+        </div>
+        <div class="card-body p-4">
+
+          <!-- 🔍 Manual Search Form -->
+          <form method="POST" action="{{ route('petugas.kode') }}" class="mb-4">
             @csrf
-            <div class="row">
-              <div class="col">
-                <div class="form-group" style="margin-bottom: 0">
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="kode"
-                    name="kode"
-                    placeholder="Kode Pemesanan"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="col-auto">
-                <button type="submit" class="btn btn-primary px-4" style="font-size: 16px">
-                  Cari
-                </button>
-              </div>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-start-pill"
+                id="kode"
+                name="kode"
+                placeholder="Masukkan Kode Pemesanan"
+                required
+                aria-label="Kode Pemesanan"
+              />
+              <button type="submit" class="btn btn-primary btn-lg rounded-end-pill px-4 fw-semibold">
+                <i class="fas fa-search me-1"></i> Cari
+              </button>
             </div>
           </form>
 
-          <!-- 🆕 QR Scanner Section -->
-          <div id="qr-scanner-section" class="mt-4 p-3 border rounded" style="background: #f8f9fa;">
-            <h5><i class="fas fa-qrcode"></i> QR Code Scanner</h5>
-            <button type="button" class="btn btn-success" id="scan-qr-btn">
-              <i class="fas fa-camera"></i> Scan QR Code
+          <!-- 📷 QR Scanner Section -->
+          <div class="border rounded-3 p-4 bg-light position-relative" id="qr-scanner-section">
+            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+              <i class="fas fa-qrcode text-success"></i> Pindai QR Code
+            </h6>
+
+            <button
+              type="button"
+              id="scan-qr-btn"
+              class="btn btn-success btn-lg w-100 mb-3 py-3 fw-bold rounded-3"
+              aria-label="Mulai pemindaian QR Code"
+            >
+              <i class="fas fa-camera me-2"></i> Mulai Pemindaian QR
             </button>
-            <div id="scanner-status" class="mt-2" style="min-height: 1.5em; font-weight: 500;">
-              <span class="text-muted">Click “Scan QR Code” to start.</span>
+
+            <div id="scanner-status" class="text-center small text-muted fst-italic py-2">
+              Tekan tombol di atas untuk memulai pemindaian.
             </div>
 
-            <!-- Scanner Video (Hidden by default) -->
-            <div id="scanner-container" style="display: none; margin-top: 20px; text-align: center;">
-              <video id="qr-video" width="300" height="225" style="border: 2px solid #000; background: #000;"></video>
-              <p class="mt-2">
-                <button id="close-scanner" class="btn btn-secondary btn-sm">❌ Close</button>
+            <!-- Scanner Video Container (Hidden by default) -->
+            <div id="scanner-container" class="text-center mt-4" style="display: none;">
+              <div class="position-relative d-inline-block">
+                <video
+                  id="qr-video"
+                  width="320"
+                  height="240"
+                  class="border rounded bg-black"
+                  playsinline
+                  muted
+                ></video>
+                <div class="position-absolute top-0 start-0 w-100 h-100 rounded border border-2 border-warning opacity-50 d-none" id="scan-overlay">
+                  <div class="h-100 w-100 d-flex align-items-center justify-content-center">
+                    <div class="spinner-border text-warning" role="status">
+                      <span class="visually-hidden">Scanning...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="mt-3">
+                <button id="close-scanner" class="btn btn-outline-secondary btn-sm px-4 rounded-pill">
+                  <i class="fas fa-times me-1"></i> Batal
+                </button>
               </p>
             </div>
+
           </div>
+
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ✅ QR Code Library -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<!-- ✅ QR Code Library (jsQR) -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
-  <!-- ✅ Inline JavaScript — Guaranteed to Run -->
-  <script>
-    console.log("✅ QR Scanner script loaded.");
+<!-- ✅ QR Scanner Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const scanButton       = document.getElementById('scan-qr-btn');
+  const closeBtn         = document.getElementById('close-scanner');
+  const video            = document.getElementById('qr-video');
+  const scannerContainer = document.getElementById('scanner-container');
+  const statusDiv        = document.getElementById('scanner-status');
+  const kodeInput        = document.getElementById('kode');
+  const cariButton       = document.querySelector('form button[type="submit"]');
+  const scanOverlay      = document.getElementById('scan-overlay');
 
-    document.addEventListener('DOMContentLoaded', function () {
-      console.log("✅ DOM fully loaded.");
+  if (!scanButton) {
+    statusDiv.innerHTML = "<span class='text-danger'>Error: Tombol scan tidak ditemukan.</span>";
+    return;
+  }
 
-      const scanButton = document.getElementById('scan-qr-btn');
-      const closeScannerButton = document.getElementById('close-scanner');
-      const video = document.getElementById('qr-video');
-      const scannerContainer = document.getElementById('scanner-container');
-      const statusDiv = document.getElementById('scanner-status');
-      const kodeInput = document.getElementById('kode');
-      const cariButton = document.querySelector('form button[type="submit"]'); // 👈 Get "Cari" button
+  let scanning = false;
 
-      if (!scanButton) {
-        console.error("🚨 Scan button not found! Check HTML ID.");
-        statusDiv.innerHTML = "<span class='text-danger'>Error: Scan button not found.</span>";
-        return;
-      }
+  // Start scanning
+  scanButton.addEventListener('click', async () => {
+    statusDiv.innerHTML = "<span class='text-warning'>Meminta akses kamera...</span>";
+    scanOverlay.classList.remove('d-none');
 
-      if (!cariButton) {
-        console.warn("⚠️ 'Cari' button not found — auto-submit will not work.");
-      }
-
-      console.log("✅ Scan button found. Adding click listener...");
-
-      let scanning = false;
-
-      scanButton.addEventListener('click', async () => {
-        console.log("🖱️ Scan button clicked.");
-        statusDiv.innerHTML = "<span class='text-warning'>Requesting camera access...</span>";
-
-        try {
-          console.log("📹 Requesting camera stream...");
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" }
-          });
-
-          console.log("✅ Camera stream received:", stream);
-
-          video.srcObject = stream;
-
-          video.onloadedmetadata = () => {
-            console.log("🎥 Video metadata loaded. Attempting to play...");
-            video.play().catch(err => {
-              console.error("❌ Failed to play video:", err);
-              statusDiv.innerHTML = "<span class='text-danger'>❌ Camera feed failed to start. Try refreshing.</span>";
-            });
-          };
-
-          scannerContainer.style.display = 'block';
-          scanning = true;
-          statusDiv.innerHTML = "<span class='text-info'>Scanning... point camera at QR code</span>";
-
-          const tick = () => {
-            if (!scanning) return;
-
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-              const canvas = document.createElement('canvas');
-              canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-              if (imageData.data.length === 0) {
-                console.warn("⚠️ No pixel data — camera may be inactive or blocked.");
-                return;
-              }
-
-              const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: "dontInvert",
-              });
-
-              if (code) {
-                console.log("✅ QR Code detected:", code.data);
-                kodeInput.value = code.data;
-                statusDiv.innerHTML = "<span class='text-success'>✅ QR Code read! Submitting...</span>";
-                stopScanner();
-
-                // ✅ AUTO CLICK "CARI" BUTTON AFTER SCAN
-                if (cariButton) {
-                  console.log("🖱️ Auto-clicking 'Cari' button...");
-                  cariButton.click();
-                } else {
-                  console.warn("⚠️ 'Cari' button not found — cannot auto-submit.");
-                }
-              }
-            }
-
-            requestAnimationFrame(tick);
-          };
-
-          requestAnimationFrame(tick);
-
-        } catch (err) {
-          console.error("🚨 Camera access error:", err);
-          let message = `<span class='text-danger'>❌ Camera Error</span><br>
-                        • Use HTTPS or localhost<br>
-                        • Allow camera permission<br>
-                        • Check camera is connected<br>
-                        <small>Error: ${err.name || 'Unknown'}</small>`;
-          statusDiv.innerHTML = message;
-          alert(`Camera Access Failed:\n${err.message || 'Unknown error'}`);
-        }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }
       });
 
-      if (closeScannerButton) {
-        closeScannerButton.addEventListener('click', () => {
-          console.log("CloseOperation clicked.");
-          stopScanner();
-          statusDiv.innerHTML = "<span class='text-muted'>Scanner closed.</span>";
+      video.srcObject = stream;
+
+      video.onloadedmetadata = () => {
+        video.play().catch(err => {
+          console.error("❌ Gagal memainkan video:", err);
+          statusDiv.innerHTML = "<span class='text-danger'>❌ Gagal memulai kamera. Coba refresh halaman.</span>";
+          scanOverlay.classList.add('d-none');
         });
-      }
+      };
 
-      function stopScanner() {
-        scanning = false;
-        if (video.srcObject) {
-          video.srcObject.getTracks().forEach(track => {
-            track.stop();
-            console.log("⏹️ Stopped track:", track.label);
+      scannerContainer.style.display = 'block';
+      scanning = true;
+      statusDiv.innerHTML = "<span class='text-info'>Memindai... arahkan kamera ke QR Code</span>";
+
+      const tick = () => {
+        if (!scanning) return;
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+          if (imageData.data.length === 0) return;
+
+          const code = jsQR(imageData.data, canvas.width, canvas.height, {
+            inversionAttempts: "dontInvert",
           });
-        }
-        scannerContainer.style.display = 'none';
-      }
 
-      console.log("✅ QR Scanner initialized and ready.");
+          if (code) {
+            kodeInput.value = code.data;
+            statusDiv.innerHTML = "<span class='text-success'>✅ QR Code terdeteksi! Mengirimkan...</span>";
+            stopScanner();
+
+            if (cariButton) {
+              setTimeout(() => cariButton.click(), 300); // slight delay for UX
+            } else {
+              console.warn("⚠️ Tombol 'Cari' tidak ditemukan — otomatisasi dibatalkan.");
+            }
+          }
+        }
+
+        requestAnimationFrame(tick);
+      };
+
+      requestAnimationFrame(tick);
+
+    } catch (err) {
+      console.error("🚨 Error akses kamera:", err);
+      statusDiv.innerHTML = `
+        <div class="text-danger small">
+          ❌ Gagal mengakses kamera.<br>
+          • Pastikan menggunakan HTTPS/localhost<br>
+          • Izinkan akses kamera<br>
+          • Periksa koneksi perangkat<br>
+          <small>${err.name}: ${err.message}</small>
+        </div>`;
+      alert(`Gagal mengakses kamera: ${err.message}`);
+      scanOverlay.classList.add('d-none');
+    }
+  });
+
+  // Close scanner
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      stopScanner();
+      statusDiv.innerHTML = "<span class='text-muted'>Pemindaian dibatalkan.</span>";
     });
-  </script>
+  }
+
+  // Stop scanner function
+  function stopScanner() {
+    scanning = false;
+    scanOverlay.classList.add('d-none');
+    if (video.srcObject) {
+      video.srcObject.getTracks().forEach(track => track.stop());
+    }
+    scannerContainer.style.display = 'none';
+  }
+
+  console.log("✅ QR Scanner siap digunakan.");
+});
+</script>
 @endsection
