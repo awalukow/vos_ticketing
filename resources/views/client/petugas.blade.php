@@ -60,6 +60,7 @@
             <!-- Scanner Video Container (Hidden by default) -->
             <div id="scanner-container" class="text-center mt-4" style="display: none;">
               <div class="position-relative d-inline-block">
+                <!-- 🎥 Live Camera Feed — No overlay/spinner -->
                 <video
                   id="qr-video"
                   width="320"
@@ -68,14 +69,8 @@
                   playsinline
                   muted
                 ></video>
-                <div class="position-absolute top-0 start-0 w-100 h-100 rounded border border-2 border-warning opacity-50 d-none" id="scan-overlay">
-                  <div class="h-100 w-100 d-flex align-items-center justify-content-center">
-                    <div class="spinner-border text-warning" role="status">
-                      <span class="visually-hidden">Scanning...</span>
-                    </div>
-                  </div>
-                </div>
               </div>
+
               <p class="mt-3">
                 <button id="close-scanner" class="btn btn-outline-secondary btn-sm px-4 rounded-pill">
                   <i class="fas fa-times me-1"></i> Batal
@@ -104,7 +99,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const statusDiv        = document.getElementById('scanner-status');
   const kodeInput        = document.getElementById('kode');
   const cariButton       = document.querySelector('form button[type="submit"]');
-  const scanOverlay      = document.getElementById('scan-overlay');
 
   if (!scanButton) {
     statusDiv.innerHTML = "<span class='text-danger'>Error: Tombol scan tidak ditemukan.</span>";
@@ -116,7 +110,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // Start scanning
   scanButton.addEventListener('click', async () => {
     statusDiv.innerHTML = "<span class='text-warning'>Meminta akses kamera...</span>";
-    scanOverlay.classList.remove('d-none');
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -129,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function () {
         video.play().catch(err => {
           console.error("❌ Gagal memainkan video:", err);
           statusDiv.innerHTML = "<span class='text-danger'>❌ Gagal memulai kamera. Coba refresh halaman.</span>";
-          scanOverlay.classList.add('d-none');
         });
       };
 
@@ -155,14 +147,20 @@ document.addEventListener('DOMContentLoaded', function () {
           });
 
           if (code) {
-            kodeInput.value = code.data;
+            kodeInput.value = code.data.trim();
+
+            // ✅ Vibrate on success
+            if (navigator.vibrate) {
+              navigator.vibrate([100, 50, 100]);
+            }
+
             statusDiv.innerHTML = "<span class='text-success'>✅ QR Code terdeteksi! Mengirimkan...</span>";
             stopScanner();
 
             if (cariButton) {
-              setTimeout(() => cariButton.click(), 300); // slight delay for UX
+              setTimeout(() => cariButton.click(), 300);
             } else {
-              console.warn("⚠️ Tombol 'Cari' tidak ditemukan — otomatisasi dibatalkan.");
+              console.warn("⚠️ Tombol 'Cari' tidak ditemukan.");
             }
           }
         }
@@ -183,7 +181,6 @@ document.addEventListener('DOMContentLoaded', function () {
           <small>${err.name}: ${err.message}</small>
         </div>`;
       alert(`Gagal mengakses kamera: ${err.message}`);
-      scanOverlay.classList.add('d-none');
     }
   });
 
@@ -198,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // Stop scanner function
   function stopScanner() {
     scanning = false;
-    scanOverlay.classList.add('d-none');
     if (video.srcObject) {
       video.srcObject.getTracks().forEach(track => track.stop());
     }
