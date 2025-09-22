@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
           if (imageData.data.length === 0) {
-            console.warn("⚠️ Tidak ada data gambar — kamera mungkin tidak aktif.");
+            requestAnimationFrame(tick); // ← Keep looping
             return;
           }
 
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
           if (code) {
             const result = code.data.trim();
-            console.log("🔍 QR Terdeteksi:", result); // 👈 DEBUG LOG
+            console.log("🔍 QR Terdeteksi:", result);
 
             // ❌ Invalid: URL
             if (result.startsWith('http://') || result.startsWith('https://')) {
@@ -174,13 +174,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
               }, 3000);
 
-              return; // Keep scanning
+              // ❗❗❗ IMPORTANT: Continue scanning — do NOT return without scheduling next frame
+              requestAnimationFrame(tick);
+              return;
             }
 
             // ✅ Valid: Non-URL and not empty
             if (result === "") {
               console.warn("⚠️ QR kosong terdeteksi — abaikan.");
               statusDiv.innerHTML = "<span class='text-warning'>QR kosong. Coba lagi.</span>";
+              requestAnimationFrame(tick); // ← Keep scanning
               return;
             }
 
@@ -192,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             statusDiv.innerHTML = "<span class='text-success fw-bold'>✅ QR Code diterima! Mengirimkan...</span>";
 
-            // Delay 300ms for UX
             setTimeout(() => {
               if (cariButton) {
                 console.log("🖱️ Klik tombol 'Cari'...");
@@ -203,9 +205,12 @@ document.addEventListener('DOMContentLoaded', function () {
               }
               stopScanner();
             }, 300);
+
+            return; // ← Stop scanning after valid scan (intentional)
           }
         }
 
+        // ✅ Always schedule next frame unless intentionally stopped
         requestAnimationFrame(tick);
       };
 
