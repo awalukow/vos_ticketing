@@ -151,18 +151,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // ✅ Check if it's a URL → INVALID
             if (result.startsWith('http://') || result.startsWith('https://')) {
-              // ❗ Vibrate for error feedback
+              // ❗ Vibrate for error feedback (mobile)
               if (navigator.vibrate) {
-                navigator.vibrate([50, 100, 50]); // short error buzz
+                navigator.vibrate([50, 100, 50]);
               }
 
+              // 🚨 Show clear error (visible on PC too)
               statusDiv.innerHTML = `
                 <div class="text-danger fw-bold d-flex align-items-center gap-2">
                   <i class="fas fa-exclamation-triangle"></i>
                   ❌ Bukan QR seat
                 </div>`;
 
-              // ❗ Keep scanning — don't stop or submit
+              // ❗ Do NOT stop scanner — keep scanning
               return;
             }
 
@@ -171,11 +172,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // ✅ Vibrate for success
             if (navigator.vibrate) {
-              navigator.vibrate([100, 50, 100]); // success buzz pattern
+              navigator.vibrate([100, 50, 100]);
             }
 
             statusDiv.innerHTML = "<span class='text-success'>✅ QR Code terdeteksi! Mengirimkan...</span>";
-            stopScanner();
+            stopScanner(); // ✅ Stop only on valid scan
 
             if (cariButton) {
               setTimeout(() => cariButton.click(), 300);
