@@ -130,6 +130,18 @@ class LaporanController extends Controller
         return redirect()->route('transaksi.show', $kode);
     }
 
+    public function show($id)
+    {
+        $data = Pemesanan::with('rute.transportasi.category', 'penumpang')->where('kode', $id)->where('rowstatus','>=',0)->first();
+        //dd(Carbon::now());
+        //dd(env('APP_ENV'));
+        if ($data) {
+            return view('server.laporan.show', compact('data'));
+        } else {
+            return redirect()->back()->with('error', 'Kode Transaksi Tidak Ditemukan!');
+        }
+    }
+
     public function uploadBuktiPembayaran(Request $request, $id)
     {
         $request->validate([
