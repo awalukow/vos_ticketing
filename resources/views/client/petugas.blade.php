@@ -63,21 +63,12 @@
                 <!-- 🎥 Live Camera Feed -->
                 <video
                   id="qr-video"
-                  width="320"
-                  height="240"
+                  width="100%"
+                  height="auto"
                   class="border rounded bg-black w-100 h-auto max-w-100"
                   playsinline
                   muted
                 ></video>
-
-                <!-- 🧩 QR Scan Guide Box -->
-                <div 
-                  class="position-absolute top-50 start-50 translate-middle"
-                  style="width: 200px; height: 200px; border: 2px solid #fff; border-radius: 8px; background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); z-index: 1;"
-                >
-                  <!-- Optional: Inner dot for center focus -->
-                  <div class="position-absolute top-50 start-50 translate-middle" style="width: 8px; height: 8px; background: white; border-radius: 50%;"></div>
-                </div>
               </div>
 
               <p class="mt-3">
