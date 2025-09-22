@@ -87,9 +87,47 @@ class LaporanController extends Controller
         return view('client.petugas');
     }
 
-    public function kode(Request $request)
+    /*public function kode(Request $request)
     {
         return redirect()->route('transaksi.show', $request->kode);
+    }*/
+    
+    public function kode(Request $request)
+    {
+        $kode = $request->kode;
+        $source = $request->input('source', 'manual'); // default to manual
+
+        // Only process special logic if it's from QR scan
+        if ($source === 'scan') {
+            // Validate format: XXXXXX_XX or XXXXXX_XXX
+            if (!preg_match('/^([A-Z0-9]{6})_([A-Z]\d{1,2})$/', $kode, $matches)) {
+                return back()->with('error', 'Format QR tidak valid. Harus: XXXXXX_XX atau XXXXXX_XXX');
+            }
+
+            $pemesananCode = $matches[1]; // e.g., W32B0FV
+            $seatNumber = $matches[2];    // e.g., O6 or O11
+
+            // Find the seat record
+            $detail = Pemesanan_Detail::where('pemesananCode', $pemesananCode)
+                                      ->where('seatNumber', $seatNumber)
+                                      ->first();
+
+            if (!$detail) {
+                return back()->with('error', "Kursi {$seatNumber} tidak ditemukan.");
+            }
+
+            if ($detail->isCheckedIn) {
+                return back()->with('error', "Kursi {$seatNumber} telah check in.");
+            }
+
+            // ✅ Mark as checked in
+            $detail->update(['isCheckedIn' => true]);
+
+            // Optional: Log or trigger event here
+        }
+
+        // Redirect to show transaction — for both manual and scan (if valid)
+        return redirect()->route('transaksi.show', $kode);
     }
 
     public function show($id)

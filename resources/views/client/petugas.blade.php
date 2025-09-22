@@ -14,14 +14,32 @@
       <div class="card shadow-sm border-0 rounded-4">
         <div class="card-header bg-white py-3">
           <h5 class="mb-0 fw-bold text-primary">
-            <i class="fas fa-search me-2"></i> Cari Pemesanan
+            <i class="fas fa-search me-2"></i> Verifikasi Kursi
           </h5>
         </div>
         <div class="card-body p-4">
 
+          <!-- ❗ Show Flash Error (from Controller) -->
+          @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+              <i class="fas fa-exclamation-triangle"></i>
+              <strong>{{ session('error') }}</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            {{-- 💥 Vibrate on server error (e.g., "telah check in") --}}
+            <script>
+              if (navigator.vibrate) {
+                navigator.vibrate([50, 100, 50]);
+              }
+            </script>
+          @endif
+
           <!-- 🔍 Manual Search Form -->
           <form method="POST" action="{{ route('petugas.kode') }}" class="mb-4">
             @csrf
+            <input type="hidden" name="source" value="manual" id="source-input">
+
             <div class="input-group">
               <input
                 type="text"
@@ -41,7 +59,7 @@
           <!-- 📷 QR Scanner Section -->
           <div class="border rounded-3 p-4 bg-light position-relative" id="qr-scanner-section">
             <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
-              <i class="fas fa-qrcode text-success"></i> Pindai QR Code
+              <i class="fas fa-qrcode text-success"></i> Pindai QR Kursi
             </h6>
 
             <button
@@ -63,12 +81,20 @@
                 <!-- 🎥 Live Camera Feed -->
                 <video
                   id="qr-video"
-                  width="100%"
-                  height="auto"
-                  class="border rounded bg-black w-100 h-auto max-w-100"
+                  width="320"
+                  height="240"
+                  class="border rounded bg-black w-100 h-auto"
                   playsinline
                   muted
                 ></video>
+
+                <!-- 🧭 QR Scan Guide Box -->
+                <div 
+                  class="position-absolute top-50 start-50 translate-middle"
+                  style="width: 200px; height: 200px; border: 2px solid #fff; border-radius: 8px; background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); z-index: 1;"
+                >
+                  <div class="position-absolute top-50 start-50 translate-middle" style="width: 8px; height: 8px; background: white; border-radius: 50%;"></div>
+                </div>
               </div>
 
               <p class="mt-3">
@@ -99,14 +125,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const statusDiv        = document.getElementById('scanner-status');
   const kodeInput        = document.getElementById('kode');
   const cariButton       = document.querySelector('form button[type="submit"]');
+  const sourceInput      = document.getElementById('source-input');
 
   if (!scanButton) {
     statusDiv.innerHTML = "<span class='text-danger'>Error: Tombol scan tidak ditemukan.</span>";
     return;
-  }
-
-  if (!cariButton) {
-    console.warn("⚠️ Tombol 'Cari' tidak ditemukan — auto-submit tidak akan bekerja.");
   }
 
   let scanning = false;
@@ -145,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
           if (imageData.data.length === 0) {
-            requestAnimationFrame(tick); // ← Keep looping
+            requestAnimationFrame(tick);
             return;
           }
 
@@ -174,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
               }, 3000);
 
-              // ❗❗❗ IMPORTANT: Continue scanning — do NOT return without scheduling next frame
               requestAnimationFrame(tick);
               return;
             }
@@ -183,12 +205,13 @@ document.addEventListener('DOMContentLoaded', function () {
             if (result === "") {
               console.warn("⚠️ QR kosong terdeteksi — abaikan.");
               statusDiv.innerHTML = "<span class='text-warning'>QR kosong. Coba lagi.</span>";
-              requestAnimationFrame(tick); // ← Keep scanning
+              requestAnimationFrame(tick);
               return;
             }
 
             // 🎯 ACCEPTED: Fill input + auto-submit
             kodeInput.value = result;
+            sourceInput.value = 'scan'; // ← MARK AS SCAN
             console.log("✅ QR valid dimasukkan ke input:", result);
 
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
@@ -206,11 +229,10 @@ document.addEventListener('DOMContentLoaded', function () {
               stopScanner();
             }, 300);
 
-            return; // ← Stop scanning after valid scan (intentional)
+            return;
           }
         }
 
-        // ✅ Always schedule next frame unless intentionally stopped
         requestAnimationFrame(tick);
       };
 
@@ -242,10 +264,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function stopScanner() {
     scanning = false;
     if (video.srcObject) {
-      video.srcObject.getTracks().forEach(track => {
-        track.stop();
-        console.log("⏹️ Track dihentikan:", track.label);
-      });
+      video.srcObject.getTracks().forEach(track => track.stop());
     }
     scannerContainer.style.display = 'none';
   }
