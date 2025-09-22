@@ -10,7 +10,7 @@
 @section('content')
 <div class="container py-4">
   <div class="row justify-content-center">
-    <div class="col-lg-8 col-md-10">
+    <div class="col-12 col-md-8 col-lg-6">
       <div class="card shadow-sm border-0 rounded-4">
         <div class="card-header bg-white py-3">
           <h5 class="mb-0 fw-bold text-primary">
@@ -60,12 +60,12 @@
             <!-- Scanner Video Container (Hidden by default) -->
             <div id="scanner-container" class="text-center mt-4" style="display: none;">
               <div class="position-relative d-inline-block">
-                <!-- 🎥 Live Camera Feed — No overlay/spinner -->
+                <!-- 🎥 Live Camera Feed -->
                 <video
                   id="qr-video"
-                  width="320"
-                  height="240"
-                  class="border rounded bg-black"
+                  width="100%"
+                  height="auto"
+                  class="border rounded bg-black w-100 h-auto max-w-100"
                   playsinline
                   muted
                 ></video>
