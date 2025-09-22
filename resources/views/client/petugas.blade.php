@@ -147,11 +147,31 @@ document.addEventListener('DOMContentLoaded', function () {
           });
 
           if (code) {
-            kodeInput.value = code.data.trim();
+            const result = code.data.trim();
 
-            // ✅ Vibrate on success
+            // ✅ Check if it's a URL → INVALID
+            if (result.startsWith('http://') || result.startsWith('https://')) {
+              // ❗ Vibrate for error feedback
+              if (navigator.vibrate) {
+                navigator.vibrate([50, 100, 50]); // short error buzz
+              }
+
+              statusDiv.innerHTML = `
+                <div class="text-danger fw-bold d-flex align-items-center gap-2">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  ❌ Bukan QR seat
+                </div>`;
+
+              // ❗ Keep scanning — don't stop or submit
+              return;
+            }
+
+            // ✅ Valid non-URL code → ACCEPT
+            kodeInput.value = result;
+
+            // ✅ Vibrate for success
             if (navigator.vibrate) {
-              navigator.vibrate([100, 50, 100]);
+              navigator.vibrate([100, 50, 100]); // success buzz pattern
             }
 
             statusDiv.innerHTML = "<span class='text-success'>✅ QR Code terdeteksi! Mengirimkan...</span>";
