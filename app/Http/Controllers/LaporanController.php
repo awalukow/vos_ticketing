@@ -119,8 +119,12 @@ class LaporanController extends Controller
                 return back()->with('error', "Kursi {$seatNumber} telah check in.");
             }
 
-            // ✅ Mark as checked in
-            $detail->update(['isCheckedIn' => true]);
+            // ✅ Mark as checked in + record timestamp + petugas
+            $detail->update([
+                'isCheckedIn' => true,
+                'checkin_timestamp' => now(),
+                'petugas_id' => Auth::user()->id
+            ]);
 
             // ✅ Stay on same page + show success
             return back()->with('success', "✅ Sukses Check-in Kursi {$seatNumber}");

@@ -12,7 +12,9 @@ class Pemesanan_Detail extends Model
     protected $fillable = [
         'pemesananCode',
         'seatNumber',
-        'isCheckedIn'
+        'isCheckedIn',
+        'checkin_timestamp',
+        'petugas_id'
     ];
     protected $table = 'pemesanan_detail';
     /**
