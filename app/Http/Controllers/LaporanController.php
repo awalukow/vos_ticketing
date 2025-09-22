@@ -96,19 +96,17 @@ class LaporanController extends Controller
     public function kode(Request $request)
     {
         $kode = $request->kode;
-        $source = $request->input('source', 'manual'); // default to manual
+        $source = $request->input('source', 'manual');
 
-        // Only process special logic if it's from QR scan
         if ($source === 'scan') {
             // Validate format: XXXXXX_XX or XXXXXX_XXX
-            if (!preg_match('/^([A-Z0-9]{7})_([A-Z]\d{1,2})$/', $kode, $matches)) {
+            if (!preg_match('/^([A-Z0-9]{6})_([A-Z]\d{1,2})$/', $kode, $matches)) {
                 return back()->with('error', 'Format QR tidak valid. Harus: XXXXXX_XX atau XXXXXX_XXX');
             }
 
-            $pemesananCode = $matches[1]; // e.g., W32B0FV ← THIS is the real kode
+            $pemesananCode = $matches[1]; // e.g., W32B0FV
             $seatNumber = $matches[2];    // e.g., O6 or O11
 
-            // Find the seat record
             $detail = Pemesanan_Detail::where('pemesananCode', $pemesananCode)
                                     ->where('seatNumber', $seatNumber)
                                     ->first();
@@ -124,11 +122,11 @@ class LaporanController extends Controller
             // ✅ Mark as checked in
             $detail->update(['isCheckedIn' => true]);
 
-            // ✅ Redirect using pemesananCode, NOT full QR string
-            return redirect()->route('transaksi.show', $pemesananCode);
+            // ✅ Stay on same page + show success
+            return back()->with('success', "✅ Sukses Check-in Kursi {$seatNumber}");
         }
 
-        // For manual input, redirect as-is (assumes user entered pemesanan kode)
+        // For manual input — redirect to transaksi.show as before
         return redirect()->route('transaksi.show', $kode);
     }
 
