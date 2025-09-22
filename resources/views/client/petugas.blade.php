@@ -105,6 +105,10 @@ document.addEventListener('DOMContentLoaded', function () {
     return;
   }
 
+  if (!cariButton) {
+    console.warn("⚠️ Tombol 'Cari' tidak ditemukan — auto-submit tidak akan bekerja.");
+  }
+
   let scanning = false;
 
   // Start scanning
@@ -140,7 +144,10 @@ document.addEventListener('DOMContentLoaded', function () {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-          if (imageData.data.length === 0) return;
+          if (imageData.data.length === 0) {
+            console.warn("⚠️ Tidak ada data gambar — kamera mungkin tidak aktif.");
+            return;
+          }
 
           const code = jsQR(imageData.data, canvas.width, canvas.height, {
             inversionAttempts: "dontInvert",
@@ -148,41 +155,54 @@ document.addEventListener('DOMContentLoaded', function () {
 
           if (code) {
             const result = code.data.trim();
+            console.log("🔍 QR Terdeteksi:", result); // 👈 DEBUG LOG
 
-            // ✅ Check if it's a URL → INVALID
+            // ❌ Invalid: URL
             if (result.startsWith('http://') || result.startsWith('https://')) {
-              // ❗ Vibrate for error feedback (mobile)
-              if (navigator.vibrate) {
-                navigator.vibrate([50, 100, 50]);
-              }
+              if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
-              // 🚨 Show clear error (visible on PC too)
               statusDiv.innerHTML = `
-                <div class="text-danger fw-bold d-flex align-items-center gap-2">
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-0" role="alert">
                   <i class="fas fa-exclamation-triangle"></i>
-                  ❌ Bukan QR seat
+                  <strong>Bukan QR seat!</strong> QR ini berisi link, bukan kode pemesanan.
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>`;
 
-              // ❗ Do NOT stop scanner — keep scanning
+              setTimeout(() => {
+                if (scanning) {
+                  statusDiv.innerHTML = "<span class='text-info'>Memindai... arahkan kamera ke QR Code</span>";
+                }
+              }, 3000);
+
+              return; // Keep scanning
+            }
+
+            // ✅ Valid: Non-URL and not empty
+            if (result === "") {
+              console.warn("⚠️ QR kosong terdeteksi — abaikan.");
+              statusDiv.innerHTML = "<span class='text-warning'>QR kosong. Coba lagi.</span>";
               return;
             }
 
-            // ✅ Valid non-URL code → ACCEPT
+            // 🎯 ACCEPTED: Fill input + auto-submit
             kodeInput.value = result;
+            console.log("✅ QR valid dimasukkan ke input:", result);
 
-            // ✅ Vibrate for success
-            if (navigator.vibrate) {
-              navigator.vibrate([100, 50, 100]);
-            }
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 
-            statusDiv.innerHTML = "<span class='text-success'>✅ QR Code terdeteksi! Mengirimkan...</span>";
-            stopScanner(); // ✅ Stop only on valid scan
+            statusDiv.innerHTML = "<span class='text-success fw-bold'>✅ QR Code diterima! Mengirimkan...</span>";
 
-            if (cariButton) {
-              setTimeout(() => cariButton.click(), 300);
-            } else {
-              console.warn("⚠️ Tombol 'Cari' tidak ditemukan.");
-            }
+            // Delay 300ms for UX
+            setTimeout(() => {
+              if (cariButton) {
+                console.log("🖱️ Klik tombol 'Cari'...");
+                cariButton.click();
+              } else {
+                console.error("🚨 Tombol 'Cari' tidak ditemukan — tidak bisa auto-submit.");
+                statusDiv.innerHTML += "<br><span class='text-danger small'>Error: tombol submit tidak ditemukan.</span>";
+              }
+              stopScanner();
+            }, 300);
           }
         }
 
@@ -217,7 +237,10 @@ document.addEventListener('DOMContentLoaded', function () {
   function stopScanner() {
     scanning = false;
     if (video.srcObject) {
-      video.srcObject.getTracks().forEach(track => track.stop());
+      video.srcObject.getTracks().forEach(track => {
+        track.stop();
+        console.log("⏹️ Track dihentikan:", track.label);
+      });
     }
     scannerContainer.style.display = 'none';
   }
