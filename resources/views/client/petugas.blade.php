@@ -34,7 +34,30 @@
               }
             </script>
           @endif
+          <!-- ✅ Show Success Message -->
+          @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+              <i class="fas fa-check-circle"></i>
+              <strong>{{ session('success') }}</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
 
+            {{-- 💥 Vibrate on success --}}
+            <script>
+              if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+              }
+
+              // 🕒 Auto-dismiss after 3 seconds
+              setTimeout(() => {
+                const alert = document.querySelector('.alert-success');
+                if (alert) {
+                  const bsAlert = new bootstrap.Alert(alert);
+                  bsAlert.close();
+                }
+              }, 3000);
+            </script>
+          @endif
           <!-- 🔍 Manual Search Form -->
           <form method="POST" action="{{ route('petugas.kode') }}" class="mb-4">
             @csrf
