@@ -100,7 +100,7 @@ class LaporanController extends Controller
 
         if ($source === 'scan') {
             // Validate format: XXXXXX_XX or XXXXXX_XXX
-            if (!preg_match('/^([A-Z0-9]{6})_([A-Z]\d{1,2})$/', $kode, $matches)) {
+            if (!preg_match('/^([A-Z0-9]{7})_([A-Z]\d{1,2})$/', $kode, $matches)) {
                 return back()->with('error', 'Format QR tidak valid. Harus: XXXXXX_XX atau XXXXXX_XXX');
             }
 
