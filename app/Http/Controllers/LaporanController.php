@@ -101,17 +101,17 @@ class LaporanController extends Controller
         // Only process special logic if it's from QR scan
         if ($source === 'scan') {
             // Validate format: XXXXXX_XX or XXXXXX_XXX
-            if (!preg_match('/^([A-Z0-9]{7})_([A-Z]\d{1,2})$/', $kode, $matches)) {
-                return back()->with('error', 'Format QR tidak valid. Harus: XXXXXXX_XX atau XXXXXX_XXX');
+            if (!preg_match('/^([A-Z0-9]{6})_([A-Z]\d{1,2})$/', $kode, $matches)) {
+                return back()->with('error', 'Format QR tidak valid. Harus: XXXXXX_XX atau XXXXXX_XXX');
             }
 
-            $pemesananCode = $matches[1]; // e.g., W32B0FV
+            $pemesananCode = $matches[1]; // e.g., W32B0FV ← THIS is the real kode
             $seatNumber = $matches[2];    // e.g., O6 or O11
 
             // Find the seat record
             $detail = Pemesanan_Detail::where('pemesananCode', $pemesananCode)
-                                      ->where('seatNumber', $seatNumber)
-                                      ->first();
+                                    ->where('seatNumber', $seatNumber)
+                                    ->first();
 
             if (!$detail) {
                 return back()->with('error', "Kursi {$seatNumber} tidak ditemukan.");
@@ -124,66 +124,13 @@ class LaporanController extends Controller
             // ✅ Mark as checked in
             $detail->update(['isCheckedIn' => true]);
 
-            // Optional: Log or trigger event here
+            // ✅ Redirect using pemesananCode, NOT full QR string
+            return redirect()->route('transaksi.show', $pemesananCode);
         }
 
-        // Redirect to show transaction — for both manual and scan (if valid)
+        // For manual input, redirect as-is (assumes user entered pemesanan kode)
         return redirect()->route('transaksi.show', $kode);
     }
-
-    public function show($id)
-    {
-        $data = Pemesanan::with('rute.transportasi.category', 'penumpang')
-                    ->where('kode', $id)
-                    ->where('rowstatus', '>=', 0)
-                    ->first();
-
-        $customerService = AppSetting::getCustomerService();
-        $eventDate = '09 November 2025';
-
-        if ($data) {
-            return view('server.laporan.show', compact('data', 'customerService', 'eventDate'));
-        } else {
-            return redirect()->back()->with('error', 'Kode Transaksi Tidak Ditemukan!');
-        }
-    }
-    public function pembayaran_old($id)
-    {
-        Pemesanan::find($id)->update([
-            'status' => 'Sudah Bayar',
-            'petugas_id' => Auth::user()->id
-        ]);
-
-        return redirect()->back()->with('success', 'Pembayaran Ticket Success!');
-    }
-
-    public function uploadBuktiPembayaranFisik(Request $request, $id)
-    {
-        $request->validate([
-            'bukti_pembayaran' => 'required|file|mimes:jpeg,png,jpg|max:2048',
-            'referral' => 'required|string|max:255',  // Add validation rule for referral
-        ]);
-
-        $transaksi = Pemesanan::find($id);
-        if (!$transaksi) {
-            return redirect()->back()->with('error', 'Transaksi tidak ditemukan');
-        }
-
-        // Store the uploaded file in the public disk
-        $file = $request->file('bukti_pembayaran');
-        $filePath = $file->store('bukti_pembayaran', 'public');
-
-        // Save the file path and referral to the database
-        $transaksi->bukti_pembayaran = $filePath;
-        $transaksi->status_pembayaran = 'Sudah Verifikasi';
-        $transaksi->referral = $request->input('referral');
-        $transaksi->status = 'Sudah Bayar'; 
-        $transaksi->petugas_id = Auth::user()->id;
-        $transaksi->save();
-
-        return redirect()->back()->with('success', 'Verifikasi Berhasil.');
-    }
-
 
     public function uploadBuktiPembayaran(Request $request, $id)
     {
