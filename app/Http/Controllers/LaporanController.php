@@ -136,11 +136,12 @@ class LaporanController extends Controller
 
     public function show($id)
     {
+        $customerService = AppSetting::getCustomerService();
         $data = Pemesanan::with('rute.transportasi.category', 'penumpang')->where('kode', $id)->where('rowstatus','>=',0)->first();
         //dd(Carbon::now());
         //dd(env('APP_ENV'));
         if ($data) {
-            return view('server.laporan.show', compact('data'));
+            return view('server.laporan.show', compact('data', 'customerService'));
         } else {
             return redirect()->back()->with('error', 'Kode Transaksi Tidak Ditemukan!');
         }
