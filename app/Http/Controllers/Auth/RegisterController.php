@@ -89,7 +89,7 @@ class RegisterController extends Controller
     // Check if user creation was successful
     if ($user) {
         // Define $destination and $message for WA
-        $laporanController = new LaporanController();
+        //$laporanController = new LaporanController();
         $destination = $data['username'];
         $message = '*[NOTIFIKASI VOS] REGISTRASI BERHASIL*
 Anda telah berhasil melakukan pendaftaran akun sistem e-Ticket VOS
