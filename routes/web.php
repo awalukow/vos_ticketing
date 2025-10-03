@@ -209,15 +209,6 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
     });
 
     // 🔻 IMPORTANT: PLACE THIS ROUTE AT THE VERY END 🔻
-    // It must come last to avoid conflicts with more specific routes
-    Route::get('/{id}/{data}', [PemesananController::class, 'show'])->name('show');
-    Route::get('/clear-cache', function() {
-    Artisan::call('config:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-    Artisan::call('config:cache');
-    return 'Cache cleared!';
 
     //https://yourdomain.com/migrate?key=mysecretkey123
     //https://ticket.voiceofsoulchoir.id/migrate?key=8f3a7c1e-bd42-4e9f-98c7-64a2c8e12a9f
@@ -233,5 +224,14 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
             return 'Migration failed: ' . $e->getMessage();
         }
     });
+    // It must come last to avoid conflicts with more specific routes
+    Route::get('/{id}/{data}', [PemesananController::class, 'show'])->name('show');
+    Route::get('/clear-cache', function() {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:cache');
+    return 'Cache cleared!';
 });
 }
