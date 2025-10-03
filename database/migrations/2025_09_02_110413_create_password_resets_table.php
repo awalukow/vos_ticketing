@@ -13,6 +13,7 @@ class CreatePasswordResetsTable extends Migration
      */
     public function up()
     {
+        /*
         Schema::create('password_resets', function (Blueprint $table) {
             $table->string('email')->index();
             $table->string('token');
@@ -21,6 +22,7 @@ class CreatePasswordResetsTable extends Migration
             // Optional: add constraint to prevent reuse
             $table->unique('email');
         });
+        */
     }
 
     /**
@@ -30,6 +32,8 @@ class CreatePasswordResetsTable extends Migration
      */
     public function down()
     {
+        /*
         Schema::dropIfExists('password_resets');
+        */
     }
 }
