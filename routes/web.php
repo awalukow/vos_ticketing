@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\TransportasiController;
 use App\Http\Controllers\RuteController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -27,7 +28,7 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
     // Route only to maintenance view
     Route::get('/', [RegisterController::class, 'showMaintenance'])->name('maintenance');
     Route::get('/{any}', [RegisterController::class, 'showMaintenance'])->where('any', '.*'); // Catch-all
-}else {
+} else {
     Auth::routes();
 
     // Public Routes
@@ -37,13 +38,73 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
     Route::post('/adminRegister', [RegisterController::class, 'fastRegister'])->name('admin-register');
     Route::get('/view/pdf', [RegisterController::class, 'view_pdf']);
 
-    Route::get('/test-whatsapp', function (WhatsAppService $whatsAppService) {
-        //$whatsAppService->sendMessage('+6285156651097', 'Test message from Laravel!');
-        $whatsAppService->sendWA('6285156651097', 'HX67e0f598e604b2044fc7cdac0162ca56', [
-                "event_name" => "VOS 20th Anniversary Concert @ Balai Resital Kartanegara",
-                "event_date" => "09 November 2025",
-                "code" => "123456",
+    // ✅ ADD THE PROMO CHECK ROUTE HERE
+    Route::get('/check-promo', function (\Illuminate\Http\Request $request) {
+        $code = strtoupper($request->query('code'));
+        $ruteId = $request->query('rute_id'); // Get from JS
+
+        if (!$code) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Kode kosong.'
             ]);
+        }
+
+        $basePricePerTicket = 150000;
+        $totalEstimated = $basePricePerTicket;
+
+        $promotion = \App\Models\Promotion::where('code', $code)->first();
+
+        if (!$promotion) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Kode promo tidak ditemukan.'
+            ]);
+        }
+
+        $userId = auth()->check() ? auth()->id() : null;
+
+        if (!$promotion->isValid($userId, $ruteId)) {
+            $msg = 'Kode tidak valid.';
+            if ($promotion->penumpang_id !== null && $promotion->penumpang_id != $userId) {
+                $msg = 'Kode ini hanya berlaku untuk pengguna tertentu.';
+            } elseif ($promotion->rute_id !== null && $promotion->rute_id != $ruteId) {
+                $msg = 'Kode ini hanya berlaku untuk kelas tertentu.';
+            } elseif ($promotion->expires_at && now()->gt($promotion->expires_at)) {
+                $msg = 'Kode sudah kadaluarsa.';
+            } elseif ($promotion->used_count >= $promotion->max_uses) {
+                $msg = 'Kode sudah mencapai batas penggunaan.';
+            }
+
+            return response()->json([
+                'valid' => false,
+                'message' => $msg
+            ]);
+        }
+
+        $discountValue = $promotion->discount_value;
+        $discountText = '';
+
+        if ($promotion->discount_type === 'percent') {
+            $nominalDiscount = $totalEstimated * ($discountValue / 100);
+            $discountText = "$discountValue% (Rp " . number_format($nominalDiscount, 0, ',', '.') . ")";
+        } else {
+            $discountText = "Rp " . number_format($discountValue, 0, ',', '.');
+        }
+
+        return response()->json([
+            'valid' => true,
+            'discount_text' => $discountText,
+        ]);
+    })->name('check.promo');
+
+    // Other public routes...
+    Route::get('/test-whatsapp', function (WhatsAppService $whatsAppService) {
+        $whatsAppService->sendWA('6285156651097', 'HX67e0f598e604b2044fc7cdac0162ca56', [
+            "event_name" => "VOS 20th Anniversary Concert @ Balai Resital Kartanegara",
+            "event_date" => "09 November 2025",
+            "code" => "123456",
+        ]);
         return 'Message sent!';
     });
 
@@ -124,6 +185,8 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
                 Route::get('/pemesanan/export', function () {
                                 return Excel::download(new PemesananExport, 'pemesanan.xlsx');
                             })->name('pemesanan.export');
+                // Promotion Routes
+                Route::resource('promotions', PromotionController::class);
             });
         });
 
@@ -155,5 +218,20 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
     Artisan::call('view:clear');
     Artisan::call('config:cache');
     return 'Cache cleared!';
+
+    //https://yourdomain.com/migrate?key=mysecretkey123
+    //https://ticket.voiceofsoulchoir.id/migrate?key=8f3a7c1e-bd42-4e9f-98c7-64a2c8e12a9f
+    Route::get('/migrate', function () {
+        if (request('key') !== '8f3a7c1e-bd42-4e9f-98c7-64a2c8e12a9f') {
+            abort(403, 'Unauthorized');
+        }
+
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+            return 'Migration completed successfully!';
+        } catch (\Exception $e) {
+            return 'Migration failed: ' . $e->getMessage();
+        }
+    });
 });
 }

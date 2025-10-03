@@ -1423,28 +1423,43 @@
     </div>
   </div>
 
-  <!-- Referral Modal -->
-  <div class="modal fade" id="referralModal" tabindex="-1" role="dialog" aria-labelledby="referralModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="referralModalLabel">Masukkan Referral</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closeReferral">
-            <span aria-hidden="true">&times;</span>
-          </button>
+<!-- Referral & Promo Code Modal -->
+<div class="modal fade" id="referralModal" tabindex="-1" role="dialog" aria-labelledby="referralModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="referralModalLabel">Referral & Kode Promo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Referral Input -->
+        <div class="form-group">
+          <label for="referralInput">Nama Referral (Opsional)</label>
+          <input type="text" id="referralInput" class="form-control" placeholder="Contoh: Stevie G">
+          <small class="text-muted d-block mt-1">Isi jika direkomendasikan oleh penyanyi VOS.</small>
         </div>
-        <div class="modal-body">
-          <input type="text" id="referralInput" class="form-control" placeholder="Nama Referral">
-          <!--<small class="text-muted d-block mt-2">Wajib diisi untuk total ≥ Rp150.000</small>-->
-          <small class="text-muted d-block mt-2">Isi referral penyanyi VOS</small>
+
+        <!-- Promo Code Input with Check Button -->
+        <div class="form-group mt-3">
+          <label for="promoCodeInput">Kode Promo (Opsional)</label>
+          <div class="input-group">
+            <input type="text" id="promoCodeInput" class="form-control" placeholder="Masukkan kode promo">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" id="checkPromoBtn">Cek</button>
+            </div>
+          </div>
+          <small id="promoFeedback" class="form-text"></small>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="cancelReferral">Batal</button>
-          <button type="button" class="btn btn-primary" id="confirmReferralBtn">Lanjutkan</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" id="confirmReferralBtn" disabled>Lanjutkan</button>
       </div>
     </div>
   </div>
+</div>
   <!-- Email Modal -->
   <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -1473,92 +1488,188 @@
 @endsection
 
 @section('script')
-  <script>
-    // From backend:
-    var seatPrice   = {{ (int) $data['harga'] }};
-    var dataString  = @json($dataString);
+<script>
+    var seatPrice = {{ (int) $data['harga'] }};
+    var dataString = @json($dataString);
     var selectedSeats = [];
     var userRole = "{{ Auth::user()->level }}";
+    var data = @json($data); // For rute_id in /check-promo
+    var ruteId = data.id;
 
     function toggleSeat(seat) {
-      if (!seat.classList.contains('reserved')) {
-        seat.classList.toggle('selected');
-        var seatNumber = seat.querySelector('div').textContent.trim();
-        var idx = selectedSeats.indexOf(seatNumber);
-        if (idx === -1) { selectedSeats.push(seatNumber); } else { selectedSeats.splice(idx, 1); }
-      }
+        if (!seat.classList.contains('reserved')) {
+            seat.classList.toggle('selected');
+            var seatNumber = seat.querySelector('div').textContent.trim();
+            var idx = selectedSeats.indexOf(seatNumber);
+            if (idx === -1) {
+                selectedSeats.push(seatNumber);
+            } else {
+                selectedSeats.splice(idx, 1);
+            }
+        }
     }
 
     document.getElementById('submitBtn').addEventListener('click', function () {
-      if (selectedSeats.length === 0) { alert('Silakan pilih minimal satu kursi.'); return; }
-      if (selectedSeats.length > 5 && userRole === "Penumpang") { alert('Maksimal 5 kursi per transaksi.'); return; }
+        if (selectedSeats.length === 0) {
+            alert('Silakan pilih minimal satu kursi.');
+            return;
+        }
+        if (selectedSeats.length > 5 && userRole === "Penumpang") {
+            alert('Maksimal 5 kursi per transaksi.');
+            return;
+        }
 
-      var seatList = selectedSeats.join(', ');
-      document.getElementById('modalBodyContent').innerHTML =
-        "<p>Apakah anda yakin akan melanjutkan pembelian tiket dengan kursi: <strong>" + seatList + "</strong>?</p>" +
-        "<p>Total: <strong>Rp " + formatRupiah(selectedSeats.length * seatPrice) + "</strong></p>";
+        var seatList = selectedSeats.join(', ');
+        var totalHarga = selectedSeats.length * seatPrice;
 
-      $('#confirmationModal').modal('show');
+        document.getElementById('modalBodyContent').innerHTML =
+            "<p>Apakah Anda yakin akan melanjutkan pembelian tiket dengan kursi: <strong>" + seatList + "</strong>?</p>" +
+            "<p>Total: <strong>Rp " + formatRupiah(totalHarga) + "</strong></p>";
+
+        $('#confirmationModal').modal('show');
     });
 
     document.getElementById('confirmPurchaseBtn').addEventListener('click', function () {
-      var totalPrice = selectedSeats.length * seatPrice;
-      $('#confirmationModal').modal('hide');
-      if (totalPrice >= 150000) {
+        $('#confirmationModal').modal('hide');
         $('#referralModal').modal('show');
-      } else {
-        proceedToBooking('');
-      }
+        resetPromoState();
+    });
+
+    function resetPromoState() {
+        const promoInput = document.getElementById('promoCodeInput');
+        const promoFeedback = document.getElementById('promoFeedback');
+        const confirmBtn = document.getElementById('confirmReferralBtn');
+
+        promoInput.value = '';
+        promoFeedback.textContent = '';
+        promoFeedback.className = 'form-text';
+        promoValidated = false;
+        confirmBtn.disabled = false;
+    }
+
+    // Handle "Check" button
+    document.getElementById('checkPromoBtn').addEventListener('click', function () {
+        const promoInput = document.getElementById('promoCodeInput');
+        const promoFeedback = document.getElementById('promoFeedback');
+        const confirmBtn = document.getElementById('confirmReferralBtn');
+        const checkBtn = document.getElementById('checkPromoBtn');
+        const promoCode = (promoInput.value || '').trim();
+
+        if (!promoCode) {
+            promoFeedback.textContent = '';
+            promoFeedback.className = 'form-text';
+            promoValidated = true;
+            confirmBtn.disabled = false;
+            return;
+        }
+
+        if (!/^[A-Z0-9]{4,12}$/i.test(promoCode)) {
+            promoFeedback.textContent = 'Format kode tidak valid.';
+            promoFeedback.className = 'form-text text-danger';
+            promoValidated = false;
+            confirmBtn.disabled = true;
+            return;
+        }
+
+        promoInput.disabled = true;
+        checkBtn.disabled = true;
+        promoFeedback.textContent = 'Memeriksa...';
+        promoFeedback.className = 'form-text text-muted';
+
+        fetch(`{{ url('/check-promo') }}?code=${encodeURIComponent(promoCode)}&rute_id=${ruteId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    promoFeedback.innerHTML = `✓ <strong>Kode valid!</strong><br>Diskon: ${data.discount_text}`;
+                    promoFeedback.className = 'form-text text-success';
+                    promoValidated = true;
+                    confirmBtn.disabled = false;
+                } else {
+                    promoFeedback.textContent = `✗ ${data.message}`;
+                    promoFeedback.className = 'form-text text-danger';
+                    promoValidated = false;
+                    confirmBtn.disabled = true;
+                }
+            })
+            .catch(() => {
+                promoFeedback.textContent = 'Gagal memeriksa kode. Coba lagi.';
+                promoFeedback.className = 'form-text text-danger';
+                promoValidated = false;
+                confirmBtn.disabled = true;
+            })
+            .finally(() => {
+                promoInput.disabled = false;
+                checkBtn.disabled = false;
+            });
     });
 
     document.getElementById('confirmReferralBtn').addEventListener('click', function () {
-    var referral = (document.getElementById('referralInput').value || '').trim();
+        const promoCode = (document.getElementById('promoCodeInput').value || '').trim();
+
+        if (promoCode && !promoValidated) {
+            alert('Silakan klik "Cek" untuk memvalidasi kode promo terlebih dahulu.');
+            return;
+        }
+
+        const referral = (document.getElementById('referralInput').value || '').trim();
         $('#referralModal').modal('hide');
-        
+
         if (userRole !== "Penumpang") {
             $('#emailModal').modal('show');
+            document.getElementById('confirmEmailBtn').setAttribute('data-referral', referral);
+            document.getElementById('confirmEmailBtn').setAttribute('data-promo', promoCode);
         } else {
-            proceedToBooking(referral, '');
+            proceedToBooking(referral, '', promoCode);
         }
     });
 
     document.getElementById('confirmEmailBtn').addEventListener('click', function () {
-        var referral = (document.getElementById('referralInput').value || '').trim();
-        var email = (document.getElementById('emailInput').value || '').trim();
-        
-        if (email === '') {
+        const referral = this.getAttribute('data-referral') || '';
+        const promoCode = this.getAttribute('data-promo') || '';
+        const email = (document.getElementById('emailInput').value || '').trim();
+
+        if (!email) {
             alert('Silakan masukkan email pemesan');
             return;
         }
-        
+
         $('#emailModal').modal('hide');
-        proceedToBooking(referral, email);
+        proceedToBooking(referral, email, promoCode);
     });
 
-    function proceedToBooking(referral, email) {
+    function proceedToBooking(referral, email, promoCode = '') {
         document.querySelector('.loading-overlay').style.display = 'block';
 
-        var seatsParam = encodeURIComponent(JSON.stringify(selectedSeats));
-        var dataParam  = encodeURIComponent(dataString);
+        const seatsParam = encodeURIComponent(JSON.stringify(selectedSeats));
+        const dataParam = encodeURIComponent(dataString);
 
-        var url2 = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE']) }}";
-        var url3 = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE', 'referral' => 'R_PLACE']) }}";
-        var url4 = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE', 'referral' => 'R_PLACE', 'email' => 'E_PLACE']) }}";
+        let url;
 
-        var url;
-        if (email && referral) {
-            url = url4.replace('K_PLACE', seatsParam).replace('D_PLACE', dataParam).replace('R_PLACE', encodeURIComponent(referral)).replace('E_PLACE', encodeURIComponent(email));
-        } else if (referral) {
-            url = url3.replace('K_PLACE', seatsParam).replace('D_PLACE', dataParam).replace('R_PLACE', encodeURIComponent(referral));
+        if (referral) {
+            url = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE', 'referral' => 'R_PLACE']) }}"
+                .replace('K_PLACE', seatsParam)
+                .replace('D_PLACE', dataParam)
+                .replace('R_PLACE', encodeURIComponent(referral));
         } else {
-            url = url2.replace('K_PLACE', seatsParam).replace('D_PLACE', dataParam);
+            url = "{{ route('pesan', ['kursi' => 'K_PLACE', 'data' => 'D_PLACE']) }}"
+                .replace('K_PLACE', seatsParam)
+                .replace('D_PLACE', dataParam);
+        }
+
+        // ✅ Now safely append query params
+        const queryParams = [];
+        if (promoCode) queryParams.push(`promo=${encodeURIComponent(promoCode).toUpperCase()}`);
+        if (email) queryParams.push(`email=${encodeURIComponent(email)}`);
+
+        if (queryParams.length > 0) {
+            url += '?' + queryParams.join('&');
         }
 
         window.location.href = url;
     }
 
     function formatRupiah(angka) {
-      return (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
-  </script>
+</script>
 @endsection
