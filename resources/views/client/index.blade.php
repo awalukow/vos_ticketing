@@ -69,29 +69,14 @@
     .event-image {
       width: 100%;
       height: 160px;
-      overflow: hidden; /* Ensures nothing spills out */
-      background: #e0e0e0; /* Fallback background */
+      object-fit: cover;
+      background: #e0e0e0;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-    }
-
-    .event-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* This makes the image cover the area while staying proportional */
-      /* Alternative: use `object-fit: fill;` if you want full stretch (may distort) */
-    }
-
-    /* Optional: Hide alt text when image fails to load */
-    .event-image img:empty {
-      background: #ffffffff;
-      color: white;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 1.2rem;
+      color: #666;
+      font-weight: 500;
     }
 
     .event-title {
@@ -101,6 +86,13 @@
       font-weight: 600;
       color: #2d3748;
       margin: 0;
+    }
+
+    /* Event Date Style */
+    .event-date {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #999;
     }
 
     /* Hidden radio */
@@ -208,13 +200,18 @@
             <!-- Hidden Radio -->
             <input type="radio" name="category" value="{{ $val->id }}" class="event-radio" required />
 
-            <!-- Banner Image -->
+            <!-- Placeholder Image -->
             <div class="event-image">
-              <img src="{{ $val->event_banner ? asset('img/' . $val->event_banner)  : asset('img/vos-logo.png') }}" alt="{{ $val->name }}" />
+              {{ $val->name }}
             </div>
 
             <!-- Title -->
             <h3 class="event-title">{{ $val->name }}</h3>
+
+            <!-- Event Date -->
+            <div class="event-date">
+              {{ \Carbon\Carbon::parse($val->EventDate)->format('d M Y') }}
+            </div>
 
             <!-- Checkmark Indicator -->
             <span class="checkmark"></span>
