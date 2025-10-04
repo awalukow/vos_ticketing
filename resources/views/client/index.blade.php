@@ -69,14 +69,29 @@
     .event-image {
       width: 100%;
       height: 160px;
-      object-fit: cover;
-      background: #e0e0e0;
+      overflow: hidden; /* Ensures nothing spills out */
+      background: #e0e0e0; /* Fallback background */
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
-      color: #666;
-      font-weight: 500;
+      position: relative;
+    }
+
+    .event-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* This makes the image cover the area while staying proportional */
+      /* Alternative: use `object-fit: fill;` if you want full stretch (may distort) */
+    }
+
+    /* Optional: Hide alt text when image fails to load */
+    .event-image img:empty {
+      background: #ffffffff;
+      color: white;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .event-title {
@@ -201,8 +216,8 @@
             <input type="radio" name="category" value="{{ $val->id }}" class="event-radio" required />
 
             <!-- Placeholder Image -->
-            <div class="event-image">
-              {{ $val->name }}
+             <div class="event-image">
+              <img src="{{ $val->event_banner ? asset('img/' . $val->event_banner)  : asset('img/vos-logo.png') }}" alt="{{ $val->name }}" />
             </div>
 
             <!-- Title -->
