@@ -28,6 +28,7 @@ class PemesananExport implements FromCollection, WithHeadings
                     'StatusPembayaran'=> $p->status_pembayaran,
                     'NamaVerifikator' => $p->petugas->name ?? '-',
                     'TanggalPemesanan'=> $p->waktu,
+                    'Referral'        => $p->referral ?? '-',
                 ];
             });
     }
@@ -46,6 +47,7 @@ class PemesananExport implements FromCollection, WithHeadings
             'Status Pembayaran',
             'Nama Verifikator',
             'Tanggal Pemesanan',
+            'Referral',
         ];
     }
 }
