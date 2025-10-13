@@ -53,7 +53,11 @@
                         </td>
                         <td>{{ $promo->max_uses }}</td>
                         <td>{{ $promo->used_count }}</td>
-                        <td>{{ $promo->expires_at ? $promo->expires_at->format('d M Y H:i') : 'Tidak ada' }}</td>
+                        <td>
+                            {{ $promo->expires_at 
+                                ? $promo->expires_at->timezone('Asia/Bangkok')->format('d M Y H:i') 
+                                : 'Tidak ada' }}
+                        </td>
                         <td>
                            @if($promo->is_active && (!$promo->expires_at || $promo->expires_at >= now()))
                                 <span class="badge badge-success badge-status">Aktif</span>

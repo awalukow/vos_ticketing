@@ -118,7 +118,7 @@
                        name="expires_at"
                        id="expires_at"
                        class="form-control @error('expires_at') is-invalid @enderror"
-                       value="{{ old('expires_at', $promotion->expires_at?->format('Y-m-d\TH:i')) }}">
+                       value="{{ old('expires_at', $promotion->expires_at?->timezone('Asia/Bangkok')->format('Y-m-d\TH:i')) }}"
                 @error('expires_at')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
