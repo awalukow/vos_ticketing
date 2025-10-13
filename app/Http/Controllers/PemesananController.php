@@ -556,17 +556,33 @@ class PemesananController extends Controller
                 return redirect()->route('store')->with('error', 'Kode promo tidak ditemukan.');
             }
 
-            if (!$promotion->isValid(Auth::id(), $rute->id)) {
-                $msg = 'Kode promo tidak valid.';
-                if ($promotion->penumpang_id !== null && $promotion->penumpang_id != Auth::id()) {
-                    $msg = 'Kode ini hanya berlaku untuk pengguna tertentu.';
-                } elseif ($promotion->rute_id !== null && $promotion->rute_id != $rute->id) {
-                    $msg = 'Kode ini hanya berlaku untuk kelas tertentu.';
-                } elseif ($promotion->expires_at && now()->gt($promotion->expires_at)) {
-                    $msg = 'Kode sudah kadaluarsa.';
-                } elseif ($promotion->used_count >= $promotion->max_uses) {
-                    $msg = 'Kode sudah mencapai batas penggunaan.';
+            // 🔍 Enhanced validation: include seat count
+            $validationErrors = [];
+
+            if ($promotion->penumpang_id !== null && $promotion->penumpang_id != Auth::id()) {
+                $validationErrors[] = 'Kode promo ini hanya berlaku untuk pengguna tertentu.';
+            }
+
+            if ($promotion->rute_id !== null && $promotion->rute_id != $rute->id) {
+                $validationErrors[] = 'Kode promo ini hanya berlaku untuk kelas tertentu.';
+            }
+
+            if ($promotion->expires_at && now()->gt($promotion->expires_at)) {
+                $validationErrors[] = 'Kode promo sudah kadaluarsa.';
+            }
+
+            // ✅ NEW: Check if adding these seats would exceed max_uses
+            if ($promotion->used_count + $seatCount > $promotion->max_uses) {
+                $remaining = max(0, $promotion->max_uses - $promotion->used_count);
+                if ($remaining === 0) {
+                    $validationErrors[] = 'Kode promo sudah mencapai batas penggunaan.';
+                } else {
+                    $validationErrors[] = "Kode promo hanya bisa digunakan untuk $remaining kursi lagi.";
                 }
+            }
+
+            if (!empty($validationErrors)) {
+                $msg = $validationErrors[0]; // or implode('<br>', $validationErrors) if you want all
                 return redirect()->route('store')->with('error', $msg);
             }
 
@@ -788,7 +804,8 @@ class PemesananController extends Controller
                 ]);
 
                 // 🔼 Increment usage in promotions table
-                $promotion->incrementUsage(); // Or: $promotion->increment('used_count');
+                //$promotion->incrementUsage(); // Or: $promotion->increment('used_count');
+                $promotion->increment('used_count', $seatCount);
             }
 
             DB::commit();

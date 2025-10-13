@@ -92,6 +92,22 @@
 </div>
 
 <script>
+$(document).ready(function() {
+    // Initialize Select2 on the user and route dropdowns
+    $('#penumpang_id').select2({
+        placeholder: '-- Semua Pengguna --',
+        allowClear: true,
+        width: '100%'
+    });
+
+    $('#rute_id').select2({
+        placeholder: '-- Semua Kelas --',
+        allowClear: true,
+        width: '100%'
+    });
+});
+
+// Keep your existing toggleDiscountValue function
 function toggleDiscountValue() {
     const type = document.getElementById('discount_type').value;
     const input = document.getElementById('discount_value');

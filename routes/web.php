@@ -41,52 +41,61 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
     // ✅ ADD THE PROMO CHECK ROUTE HERE
     Route::get('/check-promo', function (\Illuminate\Http\Request $request) {
         $code = strtoupper($request->query('code'));
-        $ruteId = $request->query('rute_id'); // Get from JS
+        $ruteId = $request->query('rute_id');
+        $seatCount = (int) $request->query('seat_count', 1); // default to 1 if not provided
 
         if (!$code) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Kode kosong.'
-            ]);
+            return response()->json(['valid' => false, 'message' => 'Kode kosong.']);
+        }
+        if (!$ruteId) {
+            return response()->json(['valid' => false, 'message' => 'Rute tidak ditemukan.']);
+        }
+        if ($seatCount <= 0) {
+            return response()->json(['valid' => false, 'message' => 'Jumlah kursi tidak valid.']);
         }
 
-        $basePricePerTicket = 150000;
-        $totalEstimated = $basePricePerTicket;
+        $rute = \App\Models\Rute::find($ruteId);
+        if (!$rute) {
+            return response()->json(['valid' => false, 'message' => 'Rute tidak valid.']);
+        }
 
         $promotion = \App\Models\Promotion::where('code', $code)->first();
-
         if (!$promotion) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Kode promo tidak ditemukan.'
-            ]);
+            return response()->json(['valid' => false, 'message' => 'Kode promo tidak ditemukan.']);
         }
 
         $userId = auth()->check() ? auth()->id() : null;
 
-        if (!$promotion->isValid($userId, $ruteId)) {
-            $msg = 'Kode tidak valid.';
-            if ($promotion->penumpang_id !== null && $promotion->penumpang_id != $userId) {
-                $msg = 'Kode ini hanya berlaku untuk pengguna tertentu.';
-            } elseif ($promotion->rute_id !== null && $promotion->rute_id != $ruteId) {
-                $msg = 'Kode ini hanya berlaku untuk kelas tertentu.';
-            } elseif ($promotion->expires_at && now()->gt($promotion->expires_at)) {
-                $msg = 'Kode sudah kadaluarsa.';
-            } elseif ($promotion->used_count >= $promotion->max_uses) {
-                $msg = 'Kode sudah mencapai batas penggunaan.';
-            }
-
-            return response()->json([
-                'valid' => false,
-                'message' => $msg
-            ]);
+        // ✅ Validate all conditions, including seat-based usage
+        if ($promotion->penumpang_id !== null && $promotion->penumpang_id != $userId) {
+            return response()->json(['valid' => false, 'message' => 'Kode ini hanya berlaku untuk pengguna tertentu.']);
         }
 
+        if ($promotion->rute_id !== null && $promotion->rute_id != $ruteId) {
+            return response()->json(['valid' => false, 'message' => 'Kode ini hanya berlaku untuk kelas tertentu.']);
+        }
+
+        if ($promotion->expires_at && now()->gt($promotion->expires_at)) {
+            return response()->json(['valid' => false, 'message' => 'Kode sudah kadaluarsa.']);
+        }
+
+        // ✅ CRITICAL: Check future usage with seat count
+        if ($promotion->used_count + $seatCount > $promotion->max_uses) {
+            $remaining = max(0, $promotion->max_uses - $promotion->used_count);
+            if ($remaining === 0) {
+                return response()->json(['valid' => false, 'message' => 'Kode promo sudah mencapai batas penggunaan.']);
+            } else {
+                return response()->json(['valid' => false, 'message' => "Kode hanya bisa digunakan untuk $remaining kursi lagi."]);
+            }
+        }
+
+        // ✅ If valid, return discount info
+        $basePricePerTicket = (int) $rute->harga;
         $discountValue = $promotion->discount_value;
         $discountText = '';
 
         if ($promotion->discount_type === 'percent') {
-            $nominalDiscount = $totalEstimated * ($discountValue / 100);
+            $nominalDiscount = $basePricePerTicket * ($discountValue / 100);
             $discountText = "$discountValue% (Rp " . number_format($nominalDiscount, 0, ',', '.') . ")";
         } else {
             $discountText = "Rp " . number_format($discountValue, 0, ',', '.');
@@ -94,6 +103,8 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
 
         return response()->json([
             'valid' => true,
+            'discount_type' => $promotion->discount_type,
+            'discount_value' => $promotion->discount_value,
             'discount_text' => $discountText,
         ]);
     })->name('check.promo');

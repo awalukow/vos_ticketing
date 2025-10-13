@@ -1547,13 +1547,15 @@
         confirmBtn.disabled = false;
     }
 
-    // Handle "Check" button
+    let promoValidated = false;
+
     document.getElementById('checkPromoBtn').addEventListener('click', function () {
         const promoInput = document.getElementById('promoCodeInput');
         const promoFeedback = document.getElementById('promoFeedback');
         const confirmBtn = document.getElementById('confirmReferralBtn');
         const checkBtn = document.getElementById('checkPromoBtn');
         const promoCode = (promoInput.value || '').trim();
+        const seatCount = selectedSeats.length;
 
         if (!promoCode) {
             promoFeedback.textContent = '';
@@ -1576,11 +1578,28 @@
         promoFeedback.textContent = 'Memeriksa...';
         promoFeedback.className = 'form-text text-muted';
 
-        fetch(`{{ url('/check-promo') }}?code=${encodeURIComponent(promoCode)}&rute_id=${ruteId}`)
+        fetch(`{{ url('/check-promo') }}?code=${encodeURIComponent(promoCode)}&rute_id=${ruteId}&seat_count=${seatCount}`)
             .then(response => response.json())
             .then(data => {
                 if (data.valid) {
-                    promoFeedback.innerHTML = `✓ <strong>Kode valid!</strong><br>Diskon: ${data.discount_text}`;
+                    const seatCount = selectedSeats.length;
+                    const totalOriginal = seatCount * seatPrice;
+                    let totalDiscount = 0;
+
+                    if (data.discount_type === 'percent') {
+                        totalDiscount = totalOriginal * (data.discount_value / 100);
+                    } else {
+                        totalDiscount = data.discount_value * seatCount; // fixed amount per ticket
+                    }
+
+                    const finalTotal = totalOriginal - totalDiscount;
+
+                    promoFeedback.innerHTML = `
+                        ✓ <strong>Kode valid!</strong><br>
+                        Diskon: ${data.discount_text} per tiket<br>
+                        Total diskon: Rp ${formatRupiah(totalDiscount)}<br>
+                        Total akhir: <strong>Rp ${formatRupiah(finalTotal)}</strong>
+                    `;
                     promoFeedback.className = 'form-text text-success';
                     promoValidated = true;
                     confirmBtn.disabled = false;
