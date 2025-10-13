@@ -137,7 +137,12 @@ class LaporanController extends Controller
     public function show($id)
     {
         $customerService = AppSetting::getCustomerService();
-        $data = Pemesanan::with('rute.transportasi.category', 'penumpang')->where('kode', $id)->where('rowstatus','>=',0)->first();
+        //$data = Pemesanan::with('rute.transportasi.category', 'penumpang', 'promoUsage')->where('kode', $id)->where('rowstatus','>=',0)->first();
+        $data = Pemesanan::with([
+            'rute.transportasi.category',
+            'penumpang',
+            'promoUsage' // ← This loads promo info if exists
+        ])->where('kode', $id)->firstOrFail();
         //dd(Carbon::now());
         //dd(env('APP_ENV'));
         if ($data) {

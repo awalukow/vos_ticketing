@@ -61,4 +61,12 @@ class Pemesanan extends Model
     {
         return $this->hasMany(Pemesanan_Detail::class, 'pemesananCode', 'kode');
     }
+
+    /**
+     * A Pemesanan may have one associated promotion usage
+     */
+    public function promoUsage()
+    {
+        return $this->hasOne(PemesananPaymentPromotion::class, 'pemesanan_id');
+    }
 }

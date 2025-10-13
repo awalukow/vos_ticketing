@@ -336,6 +336,23 @@
       color: #155724;
       border: 1px solid #a3cfbb;
     }
+    .status-promos {
+      background-color: #f8f9fa;
+      color: #2c8e09ff;
+      border: 1px solid #dee2e6;
+      font-weight: 600;
+    }
+    .status-promo {
+      background-color: #f8f9fa;
+      color: #2c8e09ff;
+      border: 1px solid #dee2e6;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
     
     /* Responsive design */
     @media (max-width: 768px) {
@@ -471,6 +488,22 @@
               <td class="label">Harga</td>
               <td class="value">Rp {{ number_format($data->total, 0, ',', '.') }}</td>
             </tr>
+            <!-- Promo Code -->
+            @if($data->promoUsage)
+              <tr>
+                <td class="label">Promo</td>
+                <td class="value">
+                  <span class="status-badge status-promo">
+                    {{ $data->promoUsage->promo_code }}
+                    @if($data->promoUsage->discount_type === 'percent')
+                      (-{{ $data->promoUsage->discount_value }}%)
+                    @else
+                      (-Rp {{ number_format($data->promoUsage->discount_value, 0, ',', '.') }})
+                    @endif
+                  </span>
+                </td>
+              </tr>
+            @endif
             
             <!-- Payment Status -->
             <tr>
