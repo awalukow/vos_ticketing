@@ -187,7 +187,7 @@ class PemesananController extends Controller
     }
 
      
-    public function show($id, $data)
+    public function show_singlekursiperbooking($id, $data)
     {
         // Decrypt the data
         $data = Crypt::decrypt($data);
@@ -252,7 +252,63 @@ class PemesananController extends Controller
         return view('client.show', compact('id', 'dataRute', 'dataString'));
     }
 
-    
+    public function show($id, $data)
+    {
+        $data = Crypt::decrypt($data);
+        $category = Category::find($data['category']);
+        $ruteList = Rute::with('transportasi')->get();
+        $dataRute = [];
+
+        foreach ($ruteList as $rute) {
+            if (!$rute->transportasi || $rute->transportasi->category_id != $category->id) {
+                continue;
+            }
+
+            // ✅ Count confirmed/paid seats
+            $bookedSeats = Pemesanan_Detail::whereHas('pemesanan', function ($q) use ($rute) {
+                $q->where('rute_id', $rute->id)
+                ->where('rowstatus', '>=', 0)
+                ->where(function ($sub) {
+                    $sub->where('status', 'Sudah Bayar')
+                        ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
+                });
+            })->count();
+
+            // ✅ Count pending unpaid (not expired) seats
+            $pendingSeats = Pemesanan_Detail::whereHas('pemesanan', function ($q) use ($rute) {
+                $q->where('rute_id', $rute->id)
+                ->where('status', 'Belum Bayar')
+                ->where('isFisik', '0')
+                ->where('rowstatus', '>=', 0)
+                ->where(function ($sub) {
+                    $sub->where('expired_date', '>', now())
+                            ->orWhereNull('expired_date');
+                });
+            })->count();
+
+            $totalCapacity = $rute->transportasi->jumlah;
+            $availableSeats = max(0, $totalCapacity - $bookedSeats - $pendingSeats);
+
+            $dataRute[] = [
+                'harga' => $rute->harga,
+                'start' => $rute->start,
+                'end' => $rute->end,
+                'tujuan' => $rute->tujuan,
+                'transportasi' => $rute->transportasi->name,
+                'kode' => $rute->transportasi->kode,
+                'kursi' => $availableSeats, // ✅ now correct!
+                'waktu' => date("h:i A", strtotime($rute->jam)),
+                'event_date' => date("h:i A", strtotime($rute->jam)),
+                'id' => $rute->id,
+                'kategori' => $category->name,
+                'isForAdmin' => $rute->transportasi->isForAdmin
+            ];
+        }
+
+        sort($dataRute);
+        $dataString = json_encode($data);
+        return view('client.show', compact('id', 'dataRute', 'dataString'));
+    }
 
     /**
      * Show the form for editing the specified resource.
