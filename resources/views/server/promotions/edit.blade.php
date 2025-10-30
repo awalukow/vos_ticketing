@@ -73,6 +73,10 @@
                     <option value="fixed" {{ old('discount_type', $promotion->discount_type) == 'fixed' ? 'selected' : '' }}>
                         Nominal (Rp)
                     </option>
+                    <option value="bogo" {{ old('discount_type', $promotion->discount_type) == 'bogo' ? 'selected' : '' }}>
+                        Beli Dapat Gratis (BOGO)
+                    </option>
+                    <option value="ticket_discount" {{ old('discount_type') == 'ticket_discount' ? 'selected' : '' }}> Diskon Tiket (Potong Harga per Tiket)</option>
                 </select>
                 @error('discount_type')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -109,6 +113,52 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
                 <small class="text-muted">Jumlah maksimal penggunaan promo ini.</small>
+            </div>
+
+            <!-- Minimal Jumlah Tiket -->
+            <div class="form-group">
+                <label for="min_order">Minimal Jumlah Tiket (Opsional)</label>
+                <input type="number"
+                    name="min_order"
+                    id="min_order"
+                    class="form-control @error('min_order') is-invalid @enderror"
+                    value="{{ old('min_order', $promotion->min_order) }}"
+                    min="1"
+                    placeholder="Contoh: 3">
+                @error('min_order')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <small class="text-muted">Jika diisi, promo hanya berlaku jika jumlah tiket ≥ nilai ini.</small>
+            </div>
+
+            <!-- BOGO Fields (Hidden by Default) -->
+            <div id="bogo-fields" class="row" style="display: none;">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="buy_quantity">Beli (Qty) *</label>
+                        <input type="number"
+                            name="buy_quantity"
+                            id="buy_quantity"
+                            class="form-control"
+                            value="{{ old('buy_quantity', $promotion->buy_quantity) }}"
+                            min="1"
+                            placeholder="Contoh: 2">
+                        <small class="text-muted">Jumlah tiket yang harus dibeli.</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="get_free">Dapatkan Gratis (Qty) *</label>
+                        <input type="number"
+                            name="get_free"
+                            id="get_free"
+                            class="form-control"
+                            value="{{ old('get_free', $promotion->get_free) }}"
+                            min="1"
+                            placeholder="Contoh: 1">
+                        <small class="text-muted">Jumlah tiket gratis per set.</small>
+                    </div>
+                </div>
             </div>
 
             <!-- Kadaluarsa -->
@@ -189,23 +239,40 @@
 @section('script')
 <script src="{{ asset('vendor/select2/dist/js/select2.full.min.js') }}"></script>
 <script>
-    // Toggle input step based on discount type
     function toggleDiscountValue() {
         const type = document.getElementById('discount_type').value;
         const input = document.getElementById('discount_value');
+        const discountField = input.closest('.form-group'); // the whole "Nilai Diskon" div
+        const bogoFields = document.getElementById('bogo-fields');
+
         if (type === 'percent') {
+            discountField.style.display = 'block';
+            bogoFields.style.display = 'none';
+            input.required = true;
             input.step = '0.01';
             input.placeholder = 'Contoh: 10.5';
-        } else {
+        } 
+        else if (type === 'fixed') {
+            discountField.style.display = 'block';
+            bogoFields.style.display = 'none';
+            input.required = true;
             input.step = '1';
             input.placeholder = 'Contoh: 25000';
+        } 
+        else if (type === 'bogo') {
+            // Hide discount field, show BOGO fields, set value 0
+            discountField.style.display = 'none';
+            input.required = false;
+            input.value = 0;
+            bogoFields.style.display = 'flex';
+        } 
+        else {
+            discountField.style.display = 'block';
+            bogoFields.style.display = 'none';
         }
     }
 
-    // Initialize on load
     document.addEventListener('DOMContentLoaded', function () {
-        toggleDiscountValue();
-
         // Initialize Select2
         $('.select2').select2({
             placeholder: '-- Pilih --',
@@ -213,16 +280,17 @@
             width: '100%'
         });
 
-        // Force selected values in Select2 (critical for Edit)
+        // Trigger correct field visibility on load
+        toggleDiscountValue();
+
+        // Force selected values in Select2 (for edit mode)
         const penumpangId = "{{ old('penumpang_id', $promotion->penumpang_id) }}";
         const ruteId = "{{ old('rute_id', $promotion->rute_id) }}";
+        if (penumpangId) $('#penumpang_id').val(penumpangId).trigger('change');
+        if (ruteId) $('#rute_id').val(ruteId).trigger('change');
 
-        if (penumpangId) {
-            $('#penumpang_id').val(penumpangId).trigger('change');
-        }
-        if (ruteId) {
-            $('#rute_id').val(ruteId).trigger('change');
-        }
+        // Attach event listener
+        document.getElementById('discount_type').addEventListener('change', toggleDiscountValue);
     });
 </script>
 @endsection

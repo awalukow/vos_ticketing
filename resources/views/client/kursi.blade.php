@@ -1579,47 +1579,68 @@
         promoFeedback.className = 'form-text text-muted';
 
         fetch(`{{ url('/check-promo') }}?code=${encodeURIComponent(promoCode)}&rute_id=${ruteId}&seat_count=${seatCount}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.valid) {
-                    const seatCount = selectedSeats.length;
-                    const totalOriginal = seatCount * seatPrice;
-                    let totalDiscount = 0;
-
-                    if (data.discount_type === 'percent') {
-                        totalDiscount = totalOriginal * (data.discount_value / 100);
-                    } else {
-                        totalDiscount = data.discount_value * seatCount; // fixed amount per ticket
-                    }
-
-                    const finalTotal = totalOriginal - totalDiscount;
-
-                    promoFeedback.innerHTML = `
-                        ✓ <strong>Kode valid!</strong><br>
-                        Diskon: ${data.discount_text} per tiket<br>
-                        Total diskon: Rp ${formatRupiah(totalDiscount)}<br>
-                        Total akhir: <strong>Rp ${formatRupiah(finalTotal)}</strong>
-                    `;
-                    promoFeedback.className = 'form-text text-success';
-                    promoValidated = true;
-                    confirmBtn.disabled = false;
-                } else {
-                    promoFeedback.textContent = `✗ ${data.message}`;
-                    promoFeedback.className = 'form-text text-danger';
-                    promoValidated = false;
-                    confirmBtn.disabled = true;
-                }
-            })
-            .catch(() => {
-                promoFeedback.textContent = 'Gagal memeriksa kode. Coba lagi.';
-                promoFeedback.className = 'form-text text-danger';
-                promoValidated = false;
-                confirmBtn.disabled = true;
-            })
-            .finally(() => {
-                promoInput.disabled = false;
-                checkBtn.disabled = false;
-            });
+          .then(response => response.json())
+          .then(data => {
+              if (data.valid) {
+                  const seatCount = selectedSeats.length;
+                  const totalOriginal = seatCount * seatPrice;
+                  let totalDiscount = 0;
+                  let discountDisplayText = '';
+                  if (data.discount_type === 'percent') {
+                      totalDiscount = totalOriginal * (data.discount_value / 100);
+                      discountDisplayText = `${data.discount_value}%`;
+                  } else if (data.discount_type === 'fixed') {
+                      totalDiscount = data.discount_value * seatCount;
+                      discountDisplayText = `Rp ${formatRupiah(data.discount_value)} per tiket`;
+                  } else if (data.discount_type === 'bogo') {
+                      const buy = data.buy_quantity;
+                      const free = data.get_free;
+                      const perSet = buy + free;
+                      const fullSets = Math.floor(seatCount / perSet);
+                      const remainder = seatCount % perSet;
+                      const payable = fullSets * buy + Math.min(remainder, buy);
+                      const freeTickets = seatCount - payable;
+                      if (freeTickets <= 0) {
+                          promoFeedback.innerHTML = `✗ Minimal beli <strong>${buy}</strong> tiket untuk mendapatkan gratis.`;
+                          promoFeedback.className = 'form-text text-danger';
+                          promoValidated = false;
+                          confirmBtn.disabled = true;
+                          return;
+                      }
+                      totalDiscount = freeTickets * seatPrice;
+                      discountDisplayText = `Beli ${buy} Gratis ${free}`;
+                  } else if (data.discount_type === 'ticket_discount') {
+                      const perTicketDiscount = Math.min(data.discount_value, seatPrice);
+                      totalDiscount = perTicketDiscount * seatCount;
+                      discountDisplayText = `Diskon Tiket: Rp ${formatRupiah(perTicketDiscount)} per tiket`;
+                  }
+                  const finalTotal = totalOriginal - totalDiscount;
+                  promoFeedback.innerHTML = `
+                      ✓ <strong>Kode valid!</strong><br>
+                      Diskon: ${discountDisplayText}<br>
+                      Total diskon: Rp ${formatRupiah(totalDiscount)}<br>
+                      Total akhir: <strong>Rp ${formatRupiah(finalTotal)}</strong>
+                  `;
+                  promoFeedback.className = 'form-text text-success';
+                  promoValidated = true;
+                  confirmBtn.disabled = false;
+              } else {
+                  promoFeedback.textContent = `✗ ${data.message}`;
+                  promoFeedback.className = 'form-text text-danger';
+                  promoValidated = false;
+                  confirmBtn.disabled = true;
+              }
+          })
+          .catch(() => {
+              promoFeedback.textContent = 'Gagal memeriksa kode. Coba lagi.';
+              promoFeedback.className = 'form-text text-danger';
+              promoValidated = false;
+              confirmBtn.disabled = true;
+          })
+          .finally(() => {
+              promoInput.disabled = false;
+              checkBtn.disabled = false;
+          });
     });
 
     document.getElementById('confirmReferralBtn').addEventListener('click', function () {

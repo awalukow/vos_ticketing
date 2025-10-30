@@ -28,6 +28,8 @@
                 <option value="">-- Pilih --</option>
                 <option value="percent" {{ old('discount_type') == 'percent' ? 'selected' : '' }}>Persentase (%)</option>
                 <option value="fixed" {{ old('discount_type') == 'fixed' ? 'selected' : '' }}>Nominal (Rp)</option>
+                <option value="bogo" {{ old('discount_type') == 'bogo' ? 'selected' : '' }}>Beli Dapat Gratis (BOGO)</option>
+                <option value="ticket_discount" {{ old('discount_type') == 'ticket_discount' ? 'selected' : '' }}> Diskon Tiket (Potong Harga per Tiket)</option>
             </select>
         </div>
     </div>
@@ -51,6 +53,17 @@
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
+            <label for="min_order">Minimal Jumlah Tiket (Opsional)</label>
+            <input type="number"
+                name="min_order"
+                id="min_order"
+                class="form-control"
+                value="{{ old('min_order', 1) }}"
+                min="1"
+                placeholder="Contoh: 3">
+            <small class="text-muted">Jika diisi, promo hanya berlaku jika jumlah tiket ≥ nilai ini.</small>
+        </div>
+        <div class="form-group">
             <label for="expires_at">Kadaluarsa (Opsional)</label>
             <input type="datetime-local" name="expires_at" id="expires_at" class="form-control" value="{{ old('expires_at') }}">
         </div>
@@ -59,6 +72,36 @@
         <div class="form-group form-check mt-4">
             <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {{ old('is_active') ? 'checked' : '' }}>
             <label class="form-check-label" for="is_active">Aktif</label>
+        </div>
+    </div>
+</div>
+
+<!-- BOGO Fields (Hidden by Default) -->
+<div id="bogo-fields" class="row" style="display: none;">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="buy_quantity">Beli (Qty) *</label>
+            <input type="number"
+                   name="buy_quantity"
+                   id="buy_quantity"
+                   class="form-control"
+                   value="{{ old('buy_quantity') }}"
+                   min="1"
+                   placeholder="Contoh: 2">
+            <small class="text-muted">Jumlah tiket yang harus dibeli.</small>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="get_free">Dapatkan Gratis (Qty) *</label>
+            <input type="number"
+                   name="get_free"
+                   id="get_free"
+                   class="form-control"
+                   value="{{ old('get_free') }}"
+                   min="1"
+                   placeholder="Contoh: 1">
+            <small class="text-muted">Jumlah tiket gratis per set.</small>
         </div>
     </div>
 </div>
@@ -92,8 +135,52 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    // Initialize Select2 on the user and route dropdowns
+document.addEventListener('DOMContentLoaded', function () {
+    const discountType = document.getElementById('discount_type');
+    const discountValueGroup = document.getElementById('discount_value').closest('.form-group');
+    const discountValueInput = document.getElementById('discount_value');
+    const bogoFields = document.getElementById('bogo-fields');
+
+    // --- Function to toggle visibility & values ---
+    function toggleDiscountValue() {
+        const type = discountType.value;
+
+        if (type === 'percent') {
+            discountValueGroup.style.display = 'block';
+            bogoFields.style.display = 'none';
+            discountValueInput.required = true;
+            discountValueInput.step = '0.01';
+            discountValueInput.placeholder = 'Contoh: 10.5';
+        } 
+        else if (type === 'fixed') {
+            discountValueGroup.style.display = 'block';
+            bogoFields.style.display = 'none';
+            discountValueInput.required = true;
+            discountValueInput.step = '1';
+            discountValueInput.placeholder = 'Contoh: 25000';
+        } 
+        else if (type === 'bogo') {
+            // Hide discount value field, default to 0
+            discountValueGroup.style.display = 'none';
+            discountValueInput.value = 0;
+            discountValueInput.required = false;
+            bogoFields.style.display = 'flex';
+        } 
+        else {
+            // Default: show discount value
+            discountValueGroup.style.display = 'block';
+            bogoFields.style.display = 'none';
+            discountValueInput.required = true;
+        }
+    }
+
+    // --- Initialize state on load ---
+    toggleDiscountValue();
+
+    // --- Event listeners ---
+    discountType.addEventListener('change', toggleDiscountValue);
+
+    // --- Initialize Select2 ---
     $('#penumpang_id').select2({
         placeholder: '-- Semua Pengguna --',
         allowClear: true,
@@ -105,34 +192,24 @@ $(document).ready(function() {
         allowClear: true,
         width: '100%'
     });
-});
 
-// Keep your existing toggleDiscountValue function
-function toggleDiscountValue() {
-    const type = document.getElementById('discount_type').value;
-    const input = document.getElementById('discount_value');
-    input.step = type === 'percent' ? '0.01' : '1';
-    input.placeholder = type === 'percent' ? 'Contoh: 10.5' : 'Contoh: 25000';
-}
+    // --- Generate random 8-character alphanumeric code ---
+    document.getElementById('generatePromoCode').addEventListener('click', function () {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
 
-// 🔧 Generate random 8-character alphanumeric code
-document.getElementById('generatePromoCode').addEventListener('click', function () {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+        const input = document.getElementById('code');
+        input.value = code;
+        input.focus();
 
-    const input = document.getElementById('code');
-    input.value = code;
-    input.focus();
-
-    // Optional: Flash background briefly
-    input.style.backgroundColor = '#fff3cd';
-    setTimeout(() => {
-        input.style.backgroundColor = '';
-    }, 300);
-
-    input.dispatchEvent(new Event('input'));
+        // Brief highlight effect
+        input.style.backgroundColor = '#fff3cd';
+        setTimeout(() => {
+            input.style.backgroundColor = '';
+        }, 300);
+    });
 });
 </script>

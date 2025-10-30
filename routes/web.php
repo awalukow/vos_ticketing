@@ -38,75 +38,132 @@ if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  
     Route::post('/adminRegister', [RegisterController::class, 'fastRegister'])->name('admin-register');
     Route::get('/view/pdf', [RegisterController::class, 'view_pdf']);
 
-    // ✅ ADD THE PROMO CHECK ROUTE HERE
     Route::get('/check-promo', function (\Illuminate\Http\Request $request) {
-        $code = strtoupper($request->query('code'));
-        $ruteId = $request->query('rute_id');
-        $seatCount = (int) $request->query('seat_count', 1); // default to 1 if not provided
+        try {
+            $code = strtoupper($request->query('code'));
+            $ruteId = $request->query('rute_id');
+            $seatCount = (int) $request->query('seat_count', 1);
 
-        if (!$code) {
-            return response()->json(['valid' => false, 'message' => 'Kode kosong.']);
-        }
-        if (!$ruteId) {
-            return response()->json(['valid' => false, 'message' => 'Rute tidak ditemukan.']);
-        }
-        if ($seatCount <= 0) {
-            return response()->json(['valid' => false, 'message' => 'Jumlah kursi tidak valid.']);
-        }
-
-        $rute = \App\Models\Rute::find($ruteId);
-        if (!$rute) {
-            return response()->json(['valid' => false, 'message' => 'Rute tidak valid.']);
-        }
-
-        $promotion = \App\Models\Promotion::where('code', $code)->first();
-        if (!$promotion) {
-            return response()->json(['valid' => false, 'message' => 'Kode promo tidak ditemukan.']);
-        }
-
-        $userId = auth()->check() ? auth()->id() : null;
-
-        // ✅ Validate all conditions, including seat-based usage
-        if ($promotion->penumpang_id !== null && $promotion->penumpang_id != $userId) {
-            return response()->json(['valid' => false, 'message' => 'Kode ini hanya berlaku untuk pengguna tertentu.']);
-        }
-
-        if ($promotion->rute_id !== null && $promotion->rute_id != $ruteId) {
-            return response()->json(['valid' => false, 'message' => 'Kode ini hanya berlaku untuk kelas tertentu.']);
-        }
-
-        if ($promotion->expires_at && now()->gt($promotion->expires_at)) {
-            return response()->json(['valid' => false, 'message' => 'Kode sudah kadaluarsa.']);
-        }
-
-        // ✅ CRITICAL: Check future usage with seat count
-        if ($promotion->used_count + $seatCount > $promotion->max_uses) {
-            $remaining = max(0, $promotion->max_uses - $promotion->used_count);
-            if ($remaining === 0) {
-                return response()->json(['valid' => false, 'message' => 'Kode promo sudah mencapai batas penggunaan.']);
-            } else {
-                return response()->json(['valid' => false, 'message' => "Kode hanya bisa digunakan untuk $remaining kursi lagi."]);
+            if (!$code) {
+                return response()->json(['valid' => false, 'message' => 'Kode kosong.']);
             }
+            if (!$ruteId) {
+                return response()->json(['valid' => false, 'message' => 'Rute tidak ditemukan.']);
+            }
+            if ($seatCount <= 0) {
+                return response()->json(['valid' => false, 'message' => 'Jumlah kursi tidak valid.']);
+            }
+
+            $rute = \App\Models\Rute::find($ruteId);
+            if (!$rute) {
+                return response()->json(['valid' => false, 'message' => 'Rute tidak valid.']);
+            }
+
+            $promotion = \App\Models\Promotion::where('code', $code)->first();
+            if (!$promotion) {
+                return response()->json(['valid' => false, 'message' => 'Kode promo tidak ditemukan.']);
+            }
+            
+            $userId = auth()->check() ? auth()->id() : null;
+
+            // ✅ USE isValid() METHOD — IT ALREADY HANDLES is_active, rowstatus, expiry, etc.
+            if (!$promotion->isValid($userId, $ruteId, $seatCount)) {
+                
+                // Give specific message based on why it's invalid
+                if ($promotion->rowstatus < 0) {
+                    return response()->json(['valid' => false, 'message' => 'Kode telah dihapus.']);
+                }
+                if (!$promotion->is_active) {
+                    return response()->json(['valid' => false, 'message' => 'Kode ini tidak aktif.']);
+                }
+                if ($promotion->penumpang_id !== null && $promotion->penumpang_id != $userId) {
+                    return response()->json(['valid' => false, 'message' => 'Kode ini hanya berlaku untuk pengguna tertentu.']);
+                }
+                if ($promotion->rute_id !== null && $promotion->rute_id != $ruteId) {
+                    return response()->json(['valid' => false, 'message' => 'Kode ini hanya berlaku untuk kelas tertentu.']);
+                }
+                if ($promotion->expires_at && now()->gt($promotion->expires_at)) {
+                    return response()->json(['valid' => false, 'message' => 'Kode sudah kadaluarsa.']);
+                }
+                if ($promotion->min_order > $seatCount) {
+                    return response()->json([
+                        'valid' => false,
+                        'message' => "Promo ini hanya berlaku untuk pembelian minimal {$promotion->min_order} tiket."
+                    ]);
+                }
+                if ($promotion->used_count + $seatCount > $promotion->max_uses) {
+                    $remaining = max(0, $promotion->max_uses - $promotion->used_count);
+                    if ($remaining === 0) {
+                        return response()->json(['valid' => false, 'message' => 'Kode promo sudah mencapai batas penggunaan.']);
+                    } else {
+                        return response()->json([
+                            'valid' => false,
+                            'message' => "Kode hanya bisa digunakan untuk $remaining kursi lagi."
+                        ]);
+                    }
+                }
+
+                // Fallback
+                return response()->json(['valid' => false, 'message' => 'Kode tidak valid.']);
+            }
+
+            // ✅ All checks passed
+            $basePricePerTicket = (int) $rute->harga;
+            $discountValue = $promotion->discount_value;
+            $discountText = '';
+
+            if ($promotion->discount_type === 'percent') {
+                $nominalDiscount = $basePricePerTicket * ($discountValue / 100);
+                $discountText = "$discountValue% (Rp " . number_format($nominalDiscount, 0, ',', '.') . ")";
+            } 
+            elseif ($promotion->discount_type === 'bogo') {
+                $buy = $promotion->buy_quantity;
+                $free = $promotion->get_free;
+                $perSet = $buy + $free;
+                $fullSets = intdiv($seatCount, $perSet);
+                $remainder = $seatCount % $perSet;
+                $payable = ($fullSets * $buy) + min($remainder, $buy);
+                $freeTickets = $seatCount - $payable;
+
+                if ($freeTickets <= 0) {
+                    return response()->json([
+                        'valid' => false,
+                        'message' => "Promo Beli {$buy} Gratis {$free} membutuhkan minimal kelipatan " . ($buy + $free) . " tiket untuk memperoleh promo."
+                    ]);
+                }
+
+                $totalDiscount = $freeTickets * $basePricePerTicket;
+                $discountText = "Beli $buy Gratis $free → Anda hemat Rp " . number_format($totalDiscount, 0, ',', '.');
+            }
+            elseif ($promotion->discount_type === 'ticket_discount') {
+                $perTicketDiscount = min($promotion->discount_value, $basePricePerTicket);
+                $totalDiscount = $perTicketDiscount * $seatCount;
+                $discountText = "Diskon Tiket: Rp " . number_format($perTicketDiscount, 0, ',', '.') . " per tiket";
+            }
+            else {
+                // 'fixed' type: flat total discount
+                $totalDiscount = $discountValue; // <-- Note: this is TOTAL, not per ticket
+                $discountText = "Potongan: Rp " . number_format($discountValue, 0, ',', '.');
+            }
+
+            return response()->json([
+                'valid' => true,
+                'discount_type' => $promotion->discount_type,
+                'discount_value' => $promotion->discount_value,
+                'discount_text' => $discountText,
+                'buy_quantity' => $promotion->buy_quantity,
+                'get_free' => $promotion->get_free,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in /check-promo: ' . $e->getMessage());
+            \Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'valid' => false,
+                'message' => 'Server error. Coba lagi.'
+            ], 500);
         }
-
-        // ✅ If valid, return discount info
-        $basePricePerTicket = (int) $rute->harga;
-        $discountValue = $promotion->discount_value;
-        $discountText = '';
-
-        if ($promotion->discount_type === 'percent') {
-            $nominalDiscount = $basePricePerTicket * ($discountValue / 100);
-            $discountText = "$discountValue% (Rp " . number_format($nominalDiscount, 0, ',', '.') . ")";
-        } else {
-            $discountText = "Rp " . number_format($discountValue, 0, ',', '.');
-        }
-
-        return response()->json([
-            'valid' => true,
-            'discount_type' => $promotion->discount_type,
-            'discount_value' => $promotion->discount_value,
-            'discount_text' => $discountText,
-        ]);
     })->name('check.promo');
 
     // Other public routes...

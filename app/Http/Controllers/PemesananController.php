@@ -599,53 +599,35 @@ class PemesananController extends Controller
         $finalTotal = $totalAsli;
         $discountNominal = 0;
 
-        // 🔹 Get promo from query string
-        $promoCodeInput = strtoupper(request()->query('promo'));
-        $promotion = null;
-
-        if ($promoCodeInput) {
-            \Log::info("Attempting promo code: " . $promoCodeInput);
-
-            $promotion = Promotion::where('code', $promoCodeInput)->first();
-
-            if (!$promotion) {
-                return redirect()->route('store')->with('error', 'Kode promo tidak ditemukan.');
+        if ($promotion) {
+            // Validate min_order
+            if ($promotion->min_order > $seatCount) {
+                return redirect()->back()->with('error', "Promo ini hanya berlaku untuk pembelian minimal {$promotion->min_order} tiket.");
             }
 
-            // 🔍 Enhanced validation: include seat count
-            $validationErrors = [];
-
-            if ($promotion->penumpang_id !== null && $promotion->penumpang_id != Auth::id()) {
-                $validationErrors[] = 'Kode promo ini hanya berlaku untuk pengguna tertentu.';
+            // Validate using your improved isValid (should include seatCount now)
+            if (!$promotion->isValid(Auth::id(), $rute->id, $seatCount)) {
+                return redirect()->back()->with('error', 'Kode promo tidak valid.');
             }
 
-            if ($promotion->rute_id !== null && $promotion->rute_id != $rute->id) {
-                $validationErrors[] = 'Kode promo ini hanya berlaku untuk kelas tertentu.';
-            }
-
-            if ($promotion->expires_at && now()->gt($promotion->expires_at)) {
-                $validationErrors[] = 'Kode promo sudah kadaluarsa.';
-            }
-
-            // ✅ NEW: Check if adding these seats would exceed max_uses
-            if ($promotion->used_count + $seatCount > $promotion->max_uses) {
-                $remaining = max(0, $promotion->max_uses - $promotion->used_count);
-                if ($remaining === 0) {
-                    $validationErrors[] = 'Kode promo sudah mencapai batas penggunaan.';
-                } else {
-                    $validationErrors[] = "Kode promo hanya bisa digunakan untuk $remaining kursi lagi.";
-                }
-            }
-
-            if (!empty($validationErrors)) {
-                $msg = $validationErrors[0]; // or implode('<br>', $validationErrors) if you want all
-                return redirect()->route('store')->with('error', $msg);
-            }
-
+            // 💰 Calculate discount
             if ($promotion->discount_type === 'percent') {
                 $discountNominal = $totalAsli * ($promotion->discount_value / 100);
-            } else {
-                $discountNominal = $promotion->discount_value;
+            } elseif ($promotion->discount_type === 'fixed') {
+                $discountNominal = $promotion->discount_value * $seatCount;
+            } elseif ($promotion->discount_type === 'bogo') {
+                $buy = $promotion->buy_quantity;
+                $free = $promotion->get_free;
+                $perSet = $buy + $free;
+                $fullSets = intdiv($seatCount, $perSet);
+                $remainder = $seatCount % $perSet;
+                $payable = ($fullSets * $buy) + min($remainder, $buy);
+                $freeTickets = $seatCount - $payable;
+                $discountNominal = $freeTickets * $rute->harga;
+            } elseif ($promotion->discount_type === 'ticket_discount') {
+                $perTicketDiscount = min($promotion->discount_value, $rute->harga);
+                $discountNominal = $perTicketDiscount * $seatCount;
+                $finalTotal = $totalAsli - $discountNominal;
             }
 
             $discountNominal = min($discountNominal, $totalAsli);
@@ -770,18 +752,17 @@ class PemesananController extends Controller
                 return redirect()->route('store')->with('error', 'Kode promo tidak ditemukan.');
             }
 
-            // ✅ Validate with user ID AND rute ID
+            // ✅ Get seat count
+            $seatCount = count($kursiArray);
+
+            // ✅ Check min_order
+            if ($promotion->min_order > $seatCount) {
+                return redirect()->route('store')->with('error', "Promo ini hanya berlaku untuk pembelian minimal {$promotion->min_order} tiket.");
+            }
+
             if (!$promotion->isValid(Auth::id(), $rute->id)) {
                 $msg = 'Kode promo tidak valid.';
-                if ($promotion->penumpang_id !== null && $promotion->penumpang_id != Auth::id()) {
-                    $msg = 'Kode promo ini hanya berlaku untuk pengguna tertentu.';
-                } elseif ($promotion->rute_id !== null && $promotion->rute_id != $rute->id) {
-                    $msg = 'Kode promo ini hanya berlaku untuk kelas tertentu.';
-                } elseif ($promotion->expires_at && now()->gt($promotion->expires_at)) {
-                    $msg = 'Kode promo sudah kadaluarsa.';
-                } elseif ($promotion->used_count >= $promotion->max_uses) {
-                    $msg = 'Kode promo sudah mencapai batas penggunaan.';
-                }
+                // ... [existing messages] ...
                 return redirect()->route('store')->with('error', $msg);
             }
 
@@ -789,7 +770,25 @@ class PemesananController extends Controller
             if ($promotion->discount_type === 'percent') {
                 $discountNominal = $totalAsli * ($promotion->discount_value / 100);
             } else {
-                $discountNominal = $promotion->discount_value;
+                $discountNominal = $promotion->discount_value * $seatCount; // fixed per ticket
+            }
+
+            if ($promotion->discount_type === 'bogo') {
+                // Example: Buy 2 Get 1 Free
+                $buy = $promotion->buy_quantity;
+                $free = $promotion->get_free;
+
+                // How many full sets?
+                $sets = intdiv($seatCount, $buy + $free);
+
+                // Remaining tickets after full sets
+                $remainder = $seatCount % ($buy + $free);
+
+                // You pay for: (sets * buy) + remainder (but not more than buy in last group)
+                $payable = ($sets * $buy) + min($remainder, $buy);
+
+                $discountNominal = ($seatCount - $payable) * $rute->harga;
+                $finalTotal = $totalAsli - $discountNominal;
             }
 
             $discountNominal = min($discountNominal, $totalAsli);

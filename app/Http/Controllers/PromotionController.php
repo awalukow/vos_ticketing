@@ -24,9 +24,13 @@ class PromotionController extends Controller
      */
     public function index()
     {
-        $promotions = Promotion::get();
+        $promotions = Promotion::where('rowstatus', '>=', 0)
+            ->orderByDesc('created_at')
+            ->get();
+
         return view('server.promotions.index', compact('promotions'));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -43,7 +47,7 @@ class PromotionController extends Controller
     {
         $request->validate([
             'code' => 'required|string|max:12|unique:promotions,code',
-            'discount_type' => 'required|in:percent,fixed',
+            'discount_type' => 'required|in:percent,fixed,bogo,ticket_discount',
             'discount_value' => 'required|numeric|min:0',
             'max_uses' => 'required|integer|min:1',
             'expires_at' => 'nullable|date',
@@ -55,14 +59,16 @@ class PromotionController extends Controller
         Promotion::create([
             'code' => strtoupper($request->code),
             'discount_type' => $request->discount_type,
-            'discount_value' => $request->discount_value,
+            'discount_value' => $request->discount_type === 'bogo' ? 0 : $request->discount_value,
             'max_uses' => $request->max_uses,
-            'used_count' => 0,
             'expires_at' => $request->expires_at,
-            'is_active' => $request->has('is_active') ? 1 : 0, // Force boolean
+            'is_active' => $request->has('is_active') ? 1 : 0,
             'penumpang_id' => $request->penumpang_id,
             'rute_id' => $request->rute_id,
             'rowstatus' => 0,
+            'min_order' => $request->min_order ?? 1,
+            'buy_quantity' => $request->discount_type === 'bogo' ? $request->buy_quantity : null,
+            'get_free' => $request->discount_type === 'bogo' ? $request->get_free : null,
         ]);
 
         return redirect()->route('promotions.index')->with('success', 'Promo berhasil dibuat.');
@@ -82,7 +88,7 @@ class PromotionController extends Controller
     {
         $request->validate([
             'code' => 'required|string|max:12|unique:promotions,code,' . $promotion->id,
-            'discount_type' => 'required|in:percent,fixed',
+            'discount_type' => 'required|in:percent,fixed,bogo,ticket_discount',
             'discount_value' => 'required|numeric|min:0',
             'max_uses' => 'required|integer|min:1',
             'expires_at' => 'nullable|date',
@@ -100,6 +106,10 @@ class PromotionController extends Controller
             'is_active' => $request->has('is_active') ? 1 : 0,
             'penumpang_id' => $request->penumpang_id,
             'rute_id' => $request->rute_id,
+            'min_order' => $request->min_order ?? 1, // ✅ Add this line
+            // BOGO
+            'buy_quantity' => $request->discount_type === 'bogo' ? $request->buy_quantity : null,
+            'get_free' => $request->discount_type === 'bogo' ? $request->get_free : null,
         ]);
 
         return redirect()->route('promotions.index')->with('success', 'Promo berhasil diperbarui.');

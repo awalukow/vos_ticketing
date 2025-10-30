@@ -25,6 +25,9 @@ class Promotion extends Model
         'created_date',
         'modified_by',
         'modified_date',
+        'min_order', // ✅ Add here
+        'buy_quantity',   // ✅ Add
+        'get_free',       // ✅ Add
     ];
 
     protected $casts = [
@@ -33,6 +36,9 @@ class Promotion extends Model
         'modified_date' => 'datetime',
         'is_active' => 'boolean',
         'rowstatus' => 'integer',
+        'min_order' => 'integer', // ✅ Add cast
+        'buy_quantity' => 'integer', // ✅ Add cast
+        'get_free' => 'integer', // ✅ Add cast
     ];
 
     /**
@@ -80,7 +86,7 @@ class Promotion extends Model
     /**
      * Enhanced validation logic
      */
-    public function isValid($userId = null, $ruteId = null)
+    public function isValid($userId = null, $ruteId = null, $seatCount = 1)
     {
         // Soft-deleted?
         if ($this->rowstatus < 0) {
@@ -102,6 +108,23 @@ class Promotion extends Model
         // Route-specific promo?
         if ($this->rute_id && $this->rute_id != $ruteId) {
             return false;
+        }
+
+        // ✅ Min order check
+        if ($this->min_order > $seatCount) {
+            return false;
+        }
+
+        // ✅ Usage limit check (critical for BOGO)
+        if ($this->used_count + $seatCount > $this->max_uses) {
+            return false;
+        }
+
+            // ✅ BOGO: Must have valid buy/get values
+        if ($this->discount_type === 'bogo') {
+            if (!$this->buy_quantity || !$this->get_free || $this->buy_quantity <= 0 || $this->get_free <= 0) {
+                return false;
+            }
         }
 
         return true;
