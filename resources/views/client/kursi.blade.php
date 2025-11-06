@@ -487,7 +487,7 @@
           @endphp
           @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
             <div class="seat-item">
-              <div class="kursi VVIP" onclick="toggleSeat(this)">
+              <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>M{{ $i }}</div>
               </div>
             </div>
@@ -527,7 +527,7 @@
           @endphp
           @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
             <div class="seat-item">
-              <div class="kursi VVIP" onclick="toggleSeat(this)">
+              <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>M{{ $i }}</div>
               </div>
             </div>
