@@ -328,7 +328,47 @@
 
         <!-- O Row -->
         <div class="seating-container seat-row">
-          @for ($i = 1; $i <= 6; $i++)
+          @for ($i = 1; $i <= 2; $i++)
+          @php
+            $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
+            <div class="seat-item">
+              <div class="kursi platinum" onclick="toggleSeat(this)">
+                <div>O{{ $i }}</div>
+              </div>
+            </div>
+          @else
+            <div class="seat-item">
+              <div class="kursi reserved" style="background: #858796">
+                <div>O{{ $i }}</div>
+              </div>
+            </div>
+            @endif
+          @endfor
+
+          @for ($i = 3; $i <= 4; $i++)
+          @php
+            $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
+                <div>O{{ $i }}</div>
+              </div>
+            </div>
+          @else
+            <div class="seat-item">
+              <div class="kursi reserved" style="background: #858796">
+                <div>O{{ $i }}</div>
+              </div>
+            </div>
+            @endif
+          @endfor
+
+          @for ($i = 5; $i <= 6; $i++)
           @php
             $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
@@ -727,9 +767,9 @@
             $array = array('kursi' => 'K' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'GOLD')
             <div class="seat-item">
-              <div class="kursi undangan" onclick="toggleSeat(this)">
+              <div class="kursi gold" onclick="toggleSeat(this)">
                 <div>K{{ $i }}</div>
               </div>
             </div>
