@@ -1265,7 +1265,7 @@
           <!-- Spacer for the gap between D7 and D8 -->
           <div class="seatJ-spacer-after"></div>
 
-          @for ($i = 14; $i <= 19; $i++)
+          @for ($i = 14; $i <= 17; $i++)
           @php
             $array = array('kursi' => 'D' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
@@ -1273,6 +1273,26 @@
           @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
             <div class="seat-item">
               <div class="kursi platinum" onclick="toggleSeat(this)">
+                <div>D{{ $i }}</div>
+              </div>
+            </div>
+          @else
+            <div class="seat-item">
+              <div class="kursi reserved" style="background: #858796">
+                <div>D{{ $i }}</div>
+              </div>
+            </div>
+          @endif
+          @endfor
+
+          @for ($i = 18; $i <= 19; $i++)
+          @php
+            $array = array('kursi' => 'D' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
                 <div>D{{ $i }}</div>
               </div>
             </div>
