@@ -540,7 +540,7 @@
 
         <!-- M Row -->
         <div class="seating-container seat-row">
-          @for ($i = 1; $i <= 3; $i++)
+          @for ($i = 1; $i <= 2; $i++)
           @php
             $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
@@ -548,6 +548,26 @@
           @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
             <div class="seat-item">
               <div class="kursi platinum" onclick="toggleSeat(this)">
+                <div>M{{ $i }}</div>
+              </div>
+            </div>
+          @else
+            <div class="seat-item">
+              <div class="kursi reserved" style="background: #858796">
+                <div>M{{ $i }}</div>
+              </div>
+            </div>
+          @endif
+          @endfor
+
+          @for ($i = 3; $i <= 3; $i++)
+          @php
+            $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
+            <div class="seat-item">
+              <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>M{{ $i }}</div>
               </div>
             </div>
