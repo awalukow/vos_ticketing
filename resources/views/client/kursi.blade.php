@@ -431,7 +431,7 @@
           <!-- Spacer for the gap between O9 and O10 -->
           <div class="seat-spacer"></div>
           
-          @for ($i = 10; $i <= 12; $i++)
+          @for ($i = 10; $i <= 10; $i++)
           @php
             $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
@@ -439,6 +439,26 @@
           @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
             <div class="seat-item">
               <div class="kursi vvip" onclick="toggleSeat(this)">
+                <div>O{{ $i }}</div>
+              </div>
+            </div>
+            @else
+            <div class="seat-item">
+              <div class="kursi reserved" style="background: #858796">
+                <div>O{{ $i }}</div>
+              </div>
+            </div>
+            @endif
+          @endfor
+
+          @for ($i = 11; $i <= 12; $i++)
+          @php
+            $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
                 <div>O{{ $i }}</div>
               </div>
             </div>
