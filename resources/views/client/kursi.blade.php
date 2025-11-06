@@ -388,7 +388,27 @@
             @endif
           @endfor
 
-          @for ($i = 7; $i <= 9; $i++)
+          @for ($i = 7; $i <= 7; $i++)
+          @php
+            $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
+                <div>O{{ $i }}</div>
+              </div>
+            </div>
+          @else
+            <div class="seat-item">
+              <div class="kursi reserved" style="background: #858796">
+                <div>O{{ $i }}</div>
+              </div>
+            </div>
+            @endif
+          @endfor
+
+          @for ($i = 8; $i <= 9; $i++)
           @php
             $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
