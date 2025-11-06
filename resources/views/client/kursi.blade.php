@@ -480,47 +480,7 @@
           @endif
           @endfor
 
-          for ($i = 4; $i <= 5; $i++)
-          @php
-            $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
-            $cekData = json_encode($array);
-          @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
-            <div class="seat-item">
-              <div class="kursi vvip" onclick="toggleSeat(this)">
-                <div>M{{ $i }}</div>
-              </div>
-            </div>
-          @else
-            <div class="seat-item">
-              <div class="kursi reserved" style="background: #858796">
-                <div>M{{ $i }}</div>
-              </div>
-            </div>
-          @endif
-          @endfor
-
-          @for ($i = 6; $i <= 7; $i++)
-          @php
-            $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
-            $cekData = json_encode($array);
-          @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
-            <div class="seat-item">
-              <div class="kursi platinum" onclick="toggleSeat(this)">
-                <div>M{{ $i }}</div>
-              </div>
-            </div>
-          @else
-            <div class="seat-item">
-              <div class="kursi reserved" style="background: #858796">
-                <div>M{{ $i }}</div>
-              </div>
-            </div>
-          @endif
-          @endfor
-
-          for ($i = 8; $i <= 9; $i++)
+          @for ($i = 4; $i <= 9; $i++)
           @php
             $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
@@ -548,9 +508,9 @@
             $array = array('kursi' => 'M' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'VVIP')
             <div class="seat-item">
-              <div class="kursi platinum" onclick="toggleSeat(this)">
+              <div class="kursi vvip" onclick="toggleSeat(this)">
                 <div>M{{ $i }}</div>
               </div>
             </div>
@@ -730,9 +690,9 @@
             $array = array('kursi' => 'J' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
             <div class="seat-item">
-              <div class="kursi platinum" onclick="toggleSeat(this)">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
                 <div>J{{ $i }}</div>
               </div>
             </div>
