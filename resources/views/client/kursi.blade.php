@@ -845,7 +845,27 @@
 
         <!-- J Row -->
         <div class="seating-container seat-row">
-          @for ($i = 1; $i <= 6; $i++)
+          @for ($i = 1; $i <= 4; $i++)
+          @php
+            $array = array('kursi' => 'J' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
+                <div>J{{ $i }}</div>
+              </div>
+            </div>
+          @else
+            <div class="seat-item">
+              <div class="kursi reserved" style="background: #858796">
+                <div>J{{ $i }}</div>
+              </div>
+            </div>
+          @endif
+          @endfor
+
+          @for ($i = 5; $i <= 6; $i++)
           @php
             $array = array('kursi' => 'J' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
@@ -1368,7 +1388,27 @@
 
          <!-- C Row -->
         <div class="seating-container seat-row"> 
-          @for ($i = 1; $i <= 6; $i++)
+          @for ($i = 1; $i <= 2; $i++)
+          @php
+            $array = array('kursi' => 'C' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
+            $cekData = json_encode($array);
+          @endphp
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
+            <div class="seat-item">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
+                <div>C{{ $i }}</div>
+              </div>
+            </div>
+          @else
+            <div class="seat-item">
+              <div class="kursi reserved" style="background: #858796">
+                <div>C{{ $i }}</div>
+              </div>
+            </div>
+          @endif
+          @endfor
+
+          @for ($i = 3; $i <= 6; $i++)
           @php
             $array = array('kursi' => 'C' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
