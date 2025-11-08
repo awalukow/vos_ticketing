@@ -76,7 +76,7 @@
       </div>
     </div>
   @else
-    @if (Auth::user()->level != 'Penumpang')
+    @if (Auth::user()->level != 'Penumpang' && Auth::user()->level != 'Petugas')
       <!-- Page Wrapper -->
       <div id="wrapper">
         <!-- Sidebar -->
