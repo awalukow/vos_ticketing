@@ -333,9 +333,9 @@
             $array = array('kursi' => 'O' . $i, 'rute' => $data['id'], 'waktu' => $data['waktu']);
             $cekData = json_encode($array);
           @endphp
-          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'PLATINUM')
+          @if ($transportasi->kursi($cekData) != null && $transportasi->name == 'UNDANGAN')
             <div class="seat-item">
-              <div class="kursi platinum" onclick="toggleSeat(this)">
+              <div class="kursi undangan" onclick="toggleSeat(this)">
                 <div>O{{ $i }}</div>
               </div>
             </div>
