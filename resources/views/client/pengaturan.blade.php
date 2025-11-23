@@ -26,6 +26,7 @@
       <div class="card shadow">
         <div class="card-body">
           <table class="table">
+            @if (Auth::user()->level == "SuperAdmin")
             <tr>
               <td><i class="fas fa-user"></i></td>
               <td>Ubah Nama User</td>
@@ -40,6 +41,7 @@
                 </button>
               </td>
             </tr>
+            @endif
             <tr  style="border-top: 1px solid #e3e6f0;">
               <td><i class="fas fa-key"></i></td>
               <td>Ubah Password</td>
@@ -59,6 +61,8 @@
       </div>
     </div>
   </div>
+  
+  @if (Auth::user()->level == "Penumpang")
   <!-- Ubah Name Modal -->
   <div
   class="modal fade"
@@ -106,6 +110,8 @@
       </div>
     </div>
   </div>
+  @endif
+  
   <!-- Ubah Password Modal -->
   <div
   class="modal fade"

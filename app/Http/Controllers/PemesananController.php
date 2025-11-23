@@ -6,10 +6,22 @@ use App\Models\Rute;
 use App\Models\Category;
 use App\Models\Pemesanan;
 use App\Models\Transportasi;
+use App\Models\Pemesanan_Detail;
+use App\Models\User;
+use App\Models\Promotion;
+use App\Models\PemesananPaymentPromotion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmailNotification; // Assuming you have a Mailable class defined for the email notification
+use App\Mail\BookingConfirmation;
+use App\Mail\PaymentConfirmation;
+use App\Models\AppSetting;
+use Illuminate\Support\Facades\DB;
+use App\Services\WhatsAppService;
 
 class PemesananController extends Controller
 {
@@ -18,7 +30,11 @@ class PemesananController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function __construct(WhatsAppService $whatsAppService)
+    {
+        $this->whatsAppService = $whatsAppService;
+    }
+    public function index_backup()
     {
         $ruteAwal = Rute::orderBy('start')->get()->groupBy('start');
         if (count($ruteAwal) > 0) {
@@ -39,6 +55,36 @@ class PemesananController extends Controller
         $category = Category::orderBy('name')->get();
         return view('client.index', compact('data', 'category'));
     }
+
+    public function index()
+    {
+        // Group all routes by 'start' location
+        $ruteAwal = Rute::orderBy('start')->get()->groupBy('start');
+        if (count($ruteAwal) > 0) {
+            foreach ($ruteAwal as $key => $value) {
+                $data['start'][] = $key;
+            }
+        } else {
+            $data['start'] = [];
+        }
+
+        // Group all routes by 'end' location
+        $ruteAkhir = Rute::orderBy('end')->get()->groupBy('end');
+        if (count($ruteAkhir) > 0) {
+            foreach ($ruteAkhir as $key => $value) {
+                $data['end'][] = $key;
+            }
+        } else {
+            $data['end'] = [];
+        }
+
+        // Get all categories
+        $category = Category::orderBy('name')->get();
+
+        // Return the Penumpang view
+        return view('client.index', compact('data', 'category'));
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -104,12 +150,11 @@ class PemesananController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id, $data)
+    public function _show($id, $data)
     {
         $data = Crypt::decrypt($data);
         $category = Category::find($data['category']);
         
-        //$rute = Rute::with('transportasi')->where('start', $data['start'])->where('end', $data['end'])->get();
         $rute = Rute::with('transportasi')->get();
         if ($rute->count() > 0) {
             foreach ($rute as $val) {
@@ -124,7 +169,7 @@ class PemesananController extends Controller
                             'tujuan' => $val->tujuan,
                             'transportasi' => $val->transportasi->name,
                             'kode' => $val->transportasi->kode,
-                            'kursi' => $kursi,
+                            'kursi' => $kursi, // Ensure $kursi is included in the data
                             'waktu' => date("h:i A", strtotime($val->jam)),
                             'id' => $val->id,
                             'kategori' => $category->name
@@ -138,7 +183,131 @@ class PemesananController extends Controller
         }
         
         $id = $category->name;
-        return view('client.show', compact('id', 'dataRute'));
+        return view('client.show', compact('id', 'dataRute', 'kursi')); // Pass $kursi to the view
+    }
+
+     
+    public function show_singlekursiperbooking($id, $data)
+    {
+        // Decrypt the data
+        $data = Crypt::decrypt($data);
+
+        // Find the category based on the decrypted data
+        $category = Category::find($data['category']);
+        
+        // Fetch relevant route data based on the category
+        $rute = Rute::with('transportasi')->get();
+
+        // Initialize an empty array to store route data
+        $dataRute = [];
+
+        // Iterate over route data and filter based on category
+        foreach ($rute as $val) {
+            //$pemesanan = Pemesanan::where('rute_id', $val->id)->count();
+            //Blok semua pesanan yang sudah lunas dan masih dalam verifikasi pembayaran
+            $pemesanan = Pemesanan::where('rute_id', $val->id)
+                                    ->where(function ($query) {
+                                        $query->where('status', 'Sudah Bayar')
+                                            ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
+                                    })
+                                    ->where('rowstatus','>=',0)
+                                    ->sum('kursi');
+            //Blok semua seat yang belum bayar tapi masih dalam rentang waktu pembayaran
+            $pemesanan_pending = Pemesanan::where('rute_id', $val->id)
+                                            ->where('status', 'Belum Bayar')
+                                            ->where('rowstatus','>=',0)
+                                            ->where('isFisik', '0')
+                                            ->where(function ($query) {
+                                                $query->where('expired_date', '>', now())
+                                                      ->orWhereNull('expired_date');
+                                            })
+                                            //->where('isChurch','!=', '1')
+                                            ->sum('kursi');
+            if ($val->transportasi && $val->transportasi->category_id == $category->id) {
+                $kursi = Transportasi::find($val->transportasi_id)->jumlah - $pemesanan - $pemesanan_pending;
+                $dataRute[] = [
+                    'harga' => $val->harga,
+                    'start' => $val->start,
+                    'end' => $val->end,
+                    'tujuan' => $val->tujuan,
+                    'transportasi' => $val->transportasi->name,
+                    'kode' => $val->transportasi->kode,
+                    'kursi' => $kursi,
+                    'waktu' => date("h:i A", strtotime($val->jam)),
+                    'event_date' => date("h:i A", strtotime($val->jam)),
+                    'id' => $val->id,
+                    'kategori' => $category->name,
+                    'isForAdmin' => $val->transportasi->isForAdmin
+                ];
+            }
+        }
+        
+        // Sort the data if needed
+        sort($dataRute);
+        
+        // Encode the decrypted data as a JSON string
+        $dataString = json_encode($data);
+
+        // Pass the necessary variables to the view
+        return view('client.show', compact('id', 'dataRute', 'dataString'));
+    }
+
+    public function show($id, $data)
+    {
+        $data = Crypt::decrypt($data);
+        $category = Category::find($data['category']);
+        $ruteList = Rute::with('transportasi')->get();
+        $dataRute = [];
+
+        foreach ($ruteList as $rute) {
+            if (!$rute->transportasi || $rute->transportasi->category_id != $category->id) {
+                continue;
+            }
+
+            // ✅ Count confirmed/paid seats
+            $bookedSeats = Pemesanan_Detail::whereHas('pemesanan', function ($q) use ($rute) {
+                $q->where('rute_id', $rute->id)
+                ->where('rowstatus', '>=', 0)
+                ->where(function ($sub) {
+                    $sub->where('status', 'Sudah Bayar')
+                        ->orWhere('status_pembayaran', 'Menunggu Verifikasi');
+                });
+            })->count();
+
+            // ✅ Count pending unpaid (not expired) seats
+            $pendingSeats = Pemesanan_Detail::whereHas('pemesanan', function ($q) use ($rute) {
+                $q->where('rute_id', $rute->id)
+                ->where('status', 'Belum Bayar')
+                ->where('isFisik', '0')
+                ->where('rowstatus', '>=', 0)
+                ->where(function ($sub) {
+                    $sub->where('expired_date', '>', now())
+                            ->orWhereNull('expired_date');
+                });
+            })->count();
+
+            $totalCapacity = $rute->transportasi->jumlah;
+            $availableSeats = max(0, $totalCapacity - $bookedSeats - $pendingSeats);
+
+            $dataRute[] = [
+                'harga' => $rute->harga,
+                'start' => $rute->start,
+                'end' => $rute->end,
+                'tujuan' => $rute->tujuan,
+                'transportasi' => $rute->transportasi->name,
+                'kode' => $rute->transportasi->kode,
+                'kursi' => $availableSeats, // ✅ now correct!
+                'waktu' => date("h:i A", strtotime($rute->jam)),
+                'event_date' => date("h:i A", strtotime($rute->jam)),
+                'id' => $rute->id,
+                'kategori' => $category->name,
+                'isForAdmin' => $rute->transportasi->isForAdmin
+            ];
+        }
+
+        sort($dataRute);
+        $dataString = json_encode($data);
+        return view('client.show', compact('id', 'dataRute', 'dataString'));
     }
 
     /**
@@ -152,7 +321,9 @@ class PemesananController extends Controller
         $data = Crypt::decrypt($id);
         $rute = Rute::find($data['id']);
         $transportasi = Transportasi::find($rute->transportasi_id);
-        return view('client.kursi', compact('data', 'transportasi'));
+        //$pesananDetail = Pemesanan_Detail::where('pemesananCode', 'LIKE', '%' . $data['kode'] . '%')->get();
+        $dataString = json_encode($data);
+        return view('client.kursi', compact('data', 'transportasi', 'dataString'));
     }
 
     /**
@@ -178,7 +349,7 @@ class PemesananController extends Controller
         //
     }
 
-    public function pesan($kursi, $data)
+    public function __pesan($kursi, $data)
     {
         $d = Crypt::decrypt($data);
         $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -201,29 +372,821 @@ class PemesananController extends Controller
         return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
     }
 
-    public function pesan_NOUSE($data)
-{
-    $d = Crypt::decrypt($data);
-    $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+    public function pesan__BACKUP26AUGUST25 ($kursi, $encodedData, $referral = null)
+    {
+        if (is_string($kursi) && substr($kursi, 0, 1) === '[') {
+            $kursiArray = json_decode($kursi, true);
+            $seatCount = is_array($kursiArray) ? count($kursiArray) : 0;
+        } else {
+            $seatCount = (int)$kursi;
+        }
+        
+        if ($seatCount > 5 && $auth()->user()->level == 'Penumpang') {
+            Log::info('Pemesanan Melebihi Batas');
+            return redirect()->route('store')->with('error', 'Pemesanan melebihi batas maksimal 5 tiket');
+        }
 
-    $rute = Rute::with('transportasi.category')->find($d['id']);
+        // Decrypt the data
+        //$data = Crypt::decrypt($encodedData);
+        try {
+        $data = Crypt::decrypt($encodedData);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $data = json_decode(urldecode($encodedData), true);
+        }
 
-    // Selecting a default seat (e.g., the first available seat)
-    $firstAvailableSeat = $rute->pemesanans()->count() + 1; // Assuming seats are numbered sequentially
+        // Get the route details
+        $rute = Rute::with('transportasi.category')->find($data['id']);
 
-    $waktu = Carbon::parse($d['waktu'])->format('Y-m-d') . ' ' . $rute->jam;
+        // Calculate the total price
+        //$total = $rute->harga * $kursi;
+        $total = $rute->harga * $seatCount;
 
-    Pemesanan::create([
-        'kode' => $kodePemesanan,
-        'kursi' => 'K' . $firstAvailableSeat, // Setting default seat
-        'waktu' => $waktu,
-        'total' => $rute->harga,
-        'rute_id' => $rute->id,
-        'penumpang_id' => Auth::user()->id
-    ]);
+        // Generate a random booking code
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
 
-    return redirect('/transaksi/'.$kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
-}
+        try {
+            // Start a transaction
+            DB::beginTransaction();
+
+            // GENERATE PURCHASE
+            if(auth()->user()->level != 'Penumpang'){
+                Pemesanan::create([
+                'kode' => $kodePemesanan,
+                'kursi' => $kursi,
+                'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
+                'total' => $total,
+                'rute_id' => $rute->id,
+                'penumpang_id' => Auth::user()->id,
+                'petugas_id' => Auth::user()->id,
+                'status' => 'Sudah Bayar',
+                'referral' => $referral, // Insert referral value into the database
+                'expired_date' => Carbon::now(), // Set expired_date to today + 3 days
+                'rowstatus' => 0,
+                'isChurch' => false,
+                'isFisik' => false,
+            ]);   
+            }
+            else{
+                Pemesanan::create([
+                'kode' => $kodePemesanan,
+                'kursi' => $kursi,
+                'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
+                'total' => $total,
+                'rute_id' => $rute->id,
+                'penumpang_id' => Auth::user()->id,
+                'referral' => $referral, // Insert referral value into the database
+                'expired_date' => Carbon::now()->addDays(3), // Set expired_date to today + 3 days
+                'rowstatus' => 0,
+                'isChurch' => false,
+                'isFisik' => false,
+            ]);   
+            } 
+
+            foreach ($kursiArray as $seatNumber) {
+                Pemesanan_Detail::create([
+                    'pemesananCode' => $kodePemesanan,
+                    'seatNumber'    => $seatNumber,
+                    'isCheckedIn'   => 0,
+                ]);
+            }
+
+            // Commit the transaction
+            DB::commit();
+
+        $message_blank = '[NOTIFIKASI VOS]';
+
+        // Send admin WhatsApp message
+        // WA si Admin
+        error_log(env('APP_ENV'));
+        if (env('APP_ENV') != 'production') {
+            $destinationAdmin = '6285156651097'; // dev
+            // Send WhatsApp message
+            $destination = Auth::user()->username;
+            $message = '[NOTIFIKASI VOS DEVELOPMENT] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+    Mohon segera melakukan pembayaran tiket ke rekening: 
+    BCA 3420184785 a.n Ratno Juniarto MS 
+    dengan nominal : ' . $total . '
+    bukti transfer dapat dikirim melalui website e-Ticket VOS 
+
+    Pesanan anda dapat dilacak melalui ' . url('/transaksi/' . $kodePemesanan) . '  dengan login: 
+    Username : ' . Auth::user()->username . ' 
+    Password : password12345678
+
+    CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668)';
+
+            $messageAdmin = '[NOTIFIKASI VOS DEVELOPMENT] Tabea.! Pesanan baru dengan kode pesanan ' . $kodePemesanan . ' sudah diterima. Mohon segera dikonfirmasi!
+    Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
+            //$responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+        } else {
+            //!!! PRODUCTION !!!
+            $destinationAdmin = '6285823536364'; // jean
+            $destinationAdmin2 = '6287780553668'; // tiara
+            // Send WhatsApp message
+            $destination = Auth::user()->username;
+            $message = '[NOTIFIKASI VOS] Pesanan tiket konser VOS Interval | Pre Competition Concert, 20 Juli 2024 dengan kode booking: ' . $kodePemesanan . ' telah diterima. 
+    Mohon segera melakukan pembayaran tiket ke rekening: 
+    BCA 3420184785 a.n Ratno Juniarto MS 
+    dengan nominal : ' . $total . '
+    bukti transfer dapat dikirim melalui website e-Ticket VOS 
+
+    Pesanan anda dapat dilacak melalui ' . url('/transaksi/' . $kodePemesanan) . ' dengan login: 
+    Username : ' . Auth::user()->username . ' 
+    Password : password12345678
+
+    CS VOS (http://wa.me/6285823536364 atau http://wa.me/6287780553668)';
+
+            $messageAdmin = '[NOTIFIKASI VOS] Tabea.! Pesanan baru dengan kode pesanan ' . $kodePemesanan . ' sudah diterima. Mohon segera dikonfirmasi!
+    Nomor Kontak Pembeli : https://wa.me/' . Auth::user()->username . '';
+            //$responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+            //$responseAdmin2 = $this->sendWhatsAppMessage_2($destinationAdmin2, $messageAdmin);
+        }
+
+        //$response = $this->sendWhatsAppMessage_2($destination, $message);
+
+        // kirim WA Template
+        //$this->sendWhatsAppMessage_pesanSuccess($destination, $message_blank, $kodePemesanan);
+
+        // Send email
+        $emailData = [
+            'subject' => '[VOS] Pesanan Tiket Konser VOS anda telah berhasil - Kode Booking : ' . $kodePemesanan,
+            'content' => $message // You can customize the email content as per your requirements
+        ];
+        Mail::to(Auth::user()->email)->send(new EmailNotification($emailData));
+
+        // Send email admin
+        $emailDataAdmin = [
+            'subject' => '[VOS] Pesanan Masuk - Kode Booking : ' . $kodePemesanan,
+            'content' => $messageAdmin // You can customize the email content as per your requirements
+        ];
+        if (env('APP_ENV') == 'production') {
+            //Mail::to("jeansengkey10@gmail.com")->send(new EmailNotification($emailDataAdmin)); // jean
+            //Mail::to("jen.tenmury@gmail.com")->send(new EmailNotification($emailDataAdmin)); // tiara
+        }
+        else{
+            Mail::to("axcellentwalukow@gmail.com")->send(new EmailNotification($emailDataAdmin));
+        }
+        Mail::to("cs@voiceofsoulchoir.id")->send(new EmailNotification($emailData)); // cs
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // $messageAdmin = '[NOTIFIKASI VOS] ERROR! Modul : Pemesanan';
+            // $destinationAdmin = '6285156651097'; 
+            // $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+
+            // Log the error
+            Log::error('Error creating Pemesanan: ' . $e->getMessage());
+            return redirect()->route('store')->with('error', 'Terjadi kesalahan saat memproses pemesanan. Silakan coba beberapa saat lagi.');
+            // For debugging only — don't use in production
+            /*return response()->make(
+                '<h1>Error Creating Pemesanan</h1>' .
+                '<p><strong>Message:</strong> ' . e($e->getMessage()) . '</p>' .
+                '<p><strong>File:</strong> ' . e($e->getFile()) . '</p>' .
+                '<p><strong>Line:</strong> ' . e($e->getLine()) . '</p>' .
+                '<pre>' . e($e->getTraceAsString()) . '</pre>',
+                500
+            );
+            */
+        }
+        // Redirect to the transaction page with success message
+        return redirect('/transaksi/' . $kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+    }
+
+    public function pesanxx($kursi, $encodedData, $referral = null, $email = null)
+    {
+        $customerService = AppSetting::getCustomerService();
+
+        // ✅ CLEAN REFERRAL IF IT CONTAINS QUERY STRING
+        if ($referral && strpos($referral, '&') !== false) {
+            $parts = explode('&', $referral);
+            $referral = urldecode($parts[0]); // Keep only before &
+        }
+
+        // Parse selected seats
+        $kursiArray = [];
+
+        if (is_string($kursi) && substr($kursi, 0, 1) === '[') {
+            $decoded = json_decode($kursi, true);
+            if (is_array($decoded)) {
+                $kursiArray = $decoded;
+            } else {
+                return redirect()->route('store')->with('error', 'Data kursi tidak valid.');
+            }
+        } elseif ((int)$kursi > 0) {
+            $kursiArray = [$kursi];
+        } else {
+            return redirect()->route('store')->with('error', 'Tidak ada kursi yang dipilih.');
+        }
+
+        $seatCount = count($kursiArray);
+
+        if ($seatCount > 5 && Auth::user()->level == 'Penumpang') {
+            Log::info('Pemesanan Melebihi Batas');
+            return redirect()->route('store')->with('error', 'Pemesanan melebihi batas maksimal 5 tiket');
+        }
+
+        try {
+            $data = Crypt::decrypt($encodedData);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $data = json_decode(urldecode($encodedData), true);
+        }
+
+        $rute = Rute::with('transportasi.category')->find($data['id']);
+
+        // Calculate total price
+        $totalAsli = $rute->harga * $seatCount;
+        $finalTotal = $totalAsli;
+        $discountNominal = 0;
+
+        if ($promotion) {
+            // Validate min_order
+            if ($promotion->min_order > $seatCount) {
+                return redirect()->back()->with('error', "Promo ini hanya berlaku untuk pembelian minimal {$promotion->min_order} tiket.");
+            }
+
+            // Validate using your improved isValid (should include seatCount now)
+            if (!$promotion->isValid(Auth::id(), $rute->id, $seatCount)) {
+                return redirect()->back()->with('error', 'Kode promo tidak valid.');
+            }
+
+            // 💰 Calculate discount
+            if ($promotion->discount_type === 'percent') {
+                $discountNominal = $totalAsli * ($promotion->discount_value / 100);
+            } elseif ($promotion->discount_type === 'fixed') {
+                $discountNominal = $promotion->discount_value * $seatCount;
+            } elseif ($promotion->discount_type === 'bogo') {
+                $buy = $promotion->buy_quantity;
+                $free = $promotion->get_free;
+                $perSet = $buy + $free;
+                $fullSets = intdiv($seatCount, $perSet);
+                $remainder = $seatCount % $perSet;
+                $payable = ($fullSets * $buy) + min($remainder, $buy);
+                $freeTickets = $seatCount - $payable;
+                $discountNominal = $freeTickets * $rute->harga;
+            } elseif ($promotion->discount_type === 'ticket_discount') {
+                $perTicketDiscount = min($promotion->discount_value, $rute->harga);
+                $discountNominal = $perTicketDiscount * $seatCount;
+                $finalTotal = $totalAsli - $discountNominal;
+            }
+
+            $discountNominal = min($discountNominal, $totalAsli);
+            $finalTotal = $totalAsli - $discountNominal;
+        }
+
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+
+        try {
+            DB::beginTransaction();
+
+            $adminOrder = auth()->user()->level != 'Penumpang' && auth()->user()->level != 'AdminChurch';
+
+            $pemesanan = Pemesanan::create([
+                'kode' => $kodePemesanan,
+                'kursi' => $kursi,
+                'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
+                'total' => $finalTotal,
+                'rute_id' => $rute->id,
+                'penumpang_id' => Auth::user()->id,
+                'petugas_id' => $adminOrder ? Auth::user()->id : null,
+                'status' => 'Sudah Bayar',
+                'status_pembayaran' => $adminOrder ? 'Sudah Verifikasi' : null,
+                'referral' => $referral,
+                'expired_date' => $adminOrder ? Carbon::now() : Carbon::now()->addHours(1),
+                'rowstatus' => 0,
+                'isChurch' => false,
+                'isFisik' => false,
+            ]);
+
+            foreach ($kursiArray as $seatNumber) {
+                Pemesanan_Detail::create([
+                    'pemesananCode' => $kodePemesanan,
+                    'seatNumber' => $seatNumber,
+                    'isCheckedIn' => 0,
+                ]);
+            }
+
+            // 🔽 INSERT INTO pemesanan_payment_promotion IF PROMO WAS USED
+            if ($promotion && $discountNominal > 0) {
+                \Log::info("💾 Inserting promo usage for booking ID: " . $pemesanan->id);
+
+                PemesananPaymentPromotion::create([
+                    'pemesanan_id' => $pemesanan->id,
+                    'promo_code' => $promotion->code,
+                    'discount_type' => $promotion->discount_type,
+                    'discount_value' => $promotion->discount_value,
+                    'discount_nominal' => $discountNominal,
+                ]);
+
+                $promotion->incrementUsage();
+            }
+
+            DB::commit();
+
+            return redirect('/transaksi/' . $kodePemesanan)->with('success', 'Pemesanan berhasil!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error in PesanController@pesan: ' . $e->getMessage());
+            \Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->make(
+                '<h1>Error Creating Booking</h1>' .
+                '<p><strong>Message:</strong> ' . e($e->getMessage()) . '</p>' .
+                '<pre>' . e($e->getTraceAsString()) . '</pre>',
+                500
+            );
+        }
+    }
+    public function pesan($kursi, $encodedData, $referral = null, $email = null)
+    {
+        $customerService = AppSetting::getCustomerService();
+
+        // Parse selected seats
+        $kursiArray = [];
+
+        if (is_string($kursi) && substr($kursi, 0, 1) === '[') {
+            $decoded = json_decode($kursi, true);
+            if (is_array($decoded)) {
+                $kursiArray = $decoded;
+            } else {
+                return redirect()->route('store')->with('error', 'Data kursi tidak valid.');
+            }
+        } elseif ((int)$kursi > 0) {
+            // Fallback: single seat number? Not typical, but handle gracefully
+            $kursiArray = [$kursi];
+        } else {
+            return redirect()->route('store')->with('error', 'Tidak ada kursi yang dipilih.');
+        }
+
+        $seatCount = count($kursiArray);
+
+        if ($seatCount > 5 && Auth::user()->level == 'Penumpang') {
+            Log::info('Pemesanan Melebihi Batas');
+            return redirect()->route('store')->with('error', 'Pemesanan melebihi batas maksimal 5 tiket');
+        }
+
+        try {
+            $data = Crypt::decrypt($encodedData);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $data = json_decode(urldecode($encodedData), true);
+        }
+
+        $rute = Rute::with('transportasi.category')->find($data['id']);
+
+        // Calculate total price
+        $totalAsli = $rute->harga * $seatCount;
+        $finalTotal = $totalAsli;
+        $discountNominal = 0;
+
+        // 🔹 Get promo from query string
+        $promoCodeInput = strtoupper(request()->query('promo'));
+        $promotion = null;
+
+        if ($promoCodeInput) {
+            \Log::info("Attempting promo code: " . $promoCodeInput);
+
+            $promotion = Promotion::where('code', $promoCodeInput)->first();
+
+            if (!$promotion) {
+                return redirect()->route('store')->with('error', 'Kode promo tidak ditemukan.');
+            }
+
+            // ✅ Get seat count
+            $seatCount = count($kursiArray);
+
+            // ✅ Check min_order
+            if ($promotion->min_order > $seatCount) {
+                return redirect()->route('store')->with('error', "Promo ini hanya berlaku untuk pembelian minimal {$promotion->min_order} tiket.");
+            }
+
+            if (!$promotion->isValid(Auth::id(), $rute->id)) {
+                $msg = 'Kode promo tidak valid.';
+                // ... [existing messages] ...
+                return redirect()->route('store')->with('error', $msg);
+            }
+
+            // ✅ Calculate discount
+            if ($promotion->discount_type === 'percent') {
+                $discountNominal = $totalAsli * ($promotion->discount_value / 100);
+            } else {
+                $discountNominal = $promotion->discount_value * $seatCount; // fixed per ticket
+            }
+
+            if ($promotion->discount_type === 'bogo') {
+                // Example: Buy 2 Get 1 Free
+                $buy = $promotion->buy_quantity;
+                $free = $promotion->get_free;
+
+                // How many full sets?
+                $sets = intdiv($seatCount, $buy + $free);
+
+                // Remaining tickets after full sets
+                $remainder = $seatCount % ($buy + $free);
+
+                // You pay for: (sets * buy) + remainder (but not more than buy in last group)
+                $payable = ($sets * $buy) + min($remainder, $buy);
+
+                $discountNominal = ($seatCount - $payable) * $rute->harga;
+                $finalTotal = $totalAsli - $discountNominal;
+            }
+
+            $discountNominal = min($discountNominal, $totalAsli);
+            $finalTotal = $totalAsli - $discountNominal;
+        }
+
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+        $adminOrder = false;
+
+        try {
+            DB::beginTransaction();
+
+            // CREATE BOOKING
+            if(auth()->user()->level != 'Penumpang' && auth()->user()->level != 'AdminChurch'){
+                $adminOrder = true;
+                $pemesanan = Pemesanan::create([
+                    'kode' => $kodePemesanan,
+                    'kursi' => $kursi,
+                    'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
+                    'total' => $finalTotal,
+                    'rute_id' => $rute->id,
+                    'penumpang_id' => Auth::user()->id,
+                    'petugas_id' => Auth::user()->id,
+                    'status' => 'Sudah Bayar',
+                    'status_pembayaran' => 'Sudah Verifikasi',
+                    'referral' => $referral,
+                    'expired_date' => Carbon::now(),
+                    'rowstatus' => 0,
+                    'isChurch' => false,
+                    'isFisik' => false,
+                ]);
+            }
+            else{
+                $pemesanan = Pemesanan::create([
+                    'kode' => $kodePemesanan,
+                    'kursi' => $kursi,
+                    'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
+                    'total' => $finalTotal,
+                    'rute_id' => $rute->id,
+                    'penumpang_id' => Auth::user()->id,
+                    'referral' => $referral,
+                    'expired_date' => Carbon::now()->addHours(1),
+                    'rowstatus' => 0,
+                    'isChurch' => false,
+                    'isFisik' => false,
+                ]);
+            }
+
+            foreach ($kursiArray as $seatNumber) {
+                Pemesanan_Detail::create([
+                    'pemesananCode' => $kodePemesanan,
+                    'seatNumber'    => $seatNumber,
+                    'isCheckedIn'   => 0,
+                ]);
+            }
+
+            // 🔽 INSERT INTO pemesanan_payment_promotion IF PROMO WAS USED
+            if ($promotion && $discountNominal > 0) {
+                \Log::info("Inserting promo usage for booking ID: " . $pemesanan->id);
+
+                PemesananPaymentPromotion::create([
+                    'pemesanan_id'       => $pemesanan->id,         // Foreign key
+                    'promo_code'         => $promotion->code,       // Copy code
+                    'discount_type'      => $promotion->discount_type,
+                    'discount_value'     => $promotion->discount_value,
+                    'discount_nominal'   => $discountNominal,       // Actual Rp value
+                ]);
+
+                // 🔼 Increment usage in promotions table
+                //$promotion->incrementUsage(); // Or: $promotion->increment('used_count');
+                $promotion->increment('used_count', $seatCount);
+            }
+
+            DB::commit();
+
+            // Send emails...
+            if(!$adminOrder){
+            // Send email
+            $emailData = [
+                'subject'       => '[VOS] Pesanan Tiket Konser VOS anda telah berhasil - Kode Booking : ' . $kodePemesanan,
+                'bookingCode'   => $kodePemesanan,
+                'eventName'     => 'VOS 20th Anniversary Concert @ Balai Resital Kartanegara',
+                'eventDate'     => '09 November 2025',//Carbon::parse($data['waktu'])->format('d F Y'),
+                'eventTime'     => '18:30',
+                'seats'         => implode(', ', $kursiArray),
+                'totalAmount'   => $finalTotal,
+                'paymentUrl'    => url('/transaksi/' . $kodePemesanan),
+                'transactionUrl'=> url('/transaksi/' . $kodePemesanan),
+                'helpCenterUrl' => url('/help'),
+                'termsUrl'      => url('/terms'),
+                'privacyUrl'    => url('/privacy'),
+                'cs' => $customerService->value ?? '',
+                //'paymentExpiry' => Carbon::parse($pemesanan->expired_date)->format('d F Y H:i') . ' WIB',
+            ];
+            Mail::to(Auth::user()->email)->send(new BookingConfirmation($emailData));
+        }
+        else{
+             // Send email
+            $emailData = [
+                'subject'       => '[VOS] Pesanan Tiket Konser VOS anda telah berhasil - Kode Booking : ' . $kodePemesanan,
+                'bookingCode'   => $kodePemesanan,
+                'eventName'     => 'VOS 20th Anniversary Concert @ Balai Resital Kartanegara',
+                'eventDate'     => '09 November 2025',//Carbon::parse($data['waktu'])->format('d F Y'),
+                'eventTime'     => '18:30',
+                'seats'         => implode(', ', $kursiArray),
+                'seatCount'     => count($kursiArray),
+                'totalAmount'   => $finalTotal,
+                'transactionUrl'=> url('/transaksi/' . $kodePemesanan),
+                'helpCenterUrl' => url('/help'),
+                'termsUrl'      => url('/terms'),
+                'privacyUrl'    => url('/privacy'),
+                'cs' => $customerService->value ?? '',
+                //'paymentExpiry' => Carbon::parse($pemesanan->expired_date)->format('d F Y H:i') . ' WIB',
+            ];
+            try {
+                Mail::to(Auth::user()->email)->send(new PaymentConfirmation($emailData));
+                if($email != null && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    Mail::to($email)->send(new PaymentConfirmation($emailData));
+                }
+                if(Auth::user()->contactPerson){
+                    $WAtoCustomer = $this->whatsAppService->sendWA(Auth::user()->contactPerson, 'HX8059954450eebff37d0c37774d561809', [
+                        "code" => "" . $kodePemesanan . "",
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Email sending failed: ' . $e->getMessage());
+                // Don't fail the entire transaction if email fails
+            }
+        }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error in PesanController@pesan: ' . $e->getMessage());
+            \Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->make(
+                '<h1>Error Creating Booking</h1>' .
+                '<p><strong>Message:</strong> ' . e($e->getMessage()) . '</p>' .
+                '<pre>' . e($e->getTraceAsString()) . '</pre>',
+                500
+            );
+        }
+
+        return redirect('/transaksi/' . $kodePemesanan)->with('success', 'Pemesanan berhasil!');
+    }
+
+    public function pesanxxx ($kursi, $encodedData, $referral = null, $email = null)
+    {
+        
+        $customerService = AppSetting::getCustomerService();
+        if (is_string($kursi) && substr($kursi, 0, 1) === '[') {
+            $kursiArray = json_decode($kursi, true);
+            $seatCount = is_array($kursiArray) ? count($kursiArray) : 0;
+        } else {
+            $seatCount = (int)$kursi;
+        }
+        
+        if ($seatCount > 5 && Auth::user()->level == 'Penumpang') {
+            Log::info('Pemesanan Melebihi Batas');
+            return redirect()->route('store')->with('error', 'Pemesanan melebihi batas maksimal 5 tiket');
+        }
+
+        // Decrypt the data
+        //$data = Crypt::decrypt($encodedData);
+        try {
+        $data = Crypt::decrypt($encodedData);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $data = json_decode(urldecode($encodedData), true);
+        }
+
+        // Get the route details
+        $rute = Rute::with('transportasi.category')->find($data['id']);
+
+        // Calculate the total price
+        //$total = $rute->harga * $kursi;
+        $total = $rute->harga * $seatCount;
+
+        // Generate a random booking code
+        $huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $kodePemesanan = strtoupper(substr(str_shuffle($huruf), 0, 7));
+        $adminOrder = false;
+
+        try {
+            // Start a transaction
+            DB::beginTransaction();
+
+            // GENERATE PURCHASE
+            if(auth()->user()->level != 'Penumpang' && auth()->user()->level != 'AdminChurch'){
+                $adminOrder = true;
+                Pemesanan::create([
+                'kode' => $kodePemesanan,
+                'kursi' => $kursi,
+                'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
+                'total' => $total,
+                'rute_id' => $rute->id,
+                'penumpang_id' => Auth::user()->id,
+                'petugas_id' => Auth::user()->id,
+                'status' => 'Sudah Bayar',
+                'status_pembayaran' => 'Sudah Verifikasi',
+                'referral' => $referral, // Insert referral value into the database
+                'expired_date' => Carbon::now(), // Set expired_date to today + 3 days
+                'rowstatus' => 0,
+                'isChurch' => false,
+                'isFisik' => false,
+            ]);   
+            }
+            else{
+                Pemesanan::create([
+                'kode' => $kodePemesanan,
+                'kursi' => $kursi,
+                'waktu' => Carbon::parse($data['waktu'])->format('Y-m-d') . ' ' . $rute->jam,
+                'total' => $total,
+                'rute_id' => $rute->id,
+                'penumpang_id' => Auth::user()->id,
+                'referral' => $referral, // Insert referral value into the database
+                //'expired_date' => Carbon::now()->addDays(3), // Set expired_date to today + 3 days
+                'expired_date' => Carbon::now()->addHours(1),
+                'rowstatus' => 0,
+                'isChurch' => false,
+                'isFisik' => false,
+            ]);   
+            } 
+
+            foreach ($kursiArray as $seatNumber) {
+                Pemesanan_Detail::create([
+                    'pemesananCode' => $kodePemesanan,
+                    'seatNumber'    => $seatNumber,
+                    'isCheckedIn'   => 0,
+                ]);
+            }
+
+            // Commit the transaction
+            DB::commit();
+
+        if(!$adminOrder){
+            // Send email
+            $emailData = [
+                'subject'       => '[VOS] Pesanan Tiket Konser VOS anda telah berhasil - Kode Booking : ' . $kodePemesanan,
+                'bookingCode'   => $kodePemesanan,
+                'eventName'     => 'VOS 20th Anniversary Concert @ Balai Resital Kartanegara',
+                'eventDate'     => '09 November 2025',//Carbon::parse($data['waktu'])->format('d F Y'),
+                'eventTime'     => '18:30',
+                'seats'         => implode(', ', $kursiArray),
+                'totalAmount'   => $total,
+                'paymentUrl'    => url('/transaksi/' . $kodePemesanan),
+                'transactionUrl'=> url('/transaksi/' . $kodePemesanan),
+                'helpCenterUrl' => url('/help'),
+                'termsUrl'      => url('/terms'),
+                'privacyUrl'    => url('/privacy'),
+                'cs' => $customerService->value ?? '',
+                //'paymentExpiry' => Carbon::parse($pemesanan->expired_date)->format('d F Y H:i') . ' WIB',
+            ];
+            Mail::to(Auth::user()->email)->send(new BookingConfirmation($emailData));
+        }
+        else{
+             // Send email
+            $emailData = [
+                'subject'       => '[VOS] Pesanan Tiket Konser VOS anda telah berhasil - Kode Booking : ' . $kodePemesanan,
+                'bookingCode'   => $kodePemesanan,
+                'eventName'     => 'VOS 20th Anniversary Concert @ Balai Resital Kartanegara',
+                'eventDate'     => '09 November 2025',//Carbon::parse($data['waktu'])->format('d F Y'),
+                'eventTime'     => '18:30',
+                'seats'         => implode(', ', $kursiArray),
+                'seatCount'     => count($kursiArray),
+                'totalAmount'   => $total,
+                'transactionUrl'=> url('/transaksi/' . $kodePemesanan),
+                'helpCenterUrl' => url('/help'),
+                'termsUrl'      => url('/terms'),
+                'privacyUrl'    => url('/privacy'),
+                'cs' => $customerService->value ?? '',
+                //'paymentExpiry' => Carbon::parse($pemesanan->expired_date)->format('d F Y H:i') . ' WIB',
+            ];
+            try {
+                Mail::to(Auth::user()->email)->send(new PaymentConfirmation($emailData));
+                if($email != null && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    Mail::to($email)->send(new PaymentConfirmation($emailData));
+                }
+                if(Auth::user()->contactPerson){
+                    $WAtoCustomer = $this->whatsAppService->sendWA(Auth::user()->contactPerson, 'HX8059954450eebff37d0c37774d561809', [
+                        "code" => "" . $kodePemesanan . "",
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Email sending failed: ' . $e->getMessage());
+                // Don't fail the entire transaction if email fails
+            }
+        }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // $messageAdmin = '[NOTIFIKASI VOS] ERROR! Modul : Pemesanan';
+            // $destinationAdmin = '6285156651097'; 
+            // $responseAdmin = $this->sendWhatsAppMessage_2($destinationAdmin, $messageAdmin);
+
+            // Log the error
+            //Log::error('Error creating Pemesanan: ' . $e->getMessage());
+            //return redirect()->route('store')->with('error', 'Terjadi kesalahan saat memproses pemesanan. Silakan coba beberapa saat lagi.');
+            // For debugging only — don't use in production
+            return response()->make(
+                '<h1>Error Creating Pemesanan</h1>' .
+                '<p><strong>Message:</strong> ' . e($e->getMessage()) . '</p>' .
+                '<p><strong>File:</strong> ' . e($e->getFile()) . '</p>' .
+                '<p><strong>Line:</strong> ' . e($e->getLine()) . '</p>' .
+                '<pre>' . e($e->getTraceAsString()) . '</pre>',
+                500
+            );
+            
+        }
+        // Redirect to the transaction page with success message
+        return redirect('/transaksi/' . $kodePemesanan)->with('success', 'Pemesanan Tiket ' . $rute->transportasi->category->name . ' Success!');
+    }
+
+    public function sendWhatsAppMessage_2($destination, $message)
+    {
+        $url = 'https://wa.srv34.wapanels.com/send-message';
+        //$url   = 'https://api.watsap.id/send-message';
+        $apiKey = '5307c9fcda1ebd5e834ecde69ea16da70ee4d104'; // Insert your API key here
+        $id_device = '7601';
+    
+        $data = [
+            'api_key' => $apiKey,
+            'sender' => '6285781788462',
+            'number' => $destination,
+            'message' => $message
+        ];
+
+        $data_post = [
+            'id_device' => $id_device,
+            'api-key' => $apiKey,
+            'no_hp'   => '6285781788462',
+            'pesan'   => $message
+         ];
+    
+        $curl = curl_init();
+    
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($data),
+            //CURLOPT_POSTFIELDS => json_encode($data_post),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+    
+        $response = curl_exec($curl);
+    
+        curl_close($curl);
+    
+        return $response;
+    }
+
+    public function sendWhatsAppMessage_pesanSuccess($destination, $message, $kode)
+    {
+        $url = 'https://wa.srv34.wapanels.com/send-template';
+        $apiKey = '5307c9fcda1ebd5e834ecde69ea16da70ee4d104'; // Insert your API key here
+    
+        $data = [
+            'sender' => '6285781788462',
+            'api_key' => $apiKey,
+            'number' => $destination,
+            'url' => null,
+            'footer' => 'Link konfirmasi pembelian tiket',
+            'message' => $message,
+            'template' => ["call|Telepon CS VOS|081257575617","url|WA CS VOS|https://api.whatsapp.com/send?phone=6285156651097&text=Halo%20Admin%2C%20saya%20sudah%20melakukan%20pembelian%20tiket%20konser%20dengan%20kode%3A%20{{ $kode }}%20%5BBukti%20Bayar%20Dilampirkan%5D"]
+        ];
+    
+        $curl = curl_init();
+    
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+    
+        $response = curl_exec($curl);
+    
+        curl_close($curl);
+    
+        return $response;
+    }
+
 
 }

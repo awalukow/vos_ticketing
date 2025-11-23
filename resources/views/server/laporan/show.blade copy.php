@@ -1,0 +1,361 @@
+@extends('layouts.app')
+@section('title', 'Detail Ticket')
+@if (Auth::user()->level == "Admin")
+  @section('heading', 'Detail Pemesanan')
+@endif
+@section('styles')
+@php
+    use Carbon\Carbon;
+@endphp
+@php
+    $currentDateTime = Carbon::now();
+    if (env('APP_ENV') == 'production') {
+        $targetDateTime = Carbon::create(2024, 7, 20, 8, 0, 0);
+    } else {
+        $targetDateTime = $currentDateTime;
+    }
+@endphp
+  <style>
+    .card-body {
+      padding: .5rem 1rem;
+      color: #000;
+      border-bottom: 1px solid #e3e6f0;
+    }
+
+    .title {
+      color: #4e73df;
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      z-index: 1;
+      align-items: center;
+      justify-content: center;
+      display: flex;
+    }
+
+    .title .title-text {
+      display: inline;
+    }
+
+    .table {
+      margin-bottom: 0;
+      color: #000;
+    }
+
+    .table td {
+      padding: 0;
+      border-top: none;
+    }
+  </style>
+@endsection
+@section('content')
+  <div class="row justify-content-center" style="margin-bottom: 35px;">
+    @if (Auth::user()->level != "Admin")
+    <div class="col-12" style="margin-top: -15px">
+      <a href="javascript:window.history.back();" class="text-white btn"><i class="fas fa-arrow-left mr-2"></i> Kembali</a>
+    @else
+    <div class="col-12">
+    @endif
+      <div class="card shadow h-100" style="border-top: .25rem solid #b11e1f">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center justify-content-center">
+            <div class="col h5 font-weight-bold" style="margin-bottom: 0">Detail Pemesanan</div>
+            <div class="col-auto">
+              <span class="title">
+                <div class="title-icon rotate-n-15">
+                  <i class="fas fa-ticket-alt"></i>
+                </div>
+                <div class="title-text ml-1">Ticket</div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="font-weight-bold h4 text-center" style="margin-bottom: 0">{{ $data->rute->transportasi->category->name }}<i class="fas fa-long-arrow-alt-right mx-2" style="color: #858796;"></i>{{$data->rute->tujuan}}</div>
+        </div>
+        <div class="card-body">
+          <div class="row no-gutters align-items-center justify-content-center">
+            <div class="col">
+              <p style="margin-bottom: 0">Kode Booking</p>
+              <h3 class="font-weight-bold">{{ $data->kode }}</h3>
+            </div>
+            <div class="col-auto">
+              {!! DNS2D::getBarcodeHTML(redirect('/transaksi/'.$data->kode)->getTargetUrl(), "QRCODE", 5,5) !!}
+            </div>
+          </div>
+          <p style="margin-bottom: 0; margin-top: 5px;">Jadwal Event</p>
+          <h5 class="font-weight-bold text-center">
+            <div>{{ $data->rute->transportasi->category->name }}</div>
+            <div>
+              <!--{{ date('l, d F Y', strtotime($data->event_date)) }}-->
+              Sabtu,  Juli 2024
+            </div>
+            <div>
+              {{ date('H:i', strtotime($data->rute->jam)) }} WIB
+            </div>
+          </h5>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <tr>
+              <td>Nama Kelas</td>
+              <td class="text-right">{{ $data->rute->transportasi->name }} ({{ $data->rute->transportasi->kode }})</td>
+            </tr>
+            <tr>
+              <td>Nama Pemesan</td>
+              <td class="text-right">{{ $data->penumpang->name }}</td>
+            </tr>
+            <tr>
+              <td>Jumlah Kursi</td>
+              <td class="text-right">{{ $data->kursi }}</td>
+            </tr>
+            <tr>
+              <td>Harga</td>
+              <td class="text-right">Rp. {{ number_format($data->total, 0, ',', '.') }}</td>
+            </tr>
+            @if ( ($data->expired_date >= now()) && $data->status_pembayaran == null || $data->status_pembayaran == "Sudah Verifikasi")
+            <tr>
+              <td>Status Pembayaran</td>
+              <td class="text-right" style="color: {{ $data->status == 'Belum Bayar' ? 'red' : 'green' }};">{{ $data->status }}</td>
+            </tr>
+            @elseif ( ($data->expired_date >= now()) || $data->status_pembayaran == "Menunggu Verifikasi")
+            <tr>
+              <td>Status Pembayaran</td>
+              <td class="text-right">{{ $data->status_pembayaran }}</td>
+            </tr>
+            @elseif ( $data->isChurch == 1 && ($data->expired_date >= now() && $data->status_pembayaran != 'Sudah Bayar'))
+            <tr>
+              <td>Status Pembayaran</td>
+              <td class="text-right">TIKET GEREJA</td>
+            </tr>
+            @elseif ( $data->isFisik == 1)
+            <tr>
+              <td>Status Pembayaran</td>
+              <td class="text-right">TIKET FISIK</td>
+            </tr>
+            @else
+            <tr>
+              <td>Status Pembayaran</td>
+              <td class="text-right">TIKET EXPIRED</td>
+            </tr>
+            @endif
+            @if ($data->referral != null && $data->isChurch)
+            <tr>
+              <td>Nama Gereja</td>
+              <td class="text-right" style="text-transform: uppercase;"><strong>TIKET GEREJA</strong> | {{ $data->referral }}</td>
+            </tr>
+            @elseIf ($data->referral != null && $data->isFisik)
+            <tr>
+              <td>Nama Pembeli</td>
+              <td class="text-right" style="text-transform: uppercase;"><strong>TIKET CETAK FISIK</strong> | {{ $data->referral }}</td>
+            </tr>
+            @elseIf ($data->referral != null)
+            <tr>
+              <td>Referral Singer</td>
+              <td class="text-right" style="text-transform: uppercase;">{{ $data->referral }}</td>
+            </tr>
+            @endif
+            @if ((Auth::user()->level == "Petugas" || Auth::user()->level == "SuperAdmin" || Auth::user()->level == "Admin") && $currentDateTime >= $targetDateTime)
+            <tr>
+              <td><strong>SEAT CHECK-IN</strong></td>
+              <td class="text-right" style="text-transform: uppercase;"><strong>{{ $data->seatCheckin }}/{{ $data->kursi }}</strong></td>
+            </tr>
+            @endif
+          </table>
+        </div>
+
+        <!-- Button Cek Bukti Bayar Untuk admin-->
+        <div class="card-body">
+          @if (Auth::user()->level != "Penumpang" && $data->status_pembayaran != null)
+            <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+          @elseif ((($data->expired_date >= now()) && Auth::user()->level != "Penumpang" && $data->status_pembayaran == null) || ($data->status == "Belum Bayar" && $data->isChurch == 1))
+          <a class="btn btn-secondary btn-block btn-sm text-white" disabled>Lihat Bukti Pembayaran</a>
+          @endif
+          </div>
+
+        <!-- Button Checkin-->
+        @if((Auth::user()->level == "Petugas" || Auth::user()->level == "SuperAdmin") && $data->seatCheckin < $data->kursi && $data->status == "Sudah Bayar" && $currentDateTime >= $targetDateTime)
+        <div class="card-body">
+            <form id="checkin-form" action="{{ route('laporan.updateCheckIn', $data->id) }}" method="POST">
+              @csrf
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <button class="btn btn-danger" type="button" id="minus-btn"><i class="fas fa-minus"></i></button>
+                </div>
+                <input type="text" class="form-control text-center" id="checkin-count" name="seatNumber" value="1" readonly>
+                <div class="input-group-append">
+                  <button class="btn btn-success" type="button" id="plus-btn"><i class="fas fa-plus"></i></button>
+                </div>
+              </div>
+              <div id="loading" style="display: none; text-align: center; margin-top: 10px;">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
+          </div>
+              <button type="submit" class="btn btn-primary btn-block" id="submit-btn">Submit</button>
+            </form>
+            
+          </div>
+          @endif
+
+        <!-- Button Verifikasi Jika "Menunggu Verifikasi", Gereja Belum Bayar Khusus Admin, dan Tiket Fisik Blm bayar || UPDATE: HANYA KHUSUS ONLINE. GEREJA DAN FISIK SUDAH AUTO-->
+        @if ((($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level != "Penumpang" && $data->status_pembayaran == "Menunggu Verifikasi") || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isChurch == 1) || ($data->status_pembayaran == "Menunggu Verifikasi" && $data->isFisik == 1))
+          <div class="card-body">
+            <a href="{{ route('pembayaran', $data->id) }}" class="btn btn-primary btn-block btn-sm text-white"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Verifikasi</a>
+          </div>
+        @endif
+
+        <!-- Button Upload bukti bayar untuk gereja-->
+        @if (Auth::user()->level != "Penumpang" && $data->status == "Belum Bayar" && $data->status_pembayaran == null && $data->isChurch == 1 && $data->expired_date >= now())
+          <div class="card-body">
+            <form action="{{ route('upload.bukti.pembayaran', $data->id) }}" method="POST" enctype="multipart/form-data">
+              @csrf
+              <div class="form-group">
+                <label for="bukti_pembayaran">Upload Bukti Pembayaran</label>
+                <input type="file" class="form-control" name="bukti_pembayaran" required><br>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block btn-sm text-white">Upload</button>
+            </form>
+          </div>
+        @endif
+
+        <!-- Button Upload bukti bayar untuk tiket Fisik-->
+        @if (Auth::user()->level != "Penumpang" && $data->status == "Belum Bayar" && $data->status_pembayaran == null && $data->isFisik == 1)
+        <div class="card-body">
+            <form action="{{ route('upload.bukti.pembayaran.fisik', $data->id) }}" method="POST" enctype="multipart/form-data">
+              @csrf
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="bukti_pembayaran">Upload Bukti Pembayaran</label>
+                  <input type="file" class="form-control" name="bukti_pembayaran" required>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="referral">Identitas Pembeli</label>
+                  <input type="text" class="form-control" name="referral" placeholder="Format: Nama-NomorHP" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block btn-sm text-white">Upload</button>
+            </form>
+          </div>
+        @endif
+        
+        <!-- Button Upload bukti bayar untuk customer online-->
+        @if (($data->expired_date >= now()) && $data->status == "Belum Bayar" && Auth::user()->level == "Penumpang" &&  $data->status_pembayaran == null)
+        <div>
+            <h5 class="font-weight-bold text-center">
+              <div><br>
+                Silahkan lakukan pembayaran ke Rekening
+              </div>
+              <div>
+                Bank Jago XXX a.n Ratno Juniarto MS atau ke QRIS berikut XXX<br>
+                Dengan Nominal Rp. {{ number_format($data->total, 0, ',', '.') }}<br>
+                batas waktu pembayaran <u>{{ \Carbon\Carbon::parse($data->created_at)->addDays(3)->addHours(7)->locale('id')->isoFormat('LLLL') }}</u><br>
+            </div>
+
+            </h5>
+          </div>
+          <div class="card-body">
+            <form action="{{ route('upload.bukti.pembayaran', $data->id) }}" method="POST" enctype="multipart/form-data">
+              @csrf
+              <div class="form-group">
+                <label for="bukti_pembayaran">Upload Bukti Pembayaran</label>
+                <input type="file" class="form-control" name="bukti_pembayaran" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block btn-sm text-white">Upload</button>
+            </form>
+          </div>
+        @endif
+
+        <!-- Button cek bukti pembayaran Customer Online-->
+        @if (($data->status == "Belum Bayar" && $data->status_pembayaran == "Menunggu Verifikasi") && Auth::user()->level == "Penumpang")
+        <div>
+            <h5 class="font-weight-bold text-center">
+              <div><br>
+                Berhasil mengirim bukti pembayaran. Mohon menunggu verifikasi pembayaran
+              </div>
+            </h5>
+          </div>
+          <div class="card-body">
+              <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+              <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
+          </div>
+        @endif
+        <!-- Button Upload bukti bayar untuk customer khusus yang sudah bayar-->
+        @if (($data->status == "Sudah Bayar") && Auth::user()->level == "Penumpang")
+        <div>
+            <h5 class="font-weight-bold text-center">
+              <div><br>
+                Pembayaran Berhasil. Mohon agar dapat menunjukkan halaman ini pada saat mendatangi venue konser.
+              </div>
+            </h5>
+          </div>
+          <div class="card-body">
+              <a href="{{ asset('../storage/app/public/' . $data->bukti_pembayaran) }}" target="_blank" class="btn btn-success btn-block btn-sm text-white">Lihat Bukti Pembayaran</a>
+              <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
+          </div>
+        @endif
+
+        <!-- Untuk customer Online, jika sudah expired maka munculkan Hubungi admin-->
+        @if($data->expired_date < now() && Auth::user()->level == "Penumpang")
+        <div class="card-body">
+              <a href="https://api.whatsapp.com/send?phone=6285823536364" target=_blank class="btn btn-success btn-block btn-sm text-white">Hubungi Admin</a>
+        </div>
+        <!--Jika admin, alternatif yang diatas, muntulin hubungi pembeli-->
+        @elseif(Auth::user()->level != "Penumpang" && Auth::user()->level != "Petugas" && $data->isChurch == 0 && $data->isFisik == 0)
+        <div class="card-body">
+              <div class="row">
+                  <div class="col-12">
+                      <h5>Hubungi Pembeli</h5>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="https://api.whatsapp.com/send?phone={{$data->penumpang->username}}" target="_blank" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-brands fa-whatsapp"></i> Whatsapp
+                      </a>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="mailto:{{$data->penumpang->email}}" target="_blank" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-regular fa-envelope"></i> Email
+                      </a>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <a href="tel:+{{$data->penumpang->username}}" class="btn btn-success btn-block btn-sm text-white">
+                          <i class="fa-solid fa-phone"></i> Telepon
+                      </a>
+                  </div>
+              </div>
+          </div>
+        @endif
+      </div>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const minusBtn = document.getElementById('minus-btn');
+    const plusBtn = document.getElementById('plus-btn');
+    const checkinCount = document.getElementById('checkin-count');
+    const submitBtn = document.getElementById('submit-btn');
+    const loadingDiv = document.getElementById('loading');
+    const checkinForm = document.getElementById('checkin-form');
+
+    minusBtn.addEventListener('click', function () {
+      let currentValue = parseInt(checkinCount.value);
+      if (currentValue > 0) {
+        checkinCount.value = currentValue - 1;
+      }
+    });
+
+    plusBtn.addEventListener('click', function () {
+      let currentValue = parseInt(checkinCount.value);
+      if (currentValue < {{ $data->kursi }} - {{$data->seatCheckin}}) {
+        checkinCount.value = currentValue + 1;
+      }
+    });
+
+    checkinForm.addEventListener('submit', function () {
+      submitBtn.disabled = true;
+      loadingDiv.style.display = 'block';
+    });
+  });
+</script>
+@endsection

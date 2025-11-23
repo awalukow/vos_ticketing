@@ -7,15 +7,25 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Ticket - @yield('title')</title>
+  <title>VOS e-Ticket - @yield('title')</title>
   <link rel="shortcut icon" href="{{ asset('img/favicon.png') }}">
 
   <!-- Custom fonts for this template-->
+  <script src="https://kit.fontawesome.com/84b32aa51b.js" crossorigin="anonymous"></script>
   <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
   <!-- Custom styles for this template-->
   <link href="{{ asset('vendor/toastr/toastr.min.css') }}" rel="stylesheet"/>
-  <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet"/>
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+  <!-- jQuery is required for Select2 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
   @guest
   @else
     @if (Auth::user()->level != 'Admin')
@@ -41,6 +51,18 @@
         }
       </style>
     @endif
+    <style>
+      .bg-gradient-primary {
+            background-color: #970b72ff;
+            background-image: linear-gradient(180deg, #b71ea8ff 10%, #4d1d60ff 100%);
+            background-size: cover;
+        }
+
+        .custom-logo {
+            height: 40px;
+            width: auto;
+        }
+    </style>
   @endguest
 
   @yield('styles')
@@ -54,7 +76,7 @@
       </div>
     </div>
   @else
-    @if (Auth::user()->level == 'Admin' || Auth::user()->level == 'SuperAdmin')
+    @if (Auth::user()->level != 'Penumpang' && Auth::user()->level != 'Petugas')
       <!-- Page Wrapper -->
       <div id="wrapper">
         <!-- Sidebar -->
@@ -82,14 +104,12 @@
             <div class="container my-auto">
               <div class="copyright text-center my-auto">
                 <span>
-                  Copyright &copy; 2020
-                  @if (date('Y') != '2020')
+                  Copyright &copy; 2023
+                  @if (date('Y') != '2023')
                     - {{ date('Y') }}
                   @endif
                   &nbsp; All rights reserved • by
-                  <a href="" target="_blank"
-                    >Axcellent Christian</a
-                  >.
+                  <a href="" target="_blank">Axcellent Christian</a>.
                 </span>
               </div>
             </div>
@@ -104,10 +124,10 @@
         <nav class="navbar navbar-expand navbar-light topbar mb-4">
           <div class="container">
             <a class="title" href="{{ url('/') }}">
-              <div class="title-icon rotate-n-15">
-                <i class="fas fa-ticket-alt"></i>
+              <div class="sidebar-brand-icon">
+                <img src="{{ asset('img/favicon.png') }}" alt="Logo" class="custom-logo">
               </div>
-              <div class="title-text mx-3">Ticket</div>
+              <div class="title-text mx-3">e-Ticket VOS</div>
             </a>
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto">
@@ -161,9 +181,7 @@
                 - {{ date('Y') }}
               @endif
               &nbsp; All rights reserved • by
-              <a href="" target="_blank"
-                >Axcellent Christian</a
-              >.
+              <a href="" target="_blank">Axcellent Christian</a>.
             </span>
           </div>
         </div>
@@ -187,7 +205,21 @@
 
   @yield('script')
 
-  @if (count($errors)>0)
+  <!-- ✅ FORCE SIDEBAR TO COLLAPSE ON EVERY PAGE LOAD FOR NON-PENUMPANG USERS -->
+  @if (!Auth::guest() && Auth::user()->level != 'Penumpang')
+    <script>
+      $(document).ready(function() {
+        // Add 'sidebar-toggled' class to wrapper
+        $('#wrapper').addClass('sidebar-toggled');
+        // Also hide the sidebar content visually (optional extra safety)
+        $('.sidebar').addClass('toggled');
+        // If there's a toggle button, update its state too
+        $('#sidebarToggle').removeClass('toggled'); // or add class depending on your theme
+      });
+    </script>
+  @endif
+
+  @if (count($errors) > 0)
     @foreach ($errors->all() as $error)
       <script>
         toastr.error("{{ $error }}");

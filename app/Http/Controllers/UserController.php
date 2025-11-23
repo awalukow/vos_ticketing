@@ -144,4 +144,23 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Tolong masukkan password lama anda terlebih dahulu!');
         }
     }
+
+    public function changePassword(Request $request, $id)
+    {
+        //$request->validate([
+        //    'new_password' => 'required|min:8|confirmed',
+        //]);
+
+        if ($request->has('new_password')) {
+            $password = $request->input('new_password');
+        } else {
+            $password = 'password12345678';
+        }
+
+        $user = User::findOrFail($id);
+        $user->password = Hash::make($password);
+        $user->save();
+
+        return redirect()->route('user.index')->with('success', 'Password changed successfully.');
+    }
 }

@@ -2,59 +2,304 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PemesananController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\TransportasiController;
+use App\Http\Controllers\RuteController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-Auth::routes();
-
-Route::get('/fastRegister', [App\Http\Controllers\Auth\RegisterController::class, 'showFastRegistrationForm'])->name('fast-register');
-Route::post('/fastRegister', [App\Http\Controllers\Auth\RegisterController::class, 'fastRegister'])->name('fast-register');
+use App\Exports\PemesananExport;
+use App\Services\WhatsAppService;
+use Maatwebsite\Excel\Facades\Excel;
 
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/pengaturan', [App\Http\Controllers\UserController::class, 'create'])->name('pengaturan');
-    Route::post('/edit/name', [App\Http\Controllers\UserController::class, 'name'])->name('edit.name');
-    Route::post('/edit/password', [App\Http\Controllers\UserController::class, 'password'])->name('edit.password');
-    Route::get('/transaksi/{kode}', [App\Http\Controllers\LaporanController::class, 'show'])->name('transaksi.show');
+$allowedIps = [
+    '36.88.182.218'
+];
 
-    Route::middleware(['petugas'])->group(function () {
-        Route::get('/pembayaran/{id}', [App\Http\Controllers\LaporanController::class, 'pembayaran'])->name('pembayaran');
-        Route::get('/petugas', [App\Http\Controllers\LaporanController::class, 'petugas'])->name('petugas');
-        Route::post('/petugas', [App\Http\Controllers\LaporanController::class, 'kode'])->name('petugas.kode');
 
-        Route::middleware(['admin'])->group(function () {
-            Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-            Route::resource('/category', App\Http\Controllers\CategoryController::class);
-            Route::resource('/transportasi', App\Http\Controllers\TransportasiController::class);
-            Route::resource('/rute', App\Http\Controllers\RuteController::class);
-            Route::resource('/user', App\Http\Controllers\UserController::class);
-            Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+if (env('APP_ENV') === 'maintenance' && !in_array(Request::ip(), $allowedIps))  {
+    // Route only to maintenance view
+    Route::get('/', [RegisterController::class, 'showMaintenance'])->name('maintenance');
+    Route::get('/{any}', [RegisterController::class, 'showMaintenance'])->where('any', '.*'); // Catch-all
+} else {
+    Auth::routes();
+
+    // Public Routes
+    Route::get('/signup', [RegisterController::class, 'showFastRegistrationForm'])->name('fast-register');
+    Route::post('/signup', [RegisterController::class, 'fastRegister'])->name('fast-register');
+    Route::get('/adminRegister', [RegisterController::class, 'showAdminRegistrationForm'])->name('admin-register');
+    Route::post('/adminRegister', [RegisterController::class, 'fastRegister'])->name('admin-register');
+    Route::get('/view/pdf', [RegisterController::class, 'view_pdf']);
+
+    Route::get('/check-promo', function (\Illuminate\Http\Request $request) {
+        try {
+            $code = strtoupper($request->query('code'));
+            $ruteId = $request->query('rute_id');
+            $seatCount = (int) $request->query('seat_count', 1);
+
+            if (!$code) {
+                return response()->json(['valid' => false, 'message' => 'Kode kosong.']);
+            }
+            if (!$ruteId) {
+                return response()->json(['valid' => false, 'message' => 'Rute tidak ditemukan.']);
+            }
+            if ($seatCount <= 0) {
+                return response()->json(['valid' => false, 'message' => 'Jumlah kursi tidak valid.']);
+            }
+
+            $rute = \App\Models\Rute::find($ruteId);
+            if (!$rute) {
+                return response()->json(['valid' => false, 'message' => 'Rute tidak valid.']);
+            }
+
+            $promotion = \App\Models\Promotion::where('code', $code)->first();
+            if (!$promotion) {
+                return response()->json(['valid' => false, 'message' => 'Kode promo tidak ditemukan.']);
+            }
+            
+            $userId = auth()->check() ? auth()->id() : null;
+
+            // ✅ USE isValid() METHOD — IT ALREADY HANDLES is_active, rowstatus, expiry, etc.
+            if (!$promotion->isValid($userId, $ruteId, $seatCount)) {
+                
+                // Give specific message based on why it's invalid
+                if ($promotion->rowstatus < 0) {
+                    return response()->json(['valid' => false, 'message' => 'Kode telah dihapus.']);
+                }
+                if (!$promotion->is_active) {
+                    return response()->json(['valid' => false, 'message' => 'Kode ini tidak aktif.']);
+                }
+                if ($promotion->penumpang_id !== null && $promotion->penumpang_id != $userId) {
+                    return response()->json(['valid' => false, 'message' => 'Kode ini hanya berlaku untuk pengguna tertentu.']);
+                }
+                if ($promotion->rute_id !== null && $promotion->rute_id != $ruteId) {
+                    return response()->json(['valid' => false, 'message' => 'Kode ini hanya berlaku untuk kelas tertentu.']);
+                }
+                if ($promotion->expires_at && now()->gt($promotion->expires_at)) {
+                    return response()->json(['valid' => false, 'message' => 'Kode sudah kadaluarsa.']);
+                }
+                if ($promotion->min_order > $seatCount) {
+                    return response()->json([
+                        'valid' => false,
+                        'message' => "Promo ini hanya berlaku untuk pembelian minimal {$promotion->min_order} tiket."
+                    ]);
+                }
+                if ($promotion->used_count + $seatCount > $promotion->max_uses) {
+                    $remaining = max(0, $promotion->max_uses - $promotion->used_count);
+                    if ($remaining === 0) {
+                        return response()->json(['valid' => false, 'message' => 'Kode promo sudah mencapai batas penggunaan.']);
+                    } else {
+                        return response()->json([
+                            'valid' => false,
+                            'message' => "Kode hanya bisa digunakan untuk $remaining kursi lagi."
+                        ]);
+                    }
+                }
+
+                // Fallback
+                return response()->json(['valid' => false, 'message' => 'Kode tidak valid.']);
+            }
+
+            // ✅ All checks passed
+            $basePricePerTicket = (int) $rute->harga;
+            $discountValue = $promotion->discount_value;
+            $discountText = '';
+
+            if ($promotion->discount_type === 'percent') {
+                $nominalDiscount = $basePricePerTicket * ($discountValue / 100);
+                $discountText = "$discountValue% (Rp " . number_format($nominalDiscount, 0, ',', '.') . ")";
+            } 
+            elseif ($promotion->discount_type === 'bogo') {
+                $buy = $promotion->buy_quantity;
+                $free = $promotion->get_free;
+                $perSet = $buy + $free;
+                $fullSets = intdiv($seatCount, $perSet);
+                $remainder = $seatCount % $perSet;
+                $payable = ($fullSets * $buy) + min($remainder, $buy);
+                $freeTickets = $seatCount - $payable;
+
+                if ($freeTickets <= 0) {
+                    return response()->json([
+                        'valid' => false,
+                        'message' => "Promo Beli {$buy} Gratis {$free} membutuhkan minimal kelipatan " . ($buy + $free) . " tiket untuk memperoleh promo."
+                    ]);
+                }
+
+                $totalDiscount = $freeTickets * $basePricePerTicket;
+                $discountText = "Beli $buy Gratis $free → Anda hemat Rp " . number_format($totalDiscount, 0, ',', '.');
+            }
+            elseif ($promotion->discount_type === 'ticket_discount') {
+                $perTicketDiscount = min($promotion->discount_value, $basePricePerTicket);
+                $totalDiscount = $perTicketDiscount * $seatCount;
+                $discountText = "Diskon Tiket: Rp " . number_format($perTicketDiscount, 0, ',', '.') . " per tiket";
+            }
+            else {
+                // 'fixed' type: flat total discount
+                $totalDiscount = $discountValue; // <-- Note: this is TOTAL, not per ticket
+                $discountText = "Potongan: Rp " . number_format($discountValue, 0, ',', '.');
+            }
+
+            return response()->json([
+                'valid' => true,
+                'discount_type' => $promotion->discount_type,
+                'discount_value' => $promotion->discount_value,
+                'discount_text' => $discountText,
+                'buy_quantity' => $promotion->buy_quantity,
+                'get_free' => $promotion->get_free,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in /check-promo: ' . $e->getMessage());
+            \Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'valid' => false,
+                'message' => 'Server error. Coba lagi.'
+            ], 500);
+        }
+    })->name('check.promo');
+
+    // Other public routes...
+    Route::get('/test-whatsapp', function (WhatsAppService $whatsAppService) {
+        $whatsAppService->sendWA('6285156651097', 'HX67e0f598e604b2044fc7cdac0162ca56', [
+            "event_name" => "VOS 20th Anniversary Concert @ Balai Resital Kartanegara",
+            "event_date" => "09 November 2025",
+            "code" => "123456",
+        ]);
+        return 'Message sent!';
+    });
+
+    Route::get('/send-sms', function (WhatsAppService $smsService) {
+        $smsService->sendSms('6285156651097', 'SMS Test Done!');
+        return 'SMS sent!';
+    });
+
+    // Password Reset Routes...
+    Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+    // Authenticated Routes
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/pengaturan', [UserController::class, 'create'])->name('pengaturan');
+        Route::post('/edit/name', [UserController::class, 'name'])->name('edit.name');
+        Route::post('/edit/password', [UserController::class, 'password'])->name('edit.password');
+        Route::get('/transaksi/{kode}', [LaporanController::class, 'show'])->name('transaksi.show');
+        Route::post('/upload-bukti-pembayaran/{id}', [LaporanController::class, 'uploadBuktiPembayaran'])->name('upload.bukti.pembayaran');
+        Route::post('/upload-bukti-pembayarans/{id}', [LaporanController::class, 'uploadBuktiPembayaranFisik'])->name('upload.bukti.pembayaran.fisik');
+
+        // Petugas Routes
+        Route::middleware(['petugas'])->group(function () {
+            Route::get('/pembayaran/{id}', [LaporanController::class, 'pembayaran'])->name('pembayaran');
+            Route::get('/petugas', [LaporanController::class, 'petugas'])->name('petugas');
+            Route::post('/petugas', [LaporanController::class, 'kode'])->name('petugas.kode');
+            Route::post('/updateCheckIn/{id}', [LaporanController::class, 'updateCheckIn'])->name('laporan.updateCheckIn');
+
+            Route::get('/transaksi', [LaporanController::class, 'index'])->name('transaksi');
+
+            // Admin Routes
+            Route::middleware(['admin'])->group(function () {
+                Route::get('/home', [HomeController::class, 'index'])->name('home');
+                Route::resource('/category', CategoryController::class);
+                Route::resource('/transportasi', TransportasiController::class);
+                Route::resource('/rute', RuteController::class);
+                Route::resource('/user', UserController::class);
+
+                Route::get('/transaksi', [LaporanController::class, 'index'])->name('transaksi');
+                Route::get('/transaksi-pending', [LaporanController::class, 'transaksi_pending'])->name('transaksi_pending');
+                Route::get('/ticket-gereja', [LaporanController::class, 'ticket_gereja'])->name('ticket_gereja');
+                Route::get('/ticket-fisik', [LaporanController::class, 'ticket_fisik'])->name('ticket_fisik');
+
+                Route::get('/order', [PemesananController::class, 'index'])->name('order');
+                Route::get('/pesan/{kursi}/{data}/{referral?}', [PemesananController::class, 'pesan'])->name('pesan');
+                Route::get('/cari/kursi/{data}', [PemesananController::class, 'edit'])->name('cari.kursi');
+                Route::post('/resend-ticket/{id}', [PemesananController::class, 'resendTicketEmail'])->name('resend.ticket.email');
+                Route::get('/pemesanan/export', function () {
+                                return Excel::download(new PemesananExport, 'pemesanan.xlsx');
+                            })->name('pemesanan.export');
+            });
+
+            // AdminChurch Routes
+            Route::middleware(['adminchurch'])->group(function () {
+                Route::get('/ticket-gereja', [LaporanController::class, 'ticket_gereja'])->name('ticket_gereja');
+            });
+
+            // SuperAdmin Routes
+            Route::middleware(['superadmin'])->group(function () {
+                Route::get('/home', [HomeController::class, 'index'])->name('home');
+                Route::resource('/category', CategoryController::class);
+                Route::resource('/transportasi', TransportasiController::class);
+                Route::resource('/rute', RuteController::class);
+                Route::resource('/user', UserController::class);
+
+                Route::get('/order', [PemesananController::class, 'index'])->name('order');
+                Route::get('/pesan/{kursi}/{data}/{referral?}', [PemesananController::class, 'pesan'])->name('pesan');
+                Route::get('/cari/kursi/{data}', [PemesananController::class, 'edit'])->name('cari.kursi');
+
+                Route::get('/transaksi-pending', [LaporanController::class, 'transaksi_pending'])->name('transaksi_pending');
+                Route::get('/ticket-gereja', [LaporanController::class, 'ticket_gereja'])->name('ticket_gereja');
+                Route::get('/ticket-fisik', [LaporanController::class, 'ticket_fisik'])->name('ticket_fisik');
+                Route::patch('/user/{id}/change-password', [UserController::class, 'changePassword'])->name('user.changePassword');
+                Route::post('/cancelOrder/{id}', [LaporanController::class, 'cancelOrder'])->name('cancelOrder');
+                Route::post('/resend-ticket/{id}', [LaporanController::class, 'resendTicketEmail'])->name('resend.ticket.email');
+                Route::get('/pemesanan/export', function () {
+                                return Excel::download(new PemesananExport, 'pemesanan.xlsx');
+                            })->name('pemesanan.export');
+                // Promotion Routes
+                Route::resource('promotions', PromotionController::class);
+            });
         });
 
+        // Penumpang Routes
+        Route::middleware(['penumpang'])->group(function () {
+            Route::get('/pesan/{kursi}/{data}/{referral?}', [PemesananController::class, 'pesan'])->name('pesan');
+            Route::get('/cari/kursi/{data}', [PemesananController::class, 'edit'])->name('cari.kursi');
+            Route::resource('/', PemesananController::class);
+            Route::get('/history', [LaporanController::class, 'history'])->name('history');
+            Route::get('/encrypt-data', [PemesananController::class, 'encryptData'])->name('encryptData');
+        });
+
+        // SuperAdmin also has access to Penumpang views
         Route::middleware(['superadmin'])->group(function () {
-            Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-            Route::resource('/category', App\Http\Controllers\CategoryController::class);
-            Route::resource('/transportasi', App\Http\Controllers\TransportasiController::class);
-            Route::resource('/rute', App\Http\Controllers\RuteController::class);
-            Route::resource('/user', App\Http\Controllers\UserController::class);
-            Route::get('/transaksi', [App\Http\Controllers\LaporanController::class, 'index'])->name('transaksi');
+            Route::get('/pesan/{kursi}/{data}/{referral?}', [PemesananController::class, 'pesan'])->name('pesan');
+            Route::get('/cari/kursi/{data}', [PemesananController::class, 'edit'])->name('cari.kursi');
+            Route::get('/history', [LaporanController::class, 'history'])->name('history');
+            Route::get('/encrypt-data', [PemesananController::class, 'encryptData'])->name('encryptData');
         });
     });
 
-    Route::middleware(['penumpang'])->group(function () {
-        Route::get('/pesan/{kursi}/{data}', [App\Http\Controllers\PemesananController::class, 'pesan'])->name('pesan');
-        Route::get('/cari/kursi/{data}', [App\Http\Controllers\PemesananController::class, 'edit'])->name('cari.kursi');
-        Route::resource('/', App\Http\Controllers\PemesananController::class);
-        Route::get('/history', [App\Http\Controllers\LaporanController::class, 'history'])->name('history');
-        Route::get('/{id}/{data}', [App\Http\Controllers\PemesananController::class, 'show'])->name('show');
+    // 🔻 IMPORTANT: PLACE THIS ROUTE AT THE VERY END 🔻
+
+    //https://yourdomain.com/migrate?key=mysecretkey123
+    //https://ticket.voiceofsoulchoir.id/migrate?key=8f3a7c1e-bd42-4e9f-98c7-64a2c8e12a9f
+    Route::get('/migrate', function () {
+        if (request('key') !== '8f3a7c1e-bd42-4e9f-98c7-64a2c8e12a9f') {
+            abort(403, 'Unauthorized');
+        }
+
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+            return 'Migration completed successfully!';
+        } catch (\Exception $e) {
+            return 'Migration failed: ' . $e->getMessage();
+        }
     });
+    // It must come last to avoid conflicts with more specific routes
+    Route::get('/{id}/{data}', [PemesananController::class, 'show'])->name('show');
+    Route::get('/clear-cache', function() {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:cache');
+    return 'Cache cleared!';
 });
+}

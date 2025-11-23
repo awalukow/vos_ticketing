@@ -11,7 +11,9 @@ class Category extends Model
 
     protected $fillable = [
         'name',
-        'slug'
+        'slug',
+        'event_banner',
+        'EventDate',
     ];
 
     protected $table = 'category';

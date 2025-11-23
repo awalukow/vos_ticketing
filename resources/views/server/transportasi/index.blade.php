@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Transportasi')
-@section('heading', 'Transportasi')
+@section('title', 'Class / Category')
+@section('heading', 'Class / Category')
 @section('styles')
   <link href="{{ asset('vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet"/>
   <link href="{{ asset('vendor/select2/dist/css/select2.min.css') }}" rel="stylesheet"/>
@@ -220,6 +220,12 @@
                   <option value="{{ $data->id }}">{{ $data->name }}</option>
                 @endforeach
               </select>
+            </div>
+            <div class="form-group form-check">
+              <input type="hidden" name="isForAdmin" value="0">
+              {{-- Just use unchecked by default --}}
+                <input type="checkbox" class="form-check-input" id="isForAdmin" name="isForAdmin" value="1">
+              <label class="form-check-label" for="isForAdmin">Only for admin</label>
             </div>
           </div>
           <div class="modal-footer">

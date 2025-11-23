@@ -24,5 +24,16 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function sendPasswordResetNotification($token)
+    {
+        $resetUrl = url(route('password.reset', [
+            'token' => $token,
+            'email' => $this->email,
+        ], false));
+
+        // Send custom notification
+        $this->notify(new \App\Notifications\ResetPasswordNotification($resetUrl));
+    }
+
     protected $table = 'users';
 }
